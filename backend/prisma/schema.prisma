@@ -1,0 +1,800 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  GUEST
+  HOST
+  ADMIN
+  OPERATOR_PROVINCE
+  OPERATOR_SUB
+}
+
+enum ListingStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  VILLA
+  HOMESTAY
+  HOTEL
+  RESORT
+  UNIQUE
+}
+
+enum BookingMethod {
+  INSTANT
+  REQUEST
+}
+
+enum PetPolicy {
+  ALLOWED
+  ON_REQUEST
+  NOT_ALLOWED
+}
+
+enum ParkingType {
+  FREE
+  PAID
+  NOT_AVAILABLE
+}
+
+enum LegalEntityType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum RatePlanType {
+  NON_REFUNDABLE
+  WEEKLY
+}
+
+enum TourCategory {
+  ADVENTURE
+  CULTURAL
+  FOOD
+  NATURE
+  CITY
+  BEACH
+}
+
+enum BookingType {
+  PROPERTY
+  TOUR
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOMO
+  VNPAY
+  ZALOPAY
+  CREDIT_CARD
+}
+
+enum TokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  BOOKING_COMPLETED
+  PAYMENT_RECEIVED
+  REVIEW_RECEIVED
+  LISTING_APPROVED
+  LISTING_REJECTED
+  SYSTEM
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum AvailabilityStatus {
+  BLOCKED
+  MAINTENANCE
+}
+
+enum CancellationPolicy {
+  FLEXIBLE
+  MODERATE
+  STRICT
+  NON_REFUNDABLE
+}
+
+enum InclusionType {
+  INCLUDED
+  EXCLUDED
+}
+
+enum ProvinceType {
+  TINH
+  THANH_PHO
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum DisputeStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  ESCALATED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String?
+  displayName   String?
+  phone         String?
+  avatar        String?
+  birthDate     DateTime? @db.Date
+  nationality   String   @default("Việt Nam")
+  gender        String?
+  address       String?
+  role          Role     @default(GUEST)
+  emailVerified Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  properties           Property[]
+  tours                Tour[]
+  bookings             Booking[]
+  reviews              Review[]
+  verificationTokens   VerificationToken[]
+  notifications        Notification[]
+  promotionRedemptions PromotionRedemption[]
+  auditLogs            AuditLog[]
+
+  // Operator relations
+  operatorAssignments  OperatorProvinceAssignment[] @relation("OperatorAssignments")
+  assignedByMe         OperatorProvinceAssignment[] @relation("AssignedByUser")
+  assignedTasks        OperatorTask[]               @relation("TaskAssignee")
+  createdTasks         OperatorTask[]               @relation("TaskAssigner")
+  hostApprovalRequests HostApprovalRequest[]        @relation("ApplicantUser")
+  reviewedApprovals    HostApprovalRequest[]        @relation("ReviewerUser")
+  disputesAsHost       Dispute[]                    @relation("DisputeHost")
+  disputesAsGuest      Dispute[]                    @relation("DisputeGuest")
+  resolvedDisputes     Dispute[]                    @relation("DisputeResolver")
+  createdByAdmin       User?                        @relation("CreatedByAdmin", fields: [createdById], references: [id])
+  createdById          String?
+  createdOperators     User[]                       @relation("CreatedByAdmin")
+
+  @@index([email])
+  @@index([role])
+  @@index([createdById])
+}
+
+model Province {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  code      String       @unique
+  type      ProvinceType @default(TINH)
+  createdAt DateTime     @default(now())
+
+  operatorAssignments  OperatorProvinceAssignment[]
+  hostApprovalRequests HostApprovalRequest[]
+  tasks                OperatorTask[]
+  disputes             Dispute[]
+
+  @@index([code])
+  @@index([type])
+}
+
+model OperatorProvinceAssignment {
+  id         String   @id @default(cuid())
+  operatorId String
+  provinceId String
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  operator       User     @relation("OperatorAssignments", fields: [operatorId], references: [id], onDelete: Cascade)
+  province       Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  assignedByUser User     @relation("AssignedByUser", fields: [assignedBy], references: [id])
+
+  @@unique([provinceId])
+  @@index([operatorId])
+  @@index([provinceId])
+}
+
+model OperatorTask {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus @default(PENDING)
+  assignedTo   String
+  assignedBy   String
+  provinceId   String?
+  entityType   String?
+  entityId     String?
+  dueDate      DateTime?
+  completedAt  DateTime?
+  reportNotes  String?
+  reportResult String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  assignee User      @relation("TaskAssignee", fields: [assignedTo], references: [id])
+  assigner User      @relation("TaskAssigner", fields: [assignedBy], references: [id])
+  province Province? @relation(fields: [provinceId], references: [id])
+
+  @@index([assignedTo])
+  @@index([assignedBy])
+  @@index([status])
+  @@index([provinceId])
+}
+
+model HostApprovalRequest {
+  id         String         @id @default(cuid())
+  userId     String
+  status     ApprovalStatus @default(PENDING)
+  provinceId String?
+  reviewedBy String?
+  reviewedAt DateTime?
+  notes      String?
+  documents  Json?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user     User      @relation("ApplicantUser", fields: [userId], references: [id])
+  reviewer User?     @relation("ReviewerUser", fields: [reviewedBy], references: [id])
+  province Province? @relation(fields: [provinceId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([provinceId])
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  bookingId   String?
+  hostId      String
+  guestId     String
+  provinceId  String?
+  status      DisputeStatus @default(OPEN)
+  subject     String
+  description String
+  resolution  String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  escalatedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  host     User      @relation("DisputeHost", fields: [hostId], references: [id])
+  guest    User      @relation("DisputeGuest", fields: [guestId], references: [id])
+  resolver User?     @relation("DisputeResolver", fields: [resolvedBy], references: [id])
+  province Province? @relation(fields: [provinceId], references: [id])
+
+  @@index([hostId])
+  @@index([guestId])
+  @@index([status])
+  @@index([provinceId])
+}
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Property {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+
+  // ── Address ──────────────────────────────────────────────────────────────
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  postalCode   String?
+  country      String        @default("Việt Nam")
+  latitude     Float?
+  longitude    Float?
+
+  // ── Type & Capacity ───────────────────────────────────────────────────────
+  type               PropertyType
+  maxGuests          Int           @default(2)
+  // Denormalized count kept in sync with PropertyBedroom rows (for search filtering)
+  bedroomCount       Int           @default(0)
+  bathrooms          Int           @default(1)
+  // Living-room sofa beds (separate from bedrooms)
+  livingRoomSofaBeds Int           @default(0)
+  childrenAllowed    Boolean       @default(true)
+  cribsAvailable     Boolean       @default(false)
+  sizeM2             Float?
+
+  // ── Pricing ───────────────────────────────────────────────────────────────
+  pricePerNight        Decimal  @db.Decimal(10, 2)
+  cleaningFee          Decimal? @db.Decimal(10, 2)
+  // 20 % launch discount shown to first guests
+  launchDiscountEnabled Boolean @default(false)
+  // Platform commission stored for revenue reporting (default 15 %)
+  commission           Decimal  @default(0.15) @db.Decimal(5, 4)
+
+  // ── Booking method ────────────────────────────────────────────────────────
+  bookingMethod BookingMethod @default(INSTANT)
+
+  // ── Cancellation ─────────────────────────────────────────────────────────
+  // Number of days before check-in the guest can cancel for free
+  cancellationFreeDays Int                @default(1)
+  mistakeProtection    Boolean            @default(true)
+  // Legacy enum kept for search-filter compatibility
+  cancellationPolicy   CancellationPolicy @default(FLEXIBLE)
+
+  // ── Services ──────────────────────────────────────────────────────────────
+  breakfastIncluded Boolean     @default(false)
+  parkingType       ParkingType @default(NOT_AVAILABLE)
+
+  // ── House rules ───────────────────────────────────────────────────────────
+  smokingAllowed Boolean   @default(false)
+  partiesAllowed Boolean   @default(false)
+  petsPolicy     PetPolicy @default(NOT_ALLOWED)
+  checkInFrom    String?
+  checkInTo      String?
+  checkOutFrom   String?
+  checkOutTo     String?
+
+  // ── Group pricing ─────────────────────────────────────────────────────────
+  groupPricingEnabled Boolean @default(false)
+  // Discount % applied when only 1 guest books (group pricing base is 2 guests)
+  oneGuestDiscountPct Int     @default(0)
+
+  // ── Availability window ───────────────────────────────────────────────────
+  availabilityWindow Int     @default(365)
+  longStayAllowed    Boolean @default(false)
+  maxStayNights      Int?
+
+  // ── Legal ─────────────────────────────────────────────────────────────────
+  legalEntityType LegalEntityType @default(INDIVIDUAL)
+  // Optional alias / alternative name for any owner
+  ownerAlias      String?
+
+  // ── Status ────────────────────────────────────────────────────────────────
+  status    ListingStatus @default(PENDING)
+  hostId    String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  host         User                   @relation(fields: [hostId], references: [id])
+  images       PropertyImage[]
+  amenities    Amenity[]
+  languages    PropertyLanguage[]
+  bedrooms     PropertyBedroom[]
+  ratePlans    PropertyRatePlan[]
+  childPricing PropertyChildPricing?
+  owners       PropertyOwner[]
+  bookings     Booking[]
+  availability PropertyAvailability[]
+
+  @@index([city])
+  @@index([hostId])
+  @@index([status])
+  @@index([type])
+  @@index([pricePerNight])
+}
+
+// ─── Per-bedroom bed configuration ───────────────────────────────────────────
+
+model PropertyBedroom {
+  id            String   @id @default(cuid())
+  propertyId    String
+  // 1-based room number; living room tracked via Property.livingRoomSofaBeds
+  roomNumber    Int
+  singleBeds    Int      @default(0)
+  doubleBeds    Int      @default(0)
+  kingBeds      Int      @default(0)
+  superKingBeds Int      @default(0)
+  bunkBeds      Int      @default(0)
+  sofaBeds      Int      @default(0)
+  futonBeds     Int      @default(0)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, roomNumber])
+  @@index([propertyId])
+}
+
+// ─── Languages spoken at the property ────────────────────────────────────────
+
+model PropertyLanguage {
+  id         String   @id @default(cuid())
+  propertyId String
+  language   String
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, language])
+  @@index([propertyId])
+}
+
+// ─── Rate plans (non-refundable, weekly discount) ────────────────────────────
+
+model PropertyRatePlan {
+  id          String       @id @default(cuid())
+  propertyId  String
+  type        RatePlanType
+  enabled     Boolean      @default(true)
+  discountPct Int
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, type])
+  @@index([propertyId])
+}
+
+// ─── Child / infant pricing ───────────────────────────────────────────────────
+
+model PropertyChildPricing {
+  id          String   @id @default(cuid())
+  propertyId  String   @unique
+  enabled     Boolean  @default(true)
+  // Infants (0-2 years)
+  infantFree  Boolean  @default(true)
+  infantPrice Decimal? @db.Decimal(10, 2)
+  // Children group: up to childMaxAge (host-chosen, max 17)
+  childMaxAge Int      @default(17)
+  childFree   Boolean  @default(true)
+  childPrice  Decimal? @db.Decimal(10, 2)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+// ─── Legal beneficial owners (≥ 25 % stake, max 4) ───────────────────────────
+
+model PropertyOwner {
+  id         String   @id @default(cuid())
+  propertyId String
+  firstName  String
+  lastName   String
+  birthDate  DateTime @db.Date
+  sortOrder  Int      @default(0)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+// ─── Property images ──────────────────────────────────────────────────────────
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  url        String
+  isPrimary  Boolean  @default(false)
+  propertyId String
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  // Partial unique index: CREATE UNIQUE INDEX ON "PropertyImage" ("propertyId") WHERE "isPrimary" = true
+}
+
+// ─── Amenities (shared catalogue) ────────────────────────────────────────────
+
+model Amenity {
+  id   String  @id @default(cuid())
+  name String  @unique
+  icon String?
+
+  properties Property[]
+}
+
+// ─── Property availability blocks ─────────────────────────────────────────────
+
+model PropertyAvailability {
+  id         String             @id @default(cuid())
+  propertyId String
+  date       DateTime           @db.Date
+  status     AvailabilityStatus @default(BLOCKED)
+  reason     String?
+  createdAt  DateTime           @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+  @@index([date])
+}
+
+// ─── Tour models ──────────────────────────────────────────────────────────────
+
+model Tour {
+  id                 String              @id @default(cuid())
+  title              String
+  description        String
+  city               String
+  country            String
+  pricePerPerson     Decimal             @db.Decimal(10, 2)
+  durationDays       Int
+  minGroupSize       Int                 @default(1)
+  maxGroupSize       Int
+  category           TourCategory
+  status             ListingStatus       @default(PENDING)
+  cancellationHours  Int?
+  cancellationPolicy CancellationPolicy?
+  hostId             String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  host         User               @relation(fields: [hostId], references: [id])
+  images       TourImage[]
+  bookings     Booking[]
+  itinerary    TourItineraryDay[]
+  inclusions   TourInclusion[]
+  availability TourAvailability[]
+
+  @@index([city])
+  @@index([hostId])
+  @@index([status])
+  @@index([category])
+}
+
+model TourImage {
+  id        String  @id @default(cuid())
+  url       String
+  isPrimary Boolean @default(false)
+  tourId    String
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  // Partial unique index: CREATE UNIQUE INDEX ON "TourImage" ("tourId") WHERE "isPrimary" = true
+}
+
+model TourItineraryDay {
+  id          String @id @default(cuid())
+  tourId      String
+  dayNumber   Int
+  title       String
+  description String
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, dayNumber])
+  @@index([tourId])
+}
+
+model TourInclusion {
+  id     String        @id @default(cuid())
+  tourId String
+  type   InclusionType
+  item   String
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId])
+}
+
+model TourAvailability {
+  id          String   @id @default(cuid())
+  tourId      String
+  date        DateTime @db.Date
+  slotsTotal  Int
+  slotsBooked Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, date])
+  @@index([tourId])
+  @@index([date])
+}
+
+// ─── Booking ──────────────────────────────────────────────────────────────────
+
+model Booking {
+  id            String        @id @default(cuid())
+  type          BookingType
+  userId        String
+  propertyId    String?
+  tourId        String?
+  checkIn       DateTime?
+  checkOut      DateTime?
+  tourDate      DateTime?
+  numGuests     Int
+  totalPrice    Decimal       @db.Decimal(10, 2)
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  promotionId   String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id])
+  property            Property?            @relation(fields: [propertyId], references: [id])
+  tour                Tour?                @relation(fields: [tourId], references: [id])
+  promotion           Promotion?           @relation(fields: [promotionId], references: [id])
+  payment             Payment?
+  review              Review?
+  promotionRedemption PromotionRedemption?
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([tourId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// ─── Payment ──────────────────────────────────────────────────────────────────
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("VND")
+  method        PaymentMethod
+  status        PaymentStatus @default(UNPAID)
+  transactionId String?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+// ─── Review ───────────────────────────────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  bookingId String   @unique
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([userId])
+}
+
+// ─── Promotions ───────────────────────────────────────────────────────────────
+
+model Promotion {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  description   String?
+  discountType  DiscountType @default(PERCENTAGE)
+  discountValue Decimal      @db.Decimal(10, 2)
+  minOrderValue Decimal?     @db.Decimal(10, 2)
+  maxUses       Int?
+  usedCount     Int          @default(0)
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  bookings    Booking[]
+  redemptions PromotionRedemption[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([startDate, endDate])
+}
+
+model PromotionRedemption {
+  id          String   @id @default(cuid())
+  promotionId String
+  userId      String
+  bookingId   String   @unique
+  createdAt   DateTime @default(now())
+
+  promotion Promotion @relation(fields: [promotionId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  booking   Booking   @relation(fields: [bookingId], references: [id])
+
+  @@unique([promotionId, userId])
+  @@index([promotionId])
+  @@index([userId])
+}
+
+// ─── Commission rules ─────────────────────────────────────────────────────────
+
+model CommissionRule {
+  id              String       @id @default(cuid())
+  name            String
+  description     String?
+  rate            Decimal      @db.Decimal(5, 4)
+  listingType     BookingType?
+  minBookingValue Decimal?     @db.Decimal(10, 2)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([isActive])
+  @@index([listingType])
+}
+
+// ─── Audit log ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  oldValue  Json?
+  newValue  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}

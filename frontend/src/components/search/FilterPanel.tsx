@@ -1,0 +1,1 @@
+export function FilterPanel() { return <aside className="rounded-3xl border border-slate-200 bg-white p-5"><h2 className="font-semibold">B? l?c</h2><p className="mt-3 text-sm text-slate-500">Gi?, ti?n nghi, lo?i ph?ng...</p></aside>; }

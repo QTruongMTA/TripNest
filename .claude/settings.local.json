@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(@\\(\"D:\\\\TripNest\\\\backend\\\\prisma.config.ts\", \"D:\\\\TripNest\\\\frontend\\\\next.config.mjs\", \"D:\\\\TripNest\\\\frontend\\\\tailwind.config.ts\"\\) | ForEach-Object { Write-Host \"=== $\\(Split-Path -Leaf $_\\) ===\" ; Get-Content $_ -TotalCount 15 })",
+      "Bash(Get-ChildItem -Path \"D:\\\\TripNest\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "PowerShell(cd \"D:\\\\TripNest\\\\backend\"; $env:PRISMA_MIGRATE_SKIP_GENERATE=\"true\"; npx prisma migrate dev --create-only --name harden_constraints 2>&1)",
+      "PowerShell(New-Item *)",
+      "Bash(npx prisma *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(npm install *)",
+      "Bash(npm run *)",
+      "PowerShell(npm run *)",
+      "PowerShell(Set-Location \"D:\\\\TripNest\\\\backend\"; $env:NODE_OPTIONS=\"\"; npx tsx prisma/seed.ts 2>&1)",
+      "PowerShell(Select-String *)",
+      "Bash(Get-ChildItem \"D:\\\\TripNest\\\\admin-portal\\\\node_modules\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -First 5)",
+      "Bash(npm install *)"
+    ]
+  }
+}

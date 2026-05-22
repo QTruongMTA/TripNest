@@ -1,0 +1,1 @@
+export default function AboutPage() { return <section className="mx-auto max-w-3xl px-6 py-12"><h1 className="text-3xl font-semibold">V? TripNest</h1><p className="mt-4 text-slate-600">TripNest k?t n?i kh?ch du l?ch v?i c?c c? s? l?u tr? ??ng tin c?y v? quy tr?nh ??t ph?ng r? r?ng.</p></section>; }

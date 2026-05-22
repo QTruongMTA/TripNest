@@ -1,0 +1,1 @@
+export function Modal({ title, children }: { title: string; children: React.ReactNode }) { return <div role="dialog" aria-label={title} className="rounded-3xl bg-white p-6 shadow-xl">{children}</div>; }

@@ -1,0 +1,2 @@
+import { Button } from "@/components/ui/Button";
+export function SearchBar() { return <form className="grid gap-3 rounded-3xl bg-white p-4 shadow-sm md:grid-cols-[1fr_1fr_auto]"><input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="B?n mu?n ?i ??u?" /><input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Ng?y nh?n ph?ng" /><Button>T?m ki?m</Button></form>; }

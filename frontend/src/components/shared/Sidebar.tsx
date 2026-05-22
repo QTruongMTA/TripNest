@@ -1,0 +1,1 @@
+export function Sidebar({ items }: { items: string[] }) { return <aside className="rounded-3xl bg-slate-950 p-5 text-white">{items.map((item) => <div key={item} className="py-2">{item}</div>)}</aside>; }
