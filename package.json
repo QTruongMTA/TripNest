@@ -1,19 +1,14 @@
 {
   "name": "tripnest",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend",
-    "admin-portal"
-  ],
   "scripts": {
-    "dev:frontend": "npm run dev --workspace frontend",
-    "dev:backend": "npm run dev --workspace backend",
-    "dev:admin": "npm run dev --workspace admin-portal",
-    "dev:admin:clean": "npm run dev:clean --workspace admin-portal",
-    "build:frontend": "npm run build --workspace frontend",
-    "build:backend": "npm run build --workspace backend",
-    "build:admin": "npm run build --workspace admin-portal"
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:admin": "npm --prefix admin-portal run dev",
+    "dev:admin:clean": "npm --prefix admin-portal run dev:clean",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build:admin": "npm --prefix admin-portal run build"
   },
   "devDependencies": {
     "es-abstract": "file:es-abstract-1.24.2.tgz"
