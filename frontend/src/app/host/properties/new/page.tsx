@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type PropertyType = "APARTMENT" | "HOUSE" | "HOTEL" | "UNIQUE";
 type Step =
@@ -17,7 +17,8 @@ type Step =
   | "nightly-price"
   | "rate-plans"
   | "availability"
-  | "legal";
+  | "legal"
+  | "review";
 
 type PhotoItem = {
   id: string;
@@ -68,6 +69,63 @@ type DetailsState = {
   size: string;
 };
 
+type AvailabilityState = {
+  firstBookableDate: "soon" | "specific";
+  specificDate: string;
+  openWindow: number;
+  longStayAllowed: boolean;
+  maxStayNights: number;
+};
+
+type ReviewState = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  country: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postalCode: string;
+  legalBusiness: boolean;
+  termsAccepted: boolean;
+};
+
+type AddressState = {
+  line1: string;
+  line2: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+};
+
+type MapLibreLngLat = { lat: number; lng: number };
+type MapLibreMapMouseEvent = { lngLat: MapLibreLngLat };
+type MapLibreMapInstance = {
+  getZoom: () => number;
+  on: (eventName: "click", callback: (event: MapLibreMapMouseEvent) => void) => MapLibreMapInstance;
+  remove: () => void;
+  resize: () => void;
+  setCenter: (position: [number, number]) => MapLibreMapInstance;
+  setZoom: (zoom: number) => MapLibreMapInstance;
+  zoomIn: () => MapLibreMapInstance;
+  zoomOut: () => MapLibreMapInstance;
+};
+type MapLibreMarkerInstance = {
+  addTo: (map: MapLibreMapInstance) => MapLibreMarkerInstance;
+  getLngLat: () => MapLibreLngLat;
+  on: (eventName: "dragend", callback: () => void) => MapLibreMarkerInstance;
+  setLngLat: (position: [number, number]) => MapLibreMarkerInstance;
+};
+type MapLibreRuntime = {
+  Map: new (options: Record<string, unknown>) => MapLibreMapInstance;
+  Marker: new (options: Record<string, unknown>) => MapLibreMarkerInstance;
+};
+type NominatimResult = { lat: string; lon: string; display_name: string };
+
 const propertyTypes: Array<{ value: PropertyType; title: string; description: string; marker: string }> = [
   { value: "APARTMENT", title: "Căn hộ", description: "Chỗ nghỉ tự nấu nướng, đầy đủ nội thất mà khách thuê nguyên căn.", marker: "A" },
   { value: "HOUSE", title: "Nhà", description: "Nhà nguyên căn, biệt thự, nhà nghỉ dưỡng hoặc homestay riêng tư.", marker: "N" },
@@ -75,7 +133,7 @@ const propertyTypes: Array<{ value: PropertyType; title: string; description: st
   { value: "UNIQUE", title: "Chỗ nghỉ khác", description: "Khu cắm trại, bungalow, thuyền nghỉ dưỡng hoặc mô hình đặc biệt.", marker: "C" },
 ];
 
-const steps: Step[] = ["type", "name", "address", "setup-details", "amenities", "services", "languages", "rules", "photos", "booking-method", "nightly-price", "rate-plans", "availability", "legal"];
+const steps: Step[] = ["type", "name", "address", "setup-details", "amenities", "services", "languages", "rules", "photos", "booking-method", "nightly-price", "rate-plans", "availability", "legal", "review"];
 const setupSteps: Step[] = ["setup-details", "amenities", "services", "languages", "rules"];
 
 const amenitySections = [
@@ -176,11 +234,18 @@ const bedOptions: Array<{ key: keyof BedCounts; title: string; size: string; ico
 const inputClass =
   "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100 disabled:bg-slate-100 disabled:text-slate-500";
 
+const defaultMapCenter = { lat: 16.047079, lng: 108.20623 };
+const mapTilerApiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
+const mapStyleUrl = mapTilerApiKey ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerApiKey}` : "https://tiles.openfreemap.org/styles/positron";
+const today = new Date();
+const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+const todayIso = toIsoDate(todayDateOnly);
+
 export default function Page() {
   const [step, setStep] = useState<Step>("type");
   const [propertyType, setPropertyType] = useState<PropertyType>("APARTMENT");
   const [title, setTitle] = useState("");
-  const [address, setAddress] = useState({ line1: "", line2: "", city: "", postalCode: "", country: "Việt Nam" });
+  const [address, setAddress] = useState<AddressState>({ line1: "", line2: "", city: "", postalCode: "", country: "Việt Nam", latitude: defaultMapCenter.lat, longitude: defaultMapCenter.lng });
   const [details, setDetails] = useState<DetailsState>({
     bedrooms: [{ id: 1, beds: defaultBedroomBeds }],
     livingBeds: 0,
@@ -196,7 +261,7 @@ export default function Page() {
   const [rules, setRules] = useState({ smoking: false, parties: false, pets: "no", checkInFrom: "15:00", checkInTo: "18:00", checkOutFrom: "08:00", checkOutTo: "11:00" });
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [bookingMethod, setBookingMethod] = useState("instant");
-  const [nightlyPrice, setNightlyPrice] = useState("300000");
+  const [nightlyPrice, setNightlyPrice] = useState("");
   const [launchDiscount, setLaunchDiscount] = useState(true);
   const [cancellationDays, setCancellationDays] = useState(1);
   const [mistakeProtection, setMistakeProtection] = useState(true);
@@ -211,11 +276,26 @@ export default function Page() {
   });
   const [nonRefundableRate, setNonRefundableRate] = useState({ enabled: true, discount: 10 });
   const [weeklyRate, setWeeklyRate] = useState({ enabled: true, discount: 15 });
-  const [availability, setAvailability] = useState({ firstBookableDate: "specific", openWindow: 365, longStayAllowed: true, maxStayNights: 30 });
+  const [availability, setAvailability] = useState<AvailabilityState>({ firstBookableDate: "soon", specificDate: todayIso, openWindow: 365, longStayAllowed: true, maxStayNights: 30 });
   const [legalType, setLegalType] = useState("individual");
   const [owners, setOwners] = useState<OwnerInfo[]>([{ id: 1, firstName: "", lastName: "", birthDate: "" }]);
   const [ownerAlias, setOwnerAlias] = useState("");
   const [legalSubmitted, setLegalSubmitted] = useState(false);
+  const [review, setReview] = useState<ReviewState>({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    country: "Việt Nam",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postalCode: "",
+    legalBusiness: false,
+    termsAccepted: false,
+  });
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   const selectedType = useMemo(() => propertyTypes.find((type) => type.value === propertyType) ?? propertyTypes[0], [propertyType]);
   const activeIndex = steps.indexOf(step);
@@ -234,7 +314,17 @@ export default function Page() {
     (step === "nightly-price" && Number(nightlyPrice) > 0) ||
     step === "rate-plans" ||
     step === "availability" ||
-    (step === "legal" && owners.length > 0 && owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim()));
+    (step === "legal" && owners.length > 0 && owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim())) ||
+    (step === "review" &&
+      review.firstName.trim() &&
+      review.lastName.trim() &&
+      review.email.trim() &&
+      /^\d{10,11}$/.test(review.phone) &&
+      review.country.trim() &&
+      review.addressLine1.trim() &&
+      review.city.trim() &&
+      review.legalBusiness &&
+      review.termsAccepted);
 
   function continueFlow(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
@@ -322,6 +412,19 @@ export default function Page() {
               canContinue={Boolean(canContinue)}
             />
           ) : null}
+          {step === "review" ? (
+            <ReviewCompleteStep
+              legalType={legalType}
+              setLegalType={setLegalType}
+              review={review}
+              setReview={setReview}
+              submitted={reviewSubmitted}
+              setSubmitted={setReviewSubmitted}
+              onBack={goBack}
+              onSubmit={continueFlow}
+              canContinue={Boolean(canContinue)}
+            />
+          ) : null}
         </div>
       </section>
     </main>
@@ -334,12 +437,13 @@ function ProgressNav({ activeIndex, setupIndex }: { activeIndex: number; setupIn
     { label: "Cài đặt chỗ nghỉ", done: activeIndex > 7, active: activeIndex >= 3 && activeIndex <= 7, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 7 ? 100 : 0 },
     { label: "Ảnh", done: activeIndex > 8, active: activeIndex === 8, progress: activeIndex >= 8 ? 100 : 0 },
     { label: "Giá và lịch", done: activeIndex > 12, active: activeIndex >= 9 && activeIndex <= 12, progress: activeIndex >= 9 ? Math.min(100, ((activeIndex - 8) / 4) * 100) : 0 },
-    { label: "Thông tin pháp lý", done: false, active: activeIndex === 13, progress: activeIndex === 13 ? 100 : 0 },
+    { label: "Thông tin pháp lý", done: activeIndex > 13, active: activeIndex === 13, progress: activeIndex > 13 ? 100 : activeIndex === 13 ? 100 : 0 },
+    { label: "Xem lại và hoàn tất", done: false, active: activeIndex === 14, progress: activeIndex === 14 ? 100 : 0 },
   ];
 
   return (
     <nav className="border-b border-slate-200 bg-white px-4 md:px-8" aria-label="Tiến trình đăng chỗ nghỉ">
-      <div className="grid gap-3 py-5 md:grid-cols-5">
+      <div className="grid gap-3 py-5 md:grid-cols-6">
         {stages.map((stage) => (
           <div key={stage.label} className="min-w-0">
             <div className="flex items-center gap-2 text-sm">
@@ -410,8 +514,12 @@ function NameStep({ title, setTitle, onBack, onSubmit, canContinue }: { title: s
   );
 }
 
-function AddressStep({ address, setAddress, selectedType, title, onBack, onSubmit, canContinue }: { address: { line1: string; line2: string; city: string; postalCode: string; country: string }; setAddress: (value: { line1: string; line2: string; city: string; postalCode: string; country: string }) => void; selectedType: string; title: string; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
+function AddressStep({ address, setAddress, selectedType, title, onBack, onSubmit, canContinue }: { address: AddressState; setAddress: (value: AddressState) => void; selectedType: string; title: string; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
   const mapLabel = [address.line1, address.city].filter(Boolean).join(", ") || "Vị trí chỗ nghỉ";
+  const mapPosition = { lat: address.latitude, lng: address.longitude };
+  const updateMapPosition = (position: { lat: number; lng: number }) => {
+    setAddress({ ...address, latitude: position.lat, longitude: position.lng });
+  };
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-6xl">
@@ -438,23 +546,253 @@ function AddressStep({ address, setAddress, selectedType, title, onBack, onSubmi
           </div>
         </section>
         <aside className="min-h-[520px] overflow-hidden rounded-lg border border-teal-950/10 bg-teal-50 shadow-sm shadow-teal-950/5">
-          <div className="relative h-full min-h-[520px] bg-[linear-gradient(135deg,_#d9f3ef_0%,_#edf8f6_35%,_#c7e9df_100%)]">
-            <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(90deg,rgba(15,118,110,.18)_1px,transparent_1px),linear-gradient(rgba(15,118,110,.18)_1px,transparent_1px)] [background-size:44px_44px]" />
-            <div className="absolute left-8 top-10 h-28 w-48 rounded-[50%] border-2 border-teal-600/30" />
-            <div className="absolute bottom-20 right-8 h-40 w-56 rounded-[45%] border-2 border-teal-700/20" />
-            <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-teal-700 text-xl font-semibold text-white shadow-xl shadow-teal-900/25">•</div>
-              <div className="mt-3 rounded-lg bg-white/95 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg">{mapLabel}</div>
-            </div>
-            <div className="absolute inset-x-5 bottom-5 rounded-lg bg-white/95 p-4 shadow-lg">
-              <p className="text-sm font-semibold text-slate-950">{title || "Tên chỗ nghỉ"}</p>
-              <p className="mt-1 text-sm text-slate-600">{selectedType} tại {address.country}</p>
-            </div>
-          </div>
+          <OpenStreetMapPicker
+            address={address}
+            label={mapLabel}
+            title={title || "Tên chỗ nghỉ"}
+            subtitle={`${selectedType} tại ${address.country}`}
+            position={mapPosition}
+            onPositionChange={updateMapPosition}
+          />
         </aside>
       </div>
       <WizardActions onBack={onBack} canContinue={canContinue} />
     </form>
+  );
+}
+
+let mapLibreLoader: Promise<void> | null = null;
+
+function loadMapLibre() {
+  if (typeof window === "undefined") return Promise.reject(new Error("Bản đồ chỉ chạy trong trình duyệt."));
+  if (getMapLibre()) return Promise.resolve();
+  if (mapLibreLoader) return mapLibreLoader;
+
+  mapLibreLoader = new Promise((resolve, reject) => {
+    if (!document.querySelector("link[data-tripnest-maplibre]")) {
+      const stylesheet = document.createElement("link");
+      stylesheet.rel = "stylesheet";
+      stylesheet.href = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
+      stylesheet.dataset.tripnestMaplibre = "true";
+      document.head.appendChild(stylesheet);
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>("script[data-tripnest-maplibre]");
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve());
+      existingScript.addEventListener("error", () => reject(new Error("Không tải được thư viện bản đồ.")));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";
+    script.async = true;
+    script.defer = true;
+    script.dataset.tripnestMaplibre = "true";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Không tải được thư viện bản đồ."));
+    document.head.appendChild(script);
+  });
+
+  return mapLibreLoader;
+}
+
+function getMapLibre() {
+  return (window as unknown as { maplibregl?: MapLibreRuntime }).maplibregl;
+}
+
+function OpenStreetMapPicker({
+  address,
+  label,
+  title,
+  subtitle,
+  position,
+  onPositionChange,
+}: {
+  address: AddressState;
+  label: string;
+  title: string;
+  subtitle: string;
+  position: { lat: number; lng: number };
+  onPositionChange: (position: { lat: number; lng: number }) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [status, setStatus] = useState("Đang tải bản đồ...");
+  const searchAddress = [address.line1, address.line2, address.city, address.country].filter(Boolean).join(", ");
+
+  return (
+    <>
+      <div className="relative h-full min-h-[520px]">
+        <OpenStreetMapCanvas addressQuery={searchAddress} position={position} onPositionChange={onPositionChange} onStatusChange={setStatus} />
+        <MapOverlay title={title} subtitle={subtitle} label={label} status={status} onExpand={() => setExpanded(true)} />
+      </div>
+      {expanded ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4">
+          <div className="flex h-[86vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-950">{label}</h2>
+                <p className="text-sm text-slate-600">Click trên bản đồ hoặc kéo ghim để chỉnh đúng vị trí chỗ nghỉ.</p>
+              </div>
+              <button type="button" onClick={() => setExpanded(false)} className="grid h-10 w-10 place-items-center rounded-full text-2xl text-slate-600 transition hover:bg-slate-100" aria-label="Đóng bản đồ">×</button>
+            </div>
+            <div className="relative min-h-0 flex-1">
+              <OpenStreetMapCanvas addressQuery={searchAddress} position={position} onPositionChange={onPositionChange} onStatusChange={setStatus} />
+              <MapOverlay title={title} subtitle={subtitle} label={label} status={status} compact />
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function OpenStreetMapCanvas({
+  addressQuery,
+  position,
+  onPositionChange,
+  onStatusChange,
+}: {
+  addressQuery: string;
+  position: { lat: number; lng: number };
+  onPositionChange: (position: { lat: number; lng: number }) => void;
+  onStatusChange: (status: string) => void;
+}) {
+  const mapElement = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<MapLibreMapInstance | null>(null);
+  const markerRef = useRef<MapLibreMarkerInstance | null>(null);
+  const lastGeocodedQuery = useRef("");
+  const positionRef = useRef(position);
+  const onPositionChangeRef = useRef(onPositionChange);
+  const onStatusChangeRef = useRef(onStatusChange);
+
+  useEffect(() => {
+    positionRef.current = position;
+    onPositionChangeRef.current = onPositionChange;
+    onStatusChangeRef.current = onStatusChange;
+  }, [onPositionChange, onStatusChange, position]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    loadMapLibre()
+      .then(() => {
+        if (!mounted || !mapElement.current) return;
+        const maplibregl = getMapLibre();
+        if (!maplibregl) return;
+        mapRef.current = new maplibregl.Map({
+          container: mapElement.current,
+          center: [positionRef.current.lng, positionRef.current.lat],
+          zoom: 15,
+          attributionControl: false,
+          style: mapStyleUrl,
+        });
+        const markerElement = document.createElement("div");
+        markerElement.className = "relative h-11 w-8";
+        markerElement.innerHTML = '<div class="absolute left-1/2 top-0 h-8 w-8 -translate-x-1/2 rotate-45 rounded-[50%_50%_50%_0] border-[3px] border-white bg-[#ea4335] shadow-lg shadow-slate-950/30"></div><div class="absolute left-1/2 top-[9px] h-3 w-3 -translate-x-1/2 rounded-full bg-white"></div>';
+        markerRef.current = new maplibregl.Marker({
+          element: markerElement,
+          draggable: true,
+          anchor: "bottom",
+        })
+          .setLngLat([positionRef.current.lng, positionRef.current.lat])
+          .addTo(mapRef.current);
+        markerRef.current.on("dragend", () => {
+          const next = markerRef.current?.getLngLat();
+          if (!next) return;
+          onPositionChangeRef.current({ lat: next.lat, lng: next.lng });
+          onStatusChangeRef.current("Đã cập nhật vị trí theo ghim trên bản đồ.");
+        });
+        mapRef.current.on("click", (event) => {
+          onPositionChangeRef.current({ lat: event.lngLat.lat, lng: event.lngLat.lng });
+          onStatusChangeRef.current("Đã cập nhật vị trí theo điểm Quý vị chọn.");
+        });
+        window.setTimeout(() => mapRef.current?.resize(), 150);
+        onStatusChangeRef.current(mapTilerApiKey ? "Nhập địa chỉ và chọn thành phố để tìm vị trí trên MapTiler." : "Nhập địa chỉ và chọn thành phố để tìm vị trí trên bản đồ.");
+      })
+      .catch((error) => {
+        if (mounted) onStatusChangeRef.current(error.message);
+      });
+
+    return () => {
+      mounted = false;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      markerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !markerRef.current) return;
+    markerRef.current.setLngLat([position.lng, position.lat]);
+    mapRef.current.setCenter([position.lng, position.lat]);
+  }, [position]);
+
+  useEffect(() => {
+    if (!addressQuery || addressQuery === lastGeocodedQuery.current) return;
+    const timeout = window.setTimeout(() => {
+      lastGeocodedQuery.current = addressQuery;
+      const params = new URLSearchParams({
+        format: "jsonv2",
+        q: addressQuery,
+        countrycodes: "vn",
+        limit: "1",
+      });
+
+      fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
+        .then((response) => response.json() as Promise<NominatimResult[]>)
+        .then((results) => {
+          const result = results[0];
+          if (!result) {
+            onStatusChangeRef.current("Chưa tìm thấy vị trí chính xác. Quý vị có thể click hoặc kéo ghim để đặt vị trí thủ công.");
+            return;
+          }
+
+          onPositionChangeRef.current({ lat: Number(result.lat), lng: Number(result.lon) });
+          onStatusChangeRef.current(`Đã tìm thấy vị trí gần: ${result.display_name}`);
+        })
+        .catch(() => {
+          onStatusChangeRef.current("Chưa tìm thấy vị trí chính xác. Quý vị có thể click hoặc kéo ghim để đặt vị trí thủ công.");
+        });
+    }, 700);
+
+    return () => window.clearTimeout(timeout);
+  }, [addressQuery]);
+
+  function changeZoom(delta: number) {
+    if (!mapRef.current) return;
+    if (delta > 0) mapRef.current.zoomIn();
+    else mapRef.current.zoomOut();
+  }
+
+  return (
+    <>
+      <div ref={mapElement} className="h-full min-h-[520px] w-full" />
+      <div className="absolute bottom-5 right-5 z-10 grid overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg">
+        <button type="button" onClick={() => changeZoom(1)} className="grid h-10 w-10 place-items-center border-b border-slate-200 text-xl font-semibold text-slate-800 transition hover:bg-slate-50" aria-label="Phóng to bản đồ">+</button>
+        <button type="button" onClick={() => changeZoom(-1)} className="grid h-10 w-10 place-items-center text-xl font-semibold text-slate-800 transition hover:bg-slate-50" aria-label="Thu nhỏ bản đồ">−</button>
+      </div>
+    </>
+  );
+}
+
+function MapOverlay({ title, subtitle, label, status, compact = false, onExpand }: { title: string; subtitle: string; label: string; status: string; compact?: boolean; onExpand?: () => void }) {
+  return (
+    <>
+      <div className="absolute left-4 top-4 z-10 max-w-[min(420px,calc(100%-112px))] rounded-md bg-white px-4 py-3 text-sm shadow-lg ring-1 ring-slate-950/10">
+        <p className="truncate font-semibold text-slate-950">{label}</p>
+        <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600">{status}</p>
+      </div>
+      {!compact && onExpand ? (
+        <button type="button" onClick={onExpand} className="absolute right-4 top-4 z-10 rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-lg ring-1 ring-slate-950/10 transition hover:bg-slate-50">
+          Xem lớn
+        </button>
+      ) : null}
+      <div className="absolute bottom-4 left-4 z-10 max-w-[min(360px,calc(100%-88px))] rounded-md bg-white px-4 py-3 shadow-lg ring-1 ring-slate-950/10">
+        <p className="text-sm font-semibold text-slate-950">{title}</p>
+        <p className="mt-1 truncate text-sm text-slate-600">{subtitle}</p>
+      </div>
+    </>
   );
 }
 
@@ -1299,7 +1637,16 @@ function RatePlansStep({
   );
 }
 
-function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: { availability: { firstBookableDate: string; openWindow: number; longStayAllowed: boolean; maxStayNights: number }; setAvailability: (value: { firstBookableDate: string; openWindow: number; longStayAllowed: boolean; maxStayNights: number }) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: { availability: AvailabilityState; setAvailability: (value: AvailabilityState) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+  const selectedDate = parseIsoDate(availability.specificDate);
+  const [visibleMonth, setVisibleMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+  const nextMonth = addMonths(visibleMonth, 1);
+  const selectedDateLabel = formatCalendarDate(selectedDate);
+
+  const selectSpecificDate = (date: Date) => {
+    setAvailability({ ...availability, firstBookableDate: "specific", specificDate: toIsoDate(date) });
+  };
+
   return (
     <form onSubmit={onSubmit} className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div>
@@ -1312,18 +1659,34 @@ function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: {
               Càng sớm càng tốt
             </label>
             <label className="flex items-center gap-2">
-              <input type="radio" checked={availability.firstBookableDate === "specific"} onChange={() => setAvailability({ ...availability, firstBookableDate: "specific" })} className="accent-teal-700" />
+              <input
+                type="radio"
+                checked={availability.firstBookableDate === "specific"}
+                onChange={() => {
+                  setAvailability({ ...availability, firstBookableDate: "specific", specificDate: availability.specificDate || todayIso });
+                  setVisibleMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+                }}
+                className="accent-teal-700"
+              />
               Vào một ngày cụ thể
             </label>
           </div>
-          <div className="my-6 border-t border-slate-200" />
-          <div className="grid gap-6 md:grid-cols-2">
-            <MiniCalendar title="Tháng 5 2026" activeDay={20} />
-            <MiniCalendar title="Tháng 6 2026" />
-          </div>
-          <div className="mt-6 border-t border-slate-200 pt-4 text-sm text-slate-600">
-            Khách có thể bắt đầu đặt phòng ngay, nhưng ngày nhận phòng đầu tiên là từ ngày 20 tháng 5, 2026.
-          </div>
+          {availability.firstBookableDate === "specific" ? (
+            <>
+              <div className="my-6 border-t border-slate-200" />
+              <div className="grid grid-cols-[44px_1fr_44px] items-start gap-4">
+                <button type="button" onClick={() => setVisibleMonth(addMonths(visibleMonth, -1))} className="mt-10 grid h-10 w-10 place-items-center rounded-full text-2xl text-slate-700 transition hover:bg-slate-100" aria-label="Tháng trước">‹</button>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <MiniCalendar monthDate={visibleMonth} selectedDate={selectedDate} todayDate={todayDateOnly} onSelectDate={selectSpecificDate} />
+                  <MiniCalendar monthDate={nextMonth} selectedDate={selectedDate} todayDate={todayDateOnly} onSelectDate={selectSpecificDate} />
+                </div>
+                <button type="button" onClick={() => setVisibleMonth(addMonths(visibleMonth, 1))} className="mt-10 grid h-10 w-10 place-items-center rounded-full text-2xl text-slate-700 transition hover:bg-slate-100" aria-label="Tháng sau">›</button>
+              </div>
+              <div className="mt-6 border-t border-slate-200 pt-4 text-sm text-slate-700">
+                Khách có thể bắt đầu đặt phòng ngay, nhưng ngày nhận phòng đầu tiên sẽ là {selectedDateLabel}.
+              </div>
+            </>
+          ) : null}
         </Panel>
 
         <Panel className="mt-7">
@@ -1364,7 +1727,6 @@ function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: {
         <WizardActions onBack={onBack} canContinue />
       </div>
       <aside className="space-y-6 pt-[72px]">
-        <InfoPanel title="Đồng bộ ngày để được đặt phòng nhanh hơn">Quý vị có thể điều chỉnh ngày đặt phòng bất cứ lúc nào. Các lựa chọn ở đây giúp lịch mở phòng dễ kiểm soát ngay từ đầu.</InfoPanel>
         <InfoPanel title="Nếu sau này tôi muốn thay đổi lựa chọn của mình thì sao?">Quý vị có thể thay đổi bất kỳ cài đặt nào trong phần lịch sau khi đăng kí xong.</InfoPanel>
       </aside>
     </form>
@@ -1465,6 +1827,173 @@ function LegalStep({
   );
 }
 
+function ReviewCompleteStep({
+  legalType,
+  setLegalType,
+  review,
+  setReview,
+  submitted,
+  setSubmitted,
+  onBack,
+  onSubmit,
+  canContinue,
+}: {
+  legalType: string;
+  setLegalType: (value: string) => void;
+  review: ReviewState;
+  setReview: (value: ReviewState) => void;
+  submitted: boolean;
+  setSubmitted: (value: boolean) => void;
+  onBack: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  canContinue: boolean;
+}) {
+  const [termsOpen, setTermsOpen] = useState(false);
+  const termsDocxUrl = "/terms/dieu-khoan-chung.docx";
+  const phoneInvalid = submitted && !/^\d{10,11}$/.test(review.phone);
+
+  function updateReview(patch: Partial<ReviewState>) {
+    setReview({ ...review, ...patch });
+  }
+
+  function submitReview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitted(true);
+    if (!canContinue) return;
+    onSubmit(event);
+  }
+
+  return (
+    <form onSubmit={submitReview} className="mx-auto max-w-3xl">
+      <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Quý vị gần xong rồi</h1>
+
+      <Panel className="mt-7">
+        <p className="text-lg font-semibold text-slate-950">Quý vị đăng chỗ nghỉ với tư cách doanh nghiệp hay cá nhân?</p>
+        <p className="mt-5 text-sm leading-6 text-slate-700">Câu trả lời của Quý vị cho câu hỏi này sẽ giúp chúng tôi đảm bảo rằng hợp đồng của Quý vị có tất cả thông tin cần thiết.</p>
+        <div className="mt-5 grid gap-4 text-sm text-slate-800">
+          <label className="grid grid-cols-[20px_1fr] gap-3">
+            <input type="radio" checked={legalType === "individual"} onChange={() => setLegalType("individual")} className="mt-1 accent-teal-700" />
+            <span>
+              <span className="block font-semibold">Cá nhân</span>
+              <span className="block text-xs leading-5 text-slate-600">Một cá nhân hoặc chủ sở hữu duy nhất là người tự làm chủ và điều hành một doanh nghiệp không có tư cách pháp nhân.</span>
+            </span>
+          </label>
+          <label className="grid grid-cols-[20px_1fr] gap-3">
+            <input type="radio" checked={legalType === "business"} onChange={() => setLegalType("business")} className="mt-1 accent-teal-700" />
+            <span>
+              <span className="block font-semibold">Doanh nghiệp</span>
+              <span className="block text-xs leading-5 text-slate-600">Một chủ thể kinh doanh có thể được sở hữu bởi nhiều cá nhân, chẳng hạn một công ty hợp danh, công ty đại chúng hoặc tư nhân, tổ chức phi lợi nhuận, v.v.</span>
+            </span>
+          </label>
+        </div>
+        <p className="mt-6 border-t border-slate-200 pt-5 text-sm leading-6 text-slate-700">Trong trường hợp Quý vị chọn đăng thêm chỗ nghỉ trong tương lai, chúng tôi sẽ sử dụng thông tin bên dưới để Quý vị chỉ cần nhập thông tin một lần.</p>
+      </Panel>
+
+      <Panel className="mt-7">
+        <h2 className="text-lg font-semibold text-slate-950">Thông tin cá nhân của bên ký kết hợp đồng</h2>
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <ReviewField label="Tên gọi theo đúng giấy tờ tùy thân" required value={review.firstName} error={submitted && !review.firstName.trim()} onChange={(value) => updateReview({ firstName: value })} />
+          <ReviewField label="Tên lót theo đúng giấy tờ tùy thân" value={review.middleName} onChange={(value) => updateReview({ middleName: value })} />
+          <ReviewField label="Họ theo đúng giấy tờ tùy thân" required value={review.lastName} error={submitted && !review.lastName.trim()} onChange={(value) => updateReview({ lastName: value })} />
+          <ReviewField label="Email" required value={review.email} error={submitted && !review.email.trim()} onChange={(value) => updateReview({ email: value })} />
+          <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
+            Số điện thoại <span className="text-rose-600">*</span>
+            <div className={`grid grid-cols-[72px_1fr] overflow-hidden rounded-md border bg-white ${phoneInvalid ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-400 focus-within:border-teal-600 focus-within:ring-4 focus-within:ring-teal-100"}`}>
+              <span className="grid place-items-center border-r border-slate-300 text-sm text-slate-700">+84</span>
+              <input value={review.phone} onChange={(event) => updateReview({ phone: event.target.value.replace(/\D/g, "").slice(0, 11) })} className="min-w-0 px-3 py-2 outline-none" inputMode="numeric" />
+            </div>
+            {phoneInvalid ? <span className="text-xs font-normal text-rose-600">Số điện thoại phải gồm 10 đến 11 chữ số.</span> : null}
+          </label>
+        </div>
+
+        <h2 className="mt-8 text-lg font-semibold text-slate-950">Nơi cư trú chính của bên ký kết hợp đồng</h2>
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
+            Quốc gia/Vùng <span className="text-rose-600">*</span>
+            <select value={review.country} onChange={(event) => updateReview({ country: event.target.value })} className="rounded-md border border-slate-400 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100">
+              <option>Việt Nam</option>
+              <option>Thái Lan</option>
+              <option>Singapore</option>
+              <option>Malaysia</option>
+            </select>
+          </label>
+          <ReviewField label="Địa chỉ dòng 1" required value={review.addressLine1} error={submitted && !review.addressLine1.trim()} onChange={(value) => updateReview({ addressLine1: value })} />
+          <ReviewField label="Địa chỉ dòng 2" value={review.addressLine2} onChange={(value) => updateReview({ addressLine2: value })} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ReviewField label="Thành phố" required value={review.city} error={submitted && !review.city.trim()} onChange={(value) => updateReview({ city: value })} />
+            <ReviewField label="Mã bưu chính" value={review.postalCode} onChange={(value) => updateReview({ postalCode: value })} />
+          </div>
+        </div>
+      </Panel>
+
+      <Panel className="mt-7">
+        <p className="text-sm text-slate-600">Một số thông tin quan trọng trước khi Quý vị đăng chỗ nghỉ trên TripNest.</p>
+        <div className="mt-5 grid gap-4 text-sm leading-6 text-slate-800">
+          <InfoLine title="Tôi có thể quyết định khi nào tôi nhận đặt phòng không?">Có. Các lựa chọn lịch phía trên giúp Quý vị chủ động mở ngày nhận đặt phòng.</InfoLine>
+          <InfoLine title="Đặt phòng có được xác nhận ngay tức thì?">Có. Đặt phòng được xác nhận ngay khi khách đặt nếu Quý vị chọn đặt phòng tức thì.</InfoLine>
+          <InfoLine title="Tôi có thể chọn khách lưu trú tại chỗ của tôi?">Không. Nếu một ngày được mở bán, khách có thể đặt ngày đó.</InfoLine>
+        </div>
+        <div className="mt-6 grid gap-4 text-sm text-slate-800">
+          <label className="grid grid-cols-[20px_1fr] gap-3">
+            <input type="checkbox" checked={review.legalBusiness} onChange={(event) => updateReview({ legalBusiness: event.target.checked })} className="mt-1 accent-teal-700" />
+            <span>Tôi cam đoan rằng đây là doanh nghiệp/chỗ nghỉ hợp pháp với tất cả giấy phép cần thiết mà tôi có thể xuất trình khi được yêu cầu chứng minh.</span>
+          </label>
+          <label className="grid grid-cols-[20px_1fr] gap-3">
+            <input type="checkbox" checked={review.termsAccepted} onChange={(event) => updateReview({ termsAccepted: event.target.checked })} className="mt-1 accent-teal-700" />
+            <span>
+              Tôi đã đọc, chấp nhận và đồng ý với{" "}
+              <button type="button" onClick={() => setTermsOpen(true)} className="font-semibold text-teal-700 underline-offset-2 hover:underline">Điều khoản chung</button>.
+            </span>
+          </label>
+          {submitted && (!review.legalBusiness || !review.termsAccepted) ? <p className="text-xs text-rose-600">Vui lòng xác nhận các điều khoản bắt buộc trước khi hoàn tất.</p> : null}
+        </div>
+      </Panel>
+
+      <div className="mt-8 grid gap-3">
+        <button type="submit" disabled={!canContinue} className="h-14 rounded-md bg-teal-700 px-6 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">Mở để nhận đặt phòng</button>
+        <button type="button" onClick={onBack} className="h-12 rounded-md text-sm font-semibold text-teal-700 transition hover:bg-teal-50">Tôi chưa sẵn sàng</button>
+      </div>
+
+      {termsOpen ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4">
+          <div className="flex h-[82vh] w-full max-w-5xl flex-col rounded-lg bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+              <h2 className="text-lg font-semibold text-slate-950">Điều khoản chung</h2>
+              <button type="button" onClick={() => setTermsOpen(false)} className="grid h-9 w-9 place-items-center rounded-full text-2xl text-slate-600 transition hover:bg-slate-100" aria-label="Đóng">×</button>
+            </div>
+            <iframe title="Điều khoản chung" src={termsDocxUrl} className="min-h-0 flex-1" />
+            <div className="border-t border-slate-200 px-5 py-3 text-sm text-slate-600">
+              Nếu trình duyệt không hiển thị trực tiếp file DOCX, hãy mở file tại <a href={termsDocxUrl} target="_blank" rel="noreferrer" className="font-semibold text-teal-700">đường dẫn này</a>.
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </form>
+  );
+}
+
+function ReviewField({ label, value, onChange, error = false, required = false }: { label: string; value: string; onChange: (value: string) => void; error?: boolean; required?: boolean }) {
+  return (
+    <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
+      <span>{label} {required ? <span className="text-rose-600">*</span> : null}</span>
+      <input value={value} onChange={(event) => onChange(event.target.value)} className={`rounded-md border bg-white px-3 py-2 outline-none transition ${error ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"}`} />
+      {error ? <span className="text-xs font-normal text-rose-600">Mục bắt buộc</span> : null}
+    </label>
+  );
+}
+
+function InfoLine({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[28px_1fr] gap-3">
+      <span className="grid h-7 w-7 place-items-center rounded border border-slate-500 text-xs font-semibold text-slate-700">i</span>
+      <span>
+        <span className="block font-semibold text-slate-950">{title}</span>
+        <span className="block text-xs leading-5 text-slate-700">{children}</span>
+      </span>
+    </div>
+  );
+}
+
 function LegalField({ label, value, onChange, error, type = "text", required = false }: { label: string; value: string; onChange: (value: string) => void; error: boolean; type?: string; required?: boolean }) {
   return (
     <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
@@ -1478,23 +2007,41 @@ function LegalField({ label, value, onChange, error, type = "text", required = f
   );
 }
 
-function MiniCalendar({ title, activeDay }: { title: string; activeDay?: number }) {
-  const days = Array.from({ length: 35 }, (_, index) => index + 1);
+function MiniCalendar({ monthDate, selectedDate, todayDate, onSelectDate }: { monthDate: Date; selectedDate: Date; todayDate: Date; onSelectDate: (date: Date) => void }) {
+  const calendarDays = getCalendarDays(monthDate);
 
   return (
     <div>
-      <h2 className="text-center text-sm font-semibold text-slate-950">{title}</h2>
+      <h2 className="text-center text-sm font-semibold text-slate-950">{monthTitle(monthDate)}</h2>
       <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs text-slate-500">
         {["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"].map((day) => <span key={day}>{day}</span>)}
       </div>
       <div className="mt-3 grid grid-cols-7 gap-2 text-center text-xs">
-        {days.map((day) => {
-          const displayDay = day <= 31 ? day : "";
-          const active = activeDay === displayDay;
+        {calendarDays.map((date, index) => {
+          if (!date) return <span key={`empty-${index}`} className="h-8" />;
+
+          const selected = isSameDate(date, selectedDate);
+          const isToday = isSameDate(date, todayDate);
+          const isPast = date < todayDate;
+
           return (
-            <span key={day} className={`grid h-8 place-items-center rounded-md ${active ? "bg-teal-700 font-semibold text-white" : "text-slate-600"}`}>
-              {displayDay}
-            </span>
+            <button
+              key={toIsoDate(date)}
+              type="button"
+              disabled={isPast}
+              onClick={() => onSelectDate(date)}
+              className={`grid h-8 place-items-center rounded-md transition ${
+                selected
+                  ? "bg-teal-700 font-semibold text-white"
+                  : isToday
+                    ? "font-semibold text-teal-700 ring-1 ring-teal-500"
+                    : isPast
+                      ? "cursor-not-allowed text-slate-300"
+                      : "text-slate-700 hover:bg-teal-50 hover:text-teal-800"
+              }`}
+            >
+              {date.getDate()}
+            </button>
           );
         })}
       </div>
@@ -1512,6 +2059,51 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function bedTotal(beds: BedCounts) {
   return Object.values(beds).reduce((total, value) => total + value, 0);
+}
+
+function toIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseIsoDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function addMonths(date: Date, offset: number) {
+  return new Date(date.getFullYear(), date.getMonth() + offset, 1);
+}
+
+function isSameDate(left: Date, right: Date) {
+  return left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
+}
+
+function monthTitle(date: Date) {
+  return `Tháng ${date.getMonth() + 1} ${date.getFullYear()}`;
+}
+
+function formatCalendarDate(date: Date) {
+  return `${date.getDate()} thg ${date.getMonth() + 1}, ${date.getFullYear()}`;
+}
+
+function getCalendarDays(monthDate: Date) {
+  const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const days: Array<Date | null> = Array.from({ length: mondayOffset }, () => null);
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    days.push(new Date(monthDate.getFullYear(), monthDate.getMonth(), day));
+  }
+
+  while (days.length % 7 !== 0) {
+    days.push(null);
+  }
+
+  return days;
 }
 
 function formatVnd(value: number) {
