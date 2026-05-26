@@ -26,7 +26,7 @@ export default function TravelerBookingsPage() {
     async function loadBookings() {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1"}/bookings/mine`,
+          `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/bookings/mine`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

@@ -18,13 +18,34 @@ import { reviewRouter } from "./routes/review.routes";
 import { tourRouter } from "./routes/tour.routes";
 
 const app = express();
+
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS ?? process.env.FRONTEND_URL ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
+
+function isAllowedOrigin(origin: string) {
+  if (allowedOrigins.has(origin)) return true;
+
+  try {
+    const url = new URL(origin);
+    return ["localhost", "127.0.0.1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://localhost:4000",
-    "http://localhost:4001",
-  ],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
   credentials: true,
 };
 app.use(helmet(), cors(corsOptions), express.json({ limit: "1mb" }), rateLimitMiddleware);
