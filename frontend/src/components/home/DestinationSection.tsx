@@ -22,6 +22,7 @@ export function DestinationSection() {
               src={destination.image}
               alt={destination.name}
               fill
+              unoptimized
               sizes={index < 2 ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 25vw, 100vw"}
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />

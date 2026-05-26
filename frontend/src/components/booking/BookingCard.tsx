@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export type TravelerBooking = {
   id: string;
   type: "PROPERTY" | "TOUR";
@@ -30,11 +32,16 @@ export function BookingCard({ booking }: { booking: TravelerBooking }) {
     <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
       <div className="grid md:grid-cols-[220px_1fr]">
         {booking.item?.thumbnailUrl ? (
-          <img
-            src={booking.item.thumbnailUrl}
-            alt={booking.item.title}
-            className="h-full min-h-[180px] w-full object-cover"
-          />
+          <div className="relative min-h-[180px]">
+            <Image
+              src={booking.item.thumbnailUrl}
+              alt={booking.item.title}
+              fill
+              unoptimized
+              sizes="(min-width: 768px) 220px, 100vw"
+              className="object-cover"
+            />
+          </div>
         ) : (
           <div className="min-h-[180px] bg-slate-100" />
         )}

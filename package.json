@@ -12,9 +12,5 @@
   },
   "devDependencies": {
     "es-abstract": "file:es-abstract-1.24.2.tgz"
-  },
-  "dependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
   }
 }

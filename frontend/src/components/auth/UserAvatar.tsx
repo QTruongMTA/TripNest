@@ -2,6 +2,7 @@
 
 import { getAccessToken } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 function LoginIcon() {
@@ -92,7 +93,14 @@ export function UserAvatar({
   const avatarContent = (
     <>
         {displayAvatar ? (
-          <img src={displayAvatar} alt="" className="h-full w-full object-cover" />
+          <Image
+            src={displayAvatar}
+            alt=""
+            width={44}
+            height={44}
+            unoptimized
+            className="h-full w-full object-cover"
+          />
         ) : (
           <LoginIcon />
         )}
