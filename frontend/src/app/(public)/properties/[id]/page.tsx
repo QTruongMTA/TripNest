@@ -1,5 +1,6 @@
 import { BookingForm } from "@/components/booking/BookingForm";
 import type { PropertyDetail } from "@/types/property";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 type PropertyDetailResponse = {
@@ -125,22 +126,31 @@ export default async function PropertyDetailPage({
 
       <div className="grid gap-3 overflow-hidden rounded-[32px] lg:grid-cols-[1.6fr_1fr]">
         {heroImage ? (
-          <img
-            src={heroImage.url}
-            alt={property.title}
-            className="h-full min-h-[320px] w-full object-cover lg:min-h-[430px]"
-          />
+          <div className="relative min-h-[320px] lg:min-h-[430px]">
+            <Image
+              src={heroImage.url}
+              alt={property.title}
+              fill
+              unoptimized
+              sizes="(min-width: 1024px) 62vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         ) : (
           <div className="min-h-[320px] bg-slate-100" />
         )}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {galleryImages.slice(0, 2).map((image) => (
-            <img
-              key={image.id}
-              src={image.url}
-              alt=""
-              className="h-full min-h-[154px] w-full object-cover"
-            />
+            <div key={image.id} className="relative min-h-[154px]">
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                unoptimized
+                sizes="(min-width: 1024px) 38vw, (min-width: 640px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           ))}
           {galleryImages.length === 0 ? (
             <div className="min-h-[154px] bg-slate-100" />

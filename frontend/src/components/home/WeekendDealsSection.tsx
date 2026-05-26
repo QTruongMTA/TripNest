@@ -36,6 +36,7 @@ export function WeekendDealsSection({ properties }: { properties: PropertyItem[]
                   src={property.thumbnailUrl ?? FALLBACK_IMAGE}
                   alt={property.title}
                   fill
+                  unoptimized
                   sizes="(min-width: 1024px) 33vw, 100vw"
                   className="object-cover"
                 />

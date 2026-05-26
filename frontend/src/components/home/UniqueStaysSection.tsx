@@ -36,6 +36,7 @@ export function UniqueStaysSection({ properties }: { properties: PropertyItem[] 
                   src={property.thumbnailUrl ?? FALLBACK_IMAGE}
                   alt={property.title}
                   fill
+                  unoptimized
                   sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                   className="object-cover transition duration-500 group-hover:scale-105"
                 />

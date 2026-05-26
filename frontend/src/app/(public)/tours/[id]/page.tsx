@@ -1,5 +1,6 @@
 import { BookingForm } from "@/components/booking/BookingForm";
 import type { TourDetail } from "@/types/tour";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -58,11 +59,16 @@ export default async function TourDetailPage({
         </p>
 
         {tour.images[0] ? (
-          <img
-            src={tour.images[0].url}
-            alt={tour.title}
-            className="mt-6 aspect-[16/9] w-full rounded-3xl object-cover"
-          />
+          <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-3xl">
+            <Image
+              src={tour.images[0].url}
+              alt={tour.title}
+              fill
+              unoptimized
+              sizes="(min-width: 1024px) 760px, 100vw"
+              className="object-cover"
+            />
+          </div>
         ) : null}
 
         <div className="mt-8">

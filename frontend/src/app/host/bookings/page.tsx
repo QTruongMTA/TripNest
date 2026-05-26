@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { getAccessToken, getStoredUser } from "@/lib/auth";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -152,11 +153,16 @@ export default function HostBookingsPage() {
           >
             <div className="grid md:grid-cols-[220px_1fr]">
               {booking.property?.thumbnailUrl ? (
-                <img
-                  src={booking.property.thumbnailUrl}
-                  alt={booking.property.title}
-                  className="h-full min-h-[180px] w-full object-cover"
-                />
+                <div className="relative min-h-[180px]">
+                  <Image
+                    src={booking.property.thumbnailUrl}
+                    alt={booking.property.title}
+                    fill
+                    unoptimized
+                    sizes="(min-width: 768px) 220px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="min-h-[180px] bg-slate-100" />
               )}

@@ -1,5 +1,6 @@
 ﻿import { Card } from "@/components/ui/Card";
 import type { PropertyListItem } from "@/types/property";
+import Image from "next/image";
 import Link from "next/link";
 
 export function PropertyCard({ property, nights }: { property: PropertyListItem; nights?: number | null }) {
@@ -8,7 +9,18 @@ export function PropertyCard({ property, nights }: { property: PropertyListItem;
   return (
     <Link href={`/properties/${property.id}`} className="block">
       <Card>
-        {property.thumbnailUrl ? <img src={property.thumbnailUrl} alt={property.title} className="mb-4 aspect-[4/3] w-full rounded-2xl object-cover" /> : null}
+        {property.thumbnailUrl ? (
+          <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-2xl">
+            <Image
+              src={property.thumbnailUrl}
+              alt={property.title}
+              fill
+              unoptimized
+              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+        ) : null}
         <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
           <p>{property.city}</p>
           <p>{property.rating.average ? `★ ${property.rating.average} (${property.rating.count})` : "Chưa có đánh giá"}</p>
