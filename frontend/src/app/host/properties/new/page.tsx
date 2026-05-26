@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 
 type PropertyType = "APARTMENT" | "HOUSE" | "HOTEL" | "UNIQUE";
 type Step =
@@ -54,6 +56,8 @@ type BedCounts = {
   futon: number;
 };
 
+type BedIconName = "single" | "double" | "king" | "superKing" | "bunk" | "sofa" | "futon";
+
 type Bedroom = {
   id: number;
   beds: BedCounts;
@@ -67,14 +71,25 @@ type DetailsState = {
   children: boolean;
   cribs: boolean;
   size: string;
+  sizeUnit: "m2" | "ft2";
 };
 
 type AvailabilityState = {
   firstBookableDate: "soon" | "specific";
   specificDate: string;
   openWindow: number;
+  first18MonthsOnly: boolean;
   longStayAllowed: boolean;
   maxStayNights: number;
+};
+
+type BusinessLegalInfo = {
+  legalName: string;
+  address: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  tradeName: string;
 };
 
 type ReviewState = {
@@ -144,6 +159,7 @@ const amenitySections = [
 ];
 
 const languageOptions = ["Tiếng Anh", "Tiếng Pháp", "Tiếng Trung", "Tiếng Tây Ban Nha", "Tiếng Việt"];
+const extraLanguageOptions = ["Tiếng Ba Lan", "Tiếng Bulgari", "Tiếng Bồ Đào Nha", "Tiếng Catalan", "Tiếng Croatia", "Tiếng Do Thái", "Tiếng Estonia", "Tiếng Gruzia", "Tiếng Hàn", "Tiếng Indonesia", "Tiếng Nhật", "Tiếng Nga", "Tiếng Thái", "Tiếng Ý"];
 const cityOptions = [
   "An Giang",
   "Bà Rịa - Vũng Tàu",
@@ -221,14 +237,14 @@ const defaultBedroomBeds: BedCounts = {
   futon: 0,
 };
 
-const bedOptions: Array<{ key: keyof BedCounts; title: string; size: string; icon: string; advanced?: boolean }> = [
-  { key: "single", title: "Giường đơn", size: "Rộng 90 - 130 cm", icon: "▔" },
-  { key: "double", title: "Giường đôi", size: "Rộng 131 - 150 cm", icon: "▔▔" },
-  { key: "king", title: "Giường lớn (cỡ King)", size: "Rộng 151 - 180 cm", icon: "▔▔" },
-  { key: "superKing", title: "Giường cực lớn (cỡ Super-king)", size: "Rộng 181 - 210 cm", icon: "▔▔" },
-  { key: "bunk", title: "Giường tầng", size: "Nhiều kích cỡ", icon: "▔" , advanced: true },
-  { key: "sofa", title: "Giường sofa", size: "Nhiều kích cỡ", icon: "▰", advanced: true },
-  { key: "futon", title: "Nệm Futon", size: "Nhiều kích cỡ", icon: "▔▔", advanced: true },
+const bedOptions: Array<{ key: keyof BedCounts; title: string; size: string; icon: BedIconName; advanced?: boolean }> = [
+  { key: "single", title: "Giường đơn", size: "Rộng 90 - 130 cm", icon: "single" },
+  { key: "double", title: "Giường đôi", size: "Rộng 131 - 150 cm", icon: "double" },
+  { key: "king", title: "Giường lớn (cỡ King)", size: "Rộng 151 - 180 cm", icon: "king" },
+  { key: "superKing", title: "Giường cực lớn (cỡ Super-king)", size: "Rộng 181 - 210 cm", icon: "superKing" },
+  { key: "bunk", title: "Giường tầng", size: "Nhiều kích cỡ", icon: "bunk" , advanced: true },
+  { key: "sofa", title: "Giường sofa", size: "Nhiều kích cỡ", icon: "sofa", advanced: true },
+  { key: "futon", title: "Nệm Futon", size: "Nhiều kích cỡ", icon: "futon", advanced: true },
 ];
 
 const inputClass =
@@ -242,8 +258,9 @@ const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getD
 const todayIso = toIsoDate(todayDateOnly);
 
 export default function Page() {
+  const sessionUser = useAuthStore((state) => state.user);
   const [step, setStep] = useState<Step>("type");
-  const [propertyType, setPropertyType] = useState<PropertyType>("APARTMENT");
+  const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
   const [title, setTitle] = useState("");
   const [address, setAddress] = useState<AddressState>({ line1: "", line2: "", city: "", postalCode: "", country: "Việt Nam", latitude: defaultMapCenter.lat, longitude: defaultMapCenter.lng });
   const [details, setDetails] = useState<DetailsState>({
@@ -254,6 +271,7 @@ export default function Page() {
     children: true,
     cribs: false,
     size: "",
+    sizeUnit: "m2",
   });
   const [amenities, setAmenities] = useState<string[]>([]);
   const [services, setServices] = useState({ breakfast: "no", parking: "no" });
@@ -276,8 +294,9 @@ export default function Page() {
   });
   const [nonRefundableRate, setNonRefundableRate] = useState({ enabled: true, discount: 10 });
   const [weeklyRate, setWeeklyRate] = useState({ enabled: true, discount: 15 });
-  const [availability, setAvailability] = useState<AvailabilityState>({ firstBookableDate: "soon", specificDate: todayIso, openWindow: 365, longStayAllowed: true, maxStayNights: 30 });
+  const [availability, setAvailability] = useState<AvailabilityState>({ firstBookableDate: "soon", specificDate: todayIso, openWindow: 365, first18MonthsOnly: false, longStayAllowed: true, maxStayNights: 30 });
   const [legalType, setLegalType] = useState("individual");
+  const [businessLegal, setBusinessLegal] = useState<BusinessLegalInfo>({ legalName: "", address: "", postalCode: "", city: "", country: "Việt Nam", tradeName: "" });
   const [owners, setOwners] = useState<OwnerInfo[]>([{ id: 1, firstName: "", lastName: "", birthDate: "" }]);
   const [ownerAlias, setOwnerAlias] = useState("");
   const [legalSubmitted, setLegalSubmitted] = useState(false);
@@ -297,14 +316,28 @@ export default function Page() {
   });
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+  useEffect(() => {
+    if (!sessionUser || owners.some((owner) => owner.firstName || owner.lastName || owner.birthDate)) return;
+    const nameParts = (sessionUser.displayName || sessionUser.name || "").trim().split(/\s+/).filter(Boolean);
+    if (!nameParts.length && !sessionUser.birthDate) return;
+    setOwners([
+      {
+        id: 1,
+        firstName: nameParts.slice(0, -1).join(" ") || nameParts[0] || "",
+        lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
+        birthDate: sessionUser.birthDate?.slice(0, 10) || "",
+      },
+    ]);
+  }, [sessionUser, owners]);
+
   const selectedType = useMemo(() => propertyTypes.find((type) => type.value === propertyType) ?? propertyTypes[0], [propertyType]);
   const activeIndex = steps.indexOf(step);
   const setupIndex = setupSteps.indexOf(step);
   const canContinue =
-    step === "type" ||
+    (step === "type" && Boolean(propertyType)) ||
     (step === "name" && title.trim().length >= 3) ||
     (step === "address" && address.line1.trim() && address.city.trim()) ||
-    (step === "setup-details" && details.guests > 0 && details.bathrooms > 0) ||
+    (step === "setup-details" && details.guests > 0 && details.bathrooms > 0 && Number(details.size) > 0) ||
     (step === "amenities" && amenities.length > 0) ||
     step === "services" ||
     (step === "languages" && languages.length > 0) ||
@@ -314,7 +347,10 @@ export default function Page() {
     (step === "nightly-price" && Number(nightlyPrice) > 0) ||
     step === "rate-plans" ||
     step === "availability" ||
-    (step === "legal" && owners.length > 0 && owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim())) ||
+    (step === "legal" &&
+      (legalType !== "business" || (businessLegal.legalName.trim() && businessLegal.postalCode.trim())) &&
+      owners.length > 0 &&
+      owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim())) ||
     (step === "review" &&
       review.firstName.trim() &&
       review.lastName.trim() &&
@@ -355,10 +391,10 @@ export default function Page() {
           </div>
         </div>
 
-        <ProgressNav activeIndex={activeIndex} setupIndex={setupIndex} />
+        <ProgressNav activeIndex={activeIndex} setupIndex={setupIndex} onSelectStep={setStep} />
 
         <div className="bg-[#f7fbfa] px-5 py-8 md:px-8 md:py-12">
-          {step === "type" ? <TypeStep propertyType={propertyType} setPropertyType={setPropertyType} onContinue={() => continueFlow()} /> : null}
+          {step === "type" ? <TypeStep propertyType={propertyType} setPropertyType={setPropertyType} onContinue={() => continueFlow()} canContinue={Boolean(canContinue)} /> : null}
           {step === "name" ? <NameStep title={title} setTitle={setTitle} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
           {step === "address" ? (
             <AddressStep address={address} setAddress={setAddress} selectedType={selectedType.title} title={title} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} />
@@ -376,7 +412,7 @@ export default function Page() {
           {step === "rules" ? <RulesStep rules={rules} setRules={setRules} onBack={goBack} onSubmit={continueFlow} /> : null}
           {step === "photos" ? <PhotosStep photos={photos} setPhotos={setPhotos} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
           {step === "booking-method" ? <BookingMethodStep bookingMethod={bookingMethod} setBookingMethod={setBookingMethod} onBack={goBack} onSubmit={continueFlow} /> : null}
-          {step === "nightly-price" ? <NightlyPriceStep price={nightlyPrice} setPrice={setNightlyPrice} launchDiscount={launchDiscount} setLaunchDiscount={setLaunchDiscount} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
+          {step === "nightly-price" ? <NightlyPriceStep city={address.city} price={nightlyPrice} setPrice={setNightlyPrice} launchDiscount={launchDiscount} setLaunchDiscount={setLaunchDiscount} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
           {step === "rate-plans" ? (
             <RatePlansStep
               price={Number(nightlyPrice) || 0}
@@ -401,6 +437,8 @@ export default function Page() {
             <LegalStep
               legalType={legalType}
               setLegalType={setLegalType}
+              businessLegal={businessLegal}
+              setBusinessLegal={setBusinessLegal}
               owners={owners}
               setOwners={setOwners}
               ownerAlias={ownerAlias}
@@ -431,36 +469,36 @@ export default function Page() {
   );
 }
 
-function ProgressNav({ activeIndex, setupIndex }: { activeIndex: number; setupIndex: number }) {
+function ProgressNav({ activeIndex, setupIndex, onSelectStep }: { activeIndex: number; setupIndex: number; onSelectStep: (step: Step) => void }) {
   const stages = [
-    { label: "Thông tin cơ bản", done: activeIndex > 2, active: activeIndex <= 2, progress: activeIndex > 2 ? 100 : ((activeIndex + 1) / 3) * 100 },
-    { label: "Cài đặt chỗ nghỉ", done: activeIndex > 7, active: activeIndex >= 3 && activeIndex <= 7, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 7 ? 100 : 0 },
-    { label: "Ảnh", done: activeIndex > 8, active: activeIndex === 8, progress: activeIndex >= 8 ? 100 : 0 },
-    { label: "Giá và lịch", done: activeIndex > 12, active: activeIndex >= 9 && activeIndex <= 12, progress: activeIndex >= 9 ? Math.min(100, ((activeIndex - 8) / 4) * 100) : 0 },
-    { label: "Thông tin pháp lý", done: activeIndex > 13, active: activeIndex === 13, progress: activeIndex > 13 ? 100 : activeIndex === 13 ? 100 : 0 },
-    { label: "Xem lại và hoàn tất", done: false, active: activeIndex === 14, progress: activeIndex === 14 ? 100 : 0 },
+    { label: "Thông tin cơ bản", step: "type" as Step, done: activeIndex > 2, active: activeIndex <= 2, progress: activeIndex > 2 ? 100 : ((activeIndex + 1) / 3) * 100 },
+    { label: "Cài đặt chỗ nghỉ", step: "setup-details" as Step, done: activeIndex > 7, active: activeIndex >= 3 && activeIndex <= 7, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 7 ? 100 : 0 },
+    { label: "Ảnh", step: "photos" as Step, done: activeIndex > 8, active: activeIndex === 8, progress: activeIndex >= 8 ? 100 : 0 },
+    { label: "Giá và lịch", step: "booking-method" as Step, done: activeIndex > 12, active: activeIndex >= 9 && activeIndex <= 12, progress: activeIndex >= 9 ? Math.min(100, ((activeIndex - 8) / 4) * 100) : 0 },
+    { label: "Thông tin pháp lý", step: "legal" as Step, done: activeIndex > 13, active: activeIndex === 13, progress: activeIndex > 13 ? 100 : activeIndex === 13 ? 100 : 0 },
+    { label: "Xem lại và hoàn tất", step: "review" as Step, done: false, active: activeIndex === 14, progress: activeIndex === 14 ? 100 : 0 },
   ];
 
   return (
     <nav className="border-b border-slate-200 bg-white px-4 md:px-8" aria-label="Tiến trình đăng chỗ nghỉ">
       <div className="grid gap-3 py-5 md:grid-cols-6">
         {stages.map((stage) => (
-          <div key={stage.label} className="min-w-0">
-            <div className="flex items-center gap-2 text-sm">
+          <button key={stage.label} type="button" onClick={() => onSelectStep(stage.step)} className="min-w-0 text-left">
+            <div className="grid grid-cols-[1fr_auto] items-start gap-2 text-sm">
               <span className={stage.active || stage.done ? "font-semibold text-teal-900" : "text-slate-400"}>{stage.label}</span>
               {stage.done ? <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-xs text-white">✓</span> : null}
             </div>
             <div className="mt-3 flex h-1.5 gap-1 overflow-hidden rounded-full bg-slate-200">
               <div className={`h-full rounded-full ${stage.done ? "bg-emerald-400" : stage.active ? "bg-teal-600" : "bg-slate-300"}`} style={{ width: `${stage.progress}%` }} />
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </nav>
   );
 }
 
-function TypeStep({ propertyType, setPropertyType, onContinue }: { propertyType: PropertyType; setPropertyType: (value: PropertyType) => void; onContinue: () => void }) {
+function TypeStep({ propertyType, setPropertyType, onContinue, canContinue }: { propertyType: PropertyType | null; setPropertyType: (value: PropertyType) => void; onContinue: () => void; canContinue: boolean }) {
   return (
     <div className="mx-auto max-w-5xl">
       <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal-700">Bước đầu tiên</p>
@@ -480,7 +518,7 @@ function TypeStep({ propertyType, setPropertyType, onContinue }: { propertyType:
         })}
       </div>
       <div className="mt-8 flex justify-end">
-        <button type="button" onClick={onContinue} className="rounded-md bg-teal-700 px-8 py-3 text-base font-semibold text-white transition hover:bg-teal-800">Tiếp tục</button>
+        <button type="button" onClick={onContinue} disabled={!canContinue} className="rounded-md bg-teal-700 px-8 py-3 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">Tiếp tục</button>
       </div>
     </div>
   );
@@ -854,7 +892,7 @@ function DetailsStep({ details, setDetails, onBack, onSubmit, canContinue }: { d
       <section className="mx-auto max-w-3xl">
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Phòng khách</h1>
         <Panel className="mt-7">
-          <BedCounterRow icon="▰" title="Giường sofa" value={livingDraft} onChange={(value) => setLivingDraft(Math.max(0, value))} />
+          <BedCounterRow icon="sofa" title="Giường sofa" value={livingDraft} onChange={(value) => setLivingDraft(Math.max(0, value))} />
         </Panel>
         <RoomEditorActions onCancel={() => setEditingRoom(null)} onSave={saveRoom} />
       </section>
@@ -929,8 +967,11 @@ function DetailsStep({ details, setDetails, onBack, onSubmit, canContinue }: { d
         <Panel>
           <Field label="Căn hộ này rộng bao nhiêu?">
             <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
-              <input value={details.size} onChange={(event) => setDetails({ ...details, size: event.target.value })} className={inputClass} inputMode="numeric" />
-              <select className={inputClass} defaultValue="m2"><option value="m2">mét vuông</option></select>
+              <input value={details.size} onChange={(event) => setDetails({ ...details, size: event.target.value.replace(/[^\d.]/g, "") })} className={inputClass} inputMode="decimal" />
+              <select value={details.sizeUnit} onChange={(event) => setDetails({ ...details, sizeUnit: event.target.value as DetailsState["sizeUnit"] })} className={inputClass}>
+                <option value="m2">mét vuông</option>
+                <option value="ft2">feet vuông</option>
+              </select>
             </div>
           </Field>
         </Panel>
@@ -981,6 +1022,9 @@ function ServicesStep({ services, setServices, onBack, onSubmit }: { services: {
 }
 
 function LanguagesStep({ languages, toggleLanguage, onBack, onSubmit, canContinue }: { languages: string[]; toggleLanguage: (item: string) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
+  const [extraOpen, setExtraOpen] = useState(false);
+  const selectedExtra = extraLanguageOptions.filter((item) => languages.includes(item));
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl">
       <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Quý vị hoặc nhân viên của mình sử dụng ngôn ngữ nào?</h1>
@@ -990,7 +1034,18 @@ function LanguagesStep({ languages, toggleLanguage, onBack, onSubmit, canContinu
           {languageOptions.map((item) => <CheckRow key={item} label={item} checked={languages.includes(item)} onChange={() => toggleLanguage(item)} />)}
         </div>
         <div className="mt-8 border-t border-slate-200 pt-7">
-          <button type="button" className="text-sm font-semibold text-teal-700">Thêm các ngôn ngữ khác</button>
+          <p className="font-semibold text-slate-950">Thêm các ngôn ngữ khác</p>
+          <button type="button" onClick={() => setExtraOpen((value) => !value)} className="mt-4 flex w-full items-center justify-between rounded-md border border-slate-400 bg-white px-4 py-3 text-left text-sm text-slate-900 transition hover:border-teal-600">
+            <span className="truncate">{selectedExtra.length ? selectedExtra.join(", ") : "Chọn thêm ngôn ngữ"}</span>
+            <span className={`text-xl transition ${extraOpen ? "rotate-180" : ""}`}>⌄</span>
+          </button>
+          {extraOpen ? (
+            <div className="mt-4 max-h-72 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 shadow-xl shadow-slate-900/10">
+              <div className="grid gap-3">
+                {extraLanguageOptions.map((item) => <CheckRow key={item} label={item} checked={languages.includes(item)} onChange={() => toggleLanguage(item)} />)}
+              </div>
+            </div>
+          ) : null}
         </div>
       </Panel>
       <WizardActions onBack={onBack} canContinue={canContinue} />
@@ -1150,10 +1205,39 @@ function BookingMethodStep({ bookingMethod, setBookingMethod, onBack, onSubmit }
   );
 }
 
-function NightlyPriceStep({ price, setPrice, launchDiscount, setLaunchDiscount, onBack, onSubmit, canContinue }: { price: string; setPrice: (value: string) => void; launchDiscount: boolean; setLaunchDiscount: (value: boolean) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
+function NightlyPriceStep({ city, price, setPrice, launchDiscount, setLaunchDiscount, onBack, onSubmit, canContinue }: { city: string; price: string; setPrice: (value: string) => void; launchDiscount: boolean; setLaunchDiscount: (value: boolean) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
   const numericPrice = Number(price) || 0;
   const hostRevenue = Math.max(0, numericPrice * 0.85);
   const discountedPrice = Math.max(0, numericPrice * 0.8);
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [launchModalOpen, setLaunchModalOpen] = useState(false);
+  const [marketPrices, setMarketPrices] = useState([35670, 281145, 495934]);
+  const [marketLoading, setMarketLoading] = useState(false);
+  const marketStats = useMemo(() => getPricePercentiles(marketPrices), [marketPrices]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!city) return;
+
+    setMarketLoading(true);
+    api
+      .get("/properties", { params: { city, limit: 50 } })
+      .then((response) => {
+        const data = response.data?.data ?? response.data?.items ?? response.data?.properties ?? [];
+        const prices = Array.isArray(data)
+          ? data.map((item) => Number(item?.pricePerNight)).filter((value) => Number.isFinite(value) && value > 0)
+          : [];
+        if (!cancelled && prices.length) setMarketPrices(prices);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) setMarketLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [city]);
 
   return (
     <form onSubmit={onSubmit} className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -1161,17 +1245,17 @@ function NightlyPriceStep({ price, setPrice, launchDiscount, setLaunchDiscount, 
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Giá mỗi đêm</h1>
         <Panel className="mt-7">
           <p className="text-lg font-semibold text-slate-950">Đưa ra giá cạnh tranh để tăng khả năng nhận thêm đặt phòng.</p>
-          <p className="mt-3 text-sm text-slate-600">Đây là khoảng giá của các chỗ nghỉ tương tự với Quý vị. <span className="font-semibold text-teal-700">Tìm hiểu thêm</span></p>
-          <div className="mt-7 px-3">
+          <p className="mt-3 text-sm text-slate-600">Đây là khoảng giá của các chỗ nghỉ tương tự với Quý vị. <button type="button" onClick={() => setPriceModalOpen(true)} className="font-semibold text-teal-700 underline-offset-2 hover:underline">Tìm hiểu thêm</button></p>
+          <div className="mt-12 px-3 pb-12">
             <div className="relative h-2 rounded-full bg-teal-100">
               <div className="absolute left-[18%] right-[18%] top-0 h-2 rounded-full bg-teal-300" />
               <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-teal-700" />
-              <span className="absolute left-1/2 top-[-42px] -translate-x-1/2 rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">Mức giá ở giữa: VND 280.113</span>
-              <span className="absolute left-[18%] top-5 -translate-x-1/2 rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">VND 35.540</span>
-              <span className="absolute right-[18%] top-5 translate-x-1/2 rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">VND 494.115</span>
+              <span className="absolute left-1/2 top-[-48px] -translate-x-1/2 whitespace-nowrap rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">Mức giá ở giữa: {formatVnd(marketStats.p50)}</span>
+              <span className="absolute left-[18%] top-6 -translate-x-1/2 whitespace-nowrap rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">{formatVnd(marketStats.p25)}</span>
+              <span className="absolute right-[18%] top-6 translate-x-1/2 whitespace-nowrap rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white">{formatVnd(marketStats.p75)}</span>
             </div>
           </div>
-          <div className="mt-16 border-t border-slate-200 pt-5 text-sm text-slate-700">Thông tin này có giúp Quý vị quyết định mức giá không? <span className="ml-2 text-lg">♡ ♧</span></div>
+          {marketLoading ? <p className="mt-2 text-xs text-slate-500">Đang cập nhật dữ liệu giá theo khu vực...</p> : null}
         </Panel>
 
         <Panel className="mt-7">
@@ -1200,7 +1284,7 @@ function NightlyPriceStep({ price, setPrice, launchDiscount, setLaunchDiscount, 
             <input type="checkbox" checked={launchDiscount} onChange={(event) => setLaunchDiscount(event.target.checked)} className="h-5 w-5 accent-teal-700" />
             Thu hút khách bằng giảm giá 20%
           </label>
-          <p className="mt-6 text-sm leading-6 text-slate-700">Giảm 20% cho 3 đơn đặt đầu tiên hoặc trong 90 ngày, tùy trường hợp nào đến trước. <span className="font-semibold text-teal-700">Tìm hiểu thêm</span></p>
+          <p className="mt-6 text-sm leading-6 text-slate-700">Giảm 20% cho 3 đơn đặt đầu tiên hoặc trong 90 ngày, tùy trường hợp nào đến trước. <button type="button" onClick={() => setLaunchModalOpen(true)} className="font-semibold text-teal-700 underline-offset-2 hover:underline">Tìm hiểu thêm</button></p>
           <div className="mt-5 border-t border-slate-200 pt-5 text-lg">
             <span className="text-slate-500 line-through">{formatVnd(numericPrice)}</span>
             <span className="ml-2 font-semibold text-emerald-700">{formatVnd(launchDiscount ? discountedPrice : numericPrice)}/đêm</span>
@@ -1217,6 +1301,8 @@ function NightlyPriceStep({ price, setPrice, launchDiscount, setLaunchDiscount, 
           Hãy đảm bảo rằng Quý vị cung cấp giảm giá đúng nghĩa cho khách hàng. Theo các quy định bảo vệ người tiêu dùng, chương trình khuyến mãi được Quý vị thiết lập trên Booking.com phải thực sự mang lại giảm giá đúng nghĩa cho khách hàng.
         </InfoPanel>
       </aside>
+      {priceModalOpen ? <MarketPriceModal stats={marketStats} onClose={() => setPriceModalOpen(false)} /> : null}
+      {launchModalOpen ? <LaunchDiscountModal price={numericPrice} onClose={() => setLaunchModalOpen(false)} /> : null}
     </form>
   );
 }
@@ -1573,11 +1659,11 @@ function RatePlansStep({
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-slate-950">Loại giá tiêu chuẩn</h2>
-        <RatePlanCard title="Chính sách hủy" onEdit={() => setEditing("cancellation")}>
+        <RatePlanCard title="Chính sách hủy" tooltip="Khách sẵn sàng trả giá cao hơn một chút cho những chỗ nghỉ có hủy linh động" onEdit={() => setEditing("cancellation")}>
           <PlanLine>Khách có thể hủy miễn phí đến {cancellationDays} ngày trước khi đến.</PlanLine>
           <PlanLine>Khách hủy trong vòng 24 giờ sẽ được miễn phí hủy.</PlanLine>
         </RatePlanCard>
-        <RatePlanCard title="Giá theo cỡ nhóm" onEdit={() => setEditing("group")}>
+        <RatePlanCard title="Giá theo cỡ nhóm" tooltip="Cài đặt giá thấp hơn cho khách nhóm sẽ giúp chỗ nghỉ hấp dẫn hơn trong mắt khách tiềm năng" onEdit={() => setEditing("group")}>
           <p className="mb-4 text-sm text-slate-600">Đặt mức giá thấp hơn cho nhóm khách ít hơn để thu hút thêm đặt phòng.</p>
           <div className="grid grid-cols-3 gap-4 text-sm font-semibold text-slate-700">
             <span>Số lượng khách</span>
@@ -1597,7 +1683,7 @@ function RatePlansStep({
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-slate-950">Giá trẻ em dành cho khách gia đình</h2>
-        <RatePlanCard title="Giá và nhóm tuổi" onEdit={() => {
+        <RatePlanCard title="Giá và nhóm tuổi" tooltip="Thiết lập giá cho tất cả trẻ em hoặc các nhóm tuổi cụ thể để tăng mức độ hiển thị và lượng đặt phòng." onEdit={() => {
           setChildDraft(childPricing);
           setEditing("children");
         }}>
@@ -1609,7 +1695,7 @@ function RatePlansStep({
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-slate-950">Loại giá không hoàn tiền</h2>
-        <RatePlanCard title="Giá và chính sách hủy" onEdit={() => {
+        <RatePlanCard title="Giá và chính sách hủy" tooltip="Giá không hoàn tiền thu hút những khách đã chắc chắn về kế hoạch của họ và muốn có lựa chọn tiết kiệm hơn" onEdit={() => {
           setNonRefundableDraft(nonRefundableRate);
           setEditing("non-refundable");
         }}>
@@ -1621,7 +1707,7 @@ function RatePlansStep({
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-slate-950">Loại giá theo tuần</h2>
-        <RatePlanCard title="Giá và chính sách hủy" onEdit={() => {
+        <RatePlanCard title="Giá và chính sách hủy" tooltip="Khách có nhu cầu cao cho các kỳ nghỉ dài, hàng triệu người đang tìm kiếm các kỳ lưu trú dài hơn 1 tuần" onEdit={() => {
           setWeeklyDraft(weeklyRate);
           setEditing("weekly");
         }}>
@@ -1693,12 +1779,18 @@ function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: {
           <p className="font-semibold text-slate-950">Quý vị muốn mở ngày để nhận đặt phòng ra sao?</p>
           <div className="mt-5 grid gap-4 text-sm text-slate-800">
             <label className="flex items-center gap-2">
-              <input type="radio" checked className="accent-teal-700" readOnly />
+              <input type="radio" checked={!availability.first18MonthsOnly} onChange={() => setAvailability({ ...availability, first18MonthsOnly: false })} className="accent-teal-700" />
               Liên tục mở phòng
             </label>
-            <select value={availability.openWindow} onChange={(event) => setAvailability({ ...availability, openWindow: Number(event.target.value) })} className="max-w-xs rounded-md border border-slate-400 bg-white px-4 py-3 outline-none focus:border-teal-600">
-              {[365, 180, 90, 60].map((days) => <option key={days} value={days}>{days} ngày</option>)}
-            </select>
+            <label className="flex w-fit items-center gap-3">
+              <input type="radio" checked={availability.first18MonthsOnly} onChange={() => setAvailability({ ...availability, first18MonthsOnly: true, openWindow: 540 })} className="accent-teal-700" />
+              Chỉ mở trong 18 tháng đầu
+            </label>
+            {!availability.first18MonthsOnly ? (
+              <select value={availability.openWindow} onChange={(event) => setAvailability({ ...availability, openWindow: Number(event.target.value) })} className="max-w-xs rounded-md border border-slate-400 bg-white px-4 py-3 outline-none focus:border-teal-600">
+                {[365, 180, 90, 60].map((days) => <option key={days} value={days}>{days} ngày</option>)}
+              </select>
+            ) : null}
           </div>
         </Panel>
 
@@ -1736,6 +1828,8 @@ function AvailabilityStep({ availability, setAvailability, onBack, onSubmit }: {
 function LegalStep({
   legalType,
   setLegalType,
+  businessLegal,
+  setBusinessLegal,
   owners,
   setOwners,
   ownerAlias,
@@ -1748,6 +1842,8 @@ function LegalStep({
 }: {
   legalType: string;
   setLegalType: (value: string) => void;
+  businessLegal: BusinessLegalInfo;
+  setBusinessLegal: (value: BusinessLegalInfo) => void;
   owners: OwnerInfo[];
   setOwners: (value: OwnerInfo[]) => void;
   ownerAlias: string;
@@ -1793,6 +1889,25 @@ function LegalStep({
           </select>
         </label>
       </Panel>
+
+      {legalType === "business" ? (
+        <Panel className="mt-7">
+          <BusinessField label="Tên đầy đủ của pháp nhân doanh nghiệp" required value={businessLegal.legalName} error={submitted && !businessLegal.legalName.trim()} onChange={(legalName) => setBusinessLegal({ ...businessLegal, legalName })} />
+          <BusinessField label="Địa chỉ của pháp nhân doanh nghiệp" value={businessLegal.address} onChange={(address) => setBusinessLegal({ ...businessLegal, address })} />
+          <BusinessField label="Mã bưu điện" required value={businessLegal.postalCode} error={submitted && !businessLegal.postalCode.trim()} onChange={(postalCode) => setBusinessLegal({ ...businessLegal, postalCode })} />
+          <BusinessField label="Thành phố" value={businessLegal.city} onChange={(city) => setBusinessLegal({ ...businessLegal, city })} />
+          <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
+            Quốc gia
+            <select value={businessLegal.country} onChange={(event) => setBusinessLegal({ ...businessLegal, country: event.target.value })} className={inputClass}>
+              <option>Việt Nam</option>
+              <option>Thái Lan</option>
+              <option>Singapore</option>
+              <option>Malaysia</option>
+            </select>
+          </label>
+          <BusinessField label="Nếu công ty hoạt động dưới tên khác (ví dụ: tên thương mại) liên quan đến chỗ nghỉ, vui lòng cung cấp chi tiết." value={businessLegal.tradeName} onChange={(tradeName) => setBusinessLegal({ ...businessLegal, tradeName })} optional />
+        </Panel>
+      ) : null}
 
       <Panel className="mt-7">
         <p className="text-base leading-7 text-slate-800">Vui lòng cung cấp tên đầy đủ và ngày sinh của tất cả cá nhân, những người sở hữu từ 25% trở lên của chỗ nghỉ.</p>
@@ -1850,6 +1965,7 @@ function ReviewCompleteStep({
 }) {
   const [termsOpen, setTermsOpen] = useState(false);
   const termsDocxUrl = "/terms/dieu-khoan-chung.docx";
+  const termsPreviewUrl = "/terms/dieu-khoan-chung-preview.html";
   const phoneInvalid = submitted && !/^\d{10,11}$/.test(review.phone);
 
   function updateReview(patch: Partial<ReviewState>) {
@@ -1935,11 +2051,11 @@ function ReviewCompleteStep({
         </div>
         <div className="mt-6 grid gap-4 text-sm text-slate-800">
           <label className="grid grid-cols-[20px_1fr] gap-3">
-            <input type="checkbox" checked={review.legalBusiness} onChange={(event) => updateReview({ legalBusiness: event.target.checked })} className="mt-1 accent-teal-700" />
+            <input type="checkbox" checked={review.legalBusiness} onChange={(event) => updateReview({ legalBusiness: event.target.checked })} className="mt-1 h-5 w-5 accent-teal-700" />
             <span>Tôi cam đoan rằng đây là doanh nghiệp/chỗ nghỉ hợp pháp với tất cả giấy phép cần thiết mà tôi có thể xuất trình khi được yêu cầu chứng minh.</span>
           </label>
           <label className="grid grid-cols-[20px_1fr] gap-3">
-            <input type="checkbox" checked={review.termsAccepted} onChange={(event) => updateReview({ termsAccepted: event.target.checked })} className="mt-1 accent-teal-700" />
+            <input type="checkbox" checked={review.termsAccepted} onChange={(event) => updateReview({ termsAccepted: event.target.checked })} className="mt-1 h-5 w-5 accent-teal-700" />
             <span>
               Tôi đã đọc, chấp nhận và đồng ý với{" "}
               <button type="button" onClick={() => setTermsOpen(true)} className="font-semibold text-teal-700 underline-offset-2 hover:underline">Điều khoản chung</button>.
@@ -1961,9 +2077,9 @@ function ReviewCompleteStep({
               <h2 className="text-lg font-semibold text-slate-950">Điều khoản chung</h2>
               <button type="button" onClick={() => setTermsOpen(false)} className="grid h-9 w-9 place-items-center rounded-full text-2xl text-slate-600 transition hover:bg-slate-100" aria-label="Đóng">×</button>
             </div>
-            <iframe title="Điều khoản chung" src={termsDocxUrl} className="min-h-0 flex-1" />
+            <iframe title="Điều khoản chung" src={termsPreviewUrl} className="min-h-0 flex-1 bg-slate-100" />
             <div className="border-t border-slate-200 px-5 py-3 text-sm text-slate-600">
-              Nếu trình duyệt không hiển thị trực tiếp file DOCX, hãy mở file tại <a href={termsDocxUrl} target="_blank" rel="noreferrer" className="font-semibold text-teal-700">đường dẫn này</a>.
+              Bản xem trước hiển thị trong khung này. <a href={termsDocxUrl} target="_blank" rel="noreferrer" className="font-semibold text-teal-700">Mở file DOCX gốc</a>.
             </div>
           </div>
         </div>
@@ -2110,6 +2226,79 @@ function formatVnd(value: number) {
   return `VND${Math.round(value).toLocaleString("vi-VN")}`;
 }
 
+function getPricePercentiles(values: number[]) {
+  const sorted = values.filter((value) => Number.isFinite(value) && value > 0).sort((left, right) => left - right);
+  const fallback = [35670, 281145, 495934];
+  const source = sorted.length ? sorted : fallback;
+  return {
+    p25: percentile(source, 0.25),
+    p50: percentile(source, 0.5),
+    p75: percentile(source, 0.75),
+  };
+}
+
+function percentile(sortedValues: number[], ratio: number) {
+  if (sortedValues.length === 1) return sortedValues[0];
+  const index = (sortedValues.length - 1) * ratio;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  const weight = index - lower;
+  return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+}
+
+function OverlayModal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4">
+      <section className="w-full max-w-3xl rounded-[20px] bg-white p-6 shadow-2xl md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{title}</h2>
+          <button type="button" onClick={onClose} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-2xl text-slate-700 transition hover:bg-slate-100" aria-label="Đóng">×</button>
+        </div>
+        <div className="mt-4 text-base leading-7 text-slate-800">{children}</div>
+      </section>
+    </div>
+  );
+}
+
+function MarketPriceModal({ stats, onClose }: { stats: { p25: number; p50: number; p75: number }; onClose: () => void }) {
+  return (
+    <OverlayModal title="Định nghĩa của chỗ nghỉ tương tự là gì?" onClose={onClose}>
+      <p>Chỗ nghỉ tương tự là những nơi nhận được đặt phòng trong năm ngoái có vị trí, tiện nghi chỗ nghỉ và tiện nghi phòng tương tự.</p>
+      <ul className="mt-7 list-disc space-y-3 pl-6">
+        <li><span className="font-semibold">25%</span> chỗ nghỉ có giá thấp hơn <span className="font-semibold">{formatVnd(stats.p25)}</span></li>
+        <li><span className="font-semibold">50%</span> chỗ nghỉ có giá thấp hơn <span className="font-semibold">{formatVnd(stats.p50)}</span></li>
+        <li><span className="font-semibold">75%</span> chỗ nghỉ có giá thấp hơn <span className="font-semibold">{formatVnd(stats.p75)}</span></li>
+      </ul>
+    </OverlayModal>
+  );
+}
+
+function LaunchDiscountModal({ price, onClose }: { price: number; onClose: () => void }) {
+  return (
+    <OverlayModal title="Nhận đặt phòng và đánh giá nhanh hơn" onClose={onClose}>
+      <p>Chỗ nghỉ có điểm đánh giá có khả năng nhận được đơn đặt cao hơn những nơi không có điểm. Tăng cơ hội nhận được đặt phòng và đánh giá nhanh hơn bằng giảm giá tạm thời 20%.</p>
+      <p className="mt-6 font-semibold">Cách thức hoạt động</p>
+      <ul className="mt-2 list-disc space-y-2 pl-6">
+        <li>Giảm giá được áp dụng cho 3 đơn đặt đầu tiên hoặc trong vòng tối đa 90 ngày, tùy trường hợp nào đến trước.</li>
+        <li>Sau đó, giá của Quý vị sẽ tự động về lại {formatVnd(price)}.</li>
+        <li>Quý vị cũng có thể ngừng Ưu Đãi Chỗ Nghỉ Mới sớm hơn.</li>
+      </ul>
+    </OverlayModal>
+  );
+}
+
+function TooltipIcon({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <span tabIndex={0} className="grid h-5 w-5 cursor-help place-items-center rounded-full border border-slate-500 text-xs font-semibold text-slate-700">i</span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 hidden w-80 max-w-[calc(100vw-48px)] -translate-x-1/2 rounded-lg bg-white px-5 py-4 text-sm font-normal leading-6 text-slate-900 shadow-xl shadow-slate-900/15 ring-1 ring-slate-200 group-hover:block group-focus-within:block">
+        {text}
+        <span className="absolute left-1/2 top-full h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-white ring-1 ring-slate-200" />
+      </span>
+    </span>
+  );
+}
+
 function childFeeLabel(mode: "free" | "fixed", price: string) {
   const numericPrice = Number(price) || 0;
   if (mode === "free" || numericPrice <= 0) return "được lưu trú miễn phí";
@@ -2137,11 +2326,14 @@ function childPricingSummary(childPricing: ChildPricingState) {
   return lines;
 }
 
-function RatePlanCard({ title, children, onEdit }: { title: string; children: React.ReactNode; onEdit: () => void }) {
+function RatePlanCard({ title, tooltip, children, onEdit }: { title: string; tooltip?: string; children: React.ReactNode; onEdit: () => void }) {
   return (
     <Panel className="mt-4">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <h3 className="font-semibold text-slate-950">{title}</h3>
+        <h3 className="flex items-center gap-2 font-semibold text-slate-950">
+          {title}
+          {tooltip ? <TooltipIcon text={tooltip} /> : null}
+        </h3>
         <button type="button" onClick={onEdit} className="rounded-md border border-teal-700 px-3 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50">Chỉnh sửa</button>
       </div>
       {children}
@@ -2180,16 +2372,54 @@ function RoomRow({ title, subtitle, onClick, onRemove }: { title: string; subtit
   );
 }
 
-function BedCounterRow({ icon, title, subtitle, value, onChange }: { icon: string; title: string; subtitle?: string; value: number; onChange: (value: number) => void }) {
+function BedCounterRow({ icon, title, subtitle, value, onChange }: { icon: BedIconName; title: string; subtitle?: string; value: number; onChange: (value: number) => void }) {
   return (
     <div className="grid grid-cols-[42px_1fr_auto] items-center gap-4">
-      <div className="grid h-9 w-9 place-items-center text-2xl text-slate-400">{icon}</div>
+      <BedIcon name={icon} />
       <div>
         <p className="text-sm font-semibold text-slate-950">{title}</p>
         {subtitle ? <p className="mt-1 text-xs text-slate-500">{subtitle}</p> : null}
       </div>
       <MiniCounter value={value} onChange={onChange} />
     </div>
+  );
+}
+
+function BusinessField({ label, value, onChange, error = false, required = false, optional = false }: { label: string; value: string; onChange: (value: string) => void; error?: boolean; required?: boolean; optional?: boolean }) {
+  return (
+    <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
+      <span>{label} {required ? <span className="text-rose-600">*</span> : null} {optional ? <span className="text-sm font-normal text-slate-500">- không bắt buộc</span> : null}</span>
+      <input value={value} onChange={(event) => onChange(event.target.value)} className={`w-full rounded-xl border bg-white px-4 py-3 text-base text-slate-950 outline-none transition ${error ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"}`} />
+      {error ? <span className="text-sm font-normal text-rose-600">Mục bắt buộc</span> : null}
+    </label>
+  );
+}
+
+function BedIcon({ name }: { name: BedIconName }) {
+  const levels = name === "bunk" ? 2 : 1;
+  const pillows = name === "single" || name === "sofa" || name === "futon" ? 1 : 2;
+  const isSofa = name === "sofa";
+
+  return (
+    <span className="grid h-9 w-9 place-items-center text-slate-500" aria-hidden="true">
+      <svg viewBox="0 0 40 40" className="h-9 w-9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {Array.from({ length: levels }).map((_, index) => {
+          const y = levels === 2 ? 9 + index * 13 : isSofa ? 18 : 15;
+          return (
+            <g key={index}>
+              <path d={`M7 ${y + 8}V${y + 1}h26v7`} />
+              <path d={`M5 ${y + 8}h30`} />
+              <path d={`M8 ${y + 8}v5M32 ${y + 8}v5`} />
+              {Array.from({ length: pillows }).map((__, pillowIndex) => (
+                <rect key={pillowIndex} x={10 + pillowIndex * 10} y={y + 2} width="8" height="4" rx="1" />
+              ))}
+            </g>
+          );
+        })}
+        {name === "bunk" ? <path d="M34 9v27M30 18h8M30 28h8" /> : null}
+        {name === "futon" ? <path d="M9 28h22" /> : null}
+      </svg>
+    </span>
   );
 }
 
@@ -2288,11 +2518,14 @@ function WizardActions({ onBack, canContinue }: { onBack: () => void; canContinu
 }
 
 function InfoPanel({ title, children }: { title: string; children: React.ReactNode }) {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
+
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-teal-950/5">
       <div className="flex items-start justify-between gap-4">
         <h2 className="text-lg font-semibold leading-7 text-slate-950">{title}</h2>
-        <span className="text-slate-400">×</span>
+        <button type="button" onClick={() => setVisible(false)} className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" aria-label="Đóng thông báo">×</button>
       </div>
       <div className="mt-4 text-sm leading-6 text-slate-700">{children}</div>
     </section>
