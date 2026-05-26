@@ -20,7 +20,7 @@ type PropertyItem = {
 
 async function fetchFeaturedProperties(): Promise<PropertyItem[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
     const res = await fetch(`${apiUrl}/properties?limit=11`, { cache: "no-store" });
     if (!res.ok) return [];
     const json = await res.json();
