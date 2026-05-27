@@ -22,7 +22,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401 && typeof window !== "undefined") {
+    const isLoginRequest = err.config?.url?.includes("/auth/login");
+
+    if (err.response?.status === 401 && !isLoginRequest && typeof window !== "undefined") {
       localStorage.removeItem("portal_token");
       localStorage.removeItem("portal_user");
       clearPortalTokenCookie();

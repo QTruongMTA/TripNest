@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import api from "@/lib/api";
@@ -14,8 +14,13 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setSession } = useAuthStore();
+  const { hasHydrated, setSession, user } = useAuthStore();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!hasHydrated || !user) return;
+    router.replace(getRedirectPath(user.role));
+  }, [hasHydrated, router, user]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

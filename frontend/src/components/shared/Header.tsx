@@ -110,17 +110,10 @@ function NotificationBell() {
               <p className="px-4 py-8 text-center text-sm text-slate-400">Chưa có thông báo.</p>
             ) : (
               items.map((item) => (
-                <div
-                  key={item.id}
-                  className={`border-b border-slate-100 px-4 py-3 last:border-0 ${
-                    item.isRead ? "bg-white" : "bg-amber-50"
-                  }`}
-                >
+                <div key={item.id} className={`border-b border-slate-100 px-4 py-3 last:border-0 ${item.isRead ? "bg-white" : "bg-amber-50"}`}>
                   <p className="text-sm font-semibold">{item.title}</p>
                   <p className="mt-1 text-sm leading-5 text-slate-600">{item.message}</p>
-                  <p className="mt-2 text-xs text-slate-400">
-                    {new Date(item.createdAt).toLocaleString("vi-VN")}
-                  </p>
+                  <p className="mt-2 text-xs text-slate-400">{new Date(item.createdAt).toLocaleString("vi-VN")}</p>
                 </div>
               ))
             )}
@@ -133,6 +126,7 @@ function NotificationBell() {
 
 export function Header({ overlay = true }: { overlay?: boolean }) {
   const user = useAuthStore((state) => state.user);
+  const isHost = user?.role === "HOST";
 
   return (
     <header className={`${overlay ? "absolute" : "relative"} inset-x-0 top-0 z-30`}>
@@ -149,11 +143,7 @@ export function Header({ overlay = true }: { overlay?: boolean }) {
 
         <nav className="hidden items-center gap-1 text-sm text-white/90 md:flex">
           {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="rounded-full px-4 py-2 transition hover:bg-white/10"
-            >
+            <a key={item.label} href={item.href} className="rounded-full px-4 py-2 transition hover:bg-white/10">
               {item.label}
             </a>
           ))}
@@ -161,10 +151,10 @@ export function Header({ overlay = true }: { overlay?: boolean }) {
 
         <div className="flex items-center gap-2">
           <a
-            href={user?.role === "HOST" ? "/host/properties" : "/host/properties/new"}
+            href={isHost ? "/host/properties" : "/host/properties/new"}
             className="hidden px-3 py-2 text-sm font-medium text-white transition hover:text-white/80 sm:inline-flex"
           >
-            {user?.role === "HOST" ? "Chỗ nghỉ của bạn" : "Đăng chỗ nghỉ"}
+            {isHost ? "Chỗ nghỉ của Quý vị" : "Đăng chỗ nghỉ"}
           </a>
           {user ? (
             <>
@@ -173,16 +163,10 @@ export function Header({ overlay = true }: { overlay?: boolean }) {
             </>
           ) : (
             <>
-              <a
-                href="/register"
-                className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-teal-950 transition hover:bg-teal-50"
-              >
+              <a href="/register" className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-teal-950 transition hover:bg-teal-50">
                 Đăng ký
               </a>
-              <a
-                href="/login"
-                className="rounded-md border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
-              >
+              <a href="/login" className="rounded-md border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">
                 Đăng nhập
               </a>
             </>

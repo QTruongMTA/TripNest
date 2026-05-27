@@ -12,7 +12,7 @@ interface AuthState {
 }
 
 const PORTAL_TOKEN_COOKIE = "portal_token";
-const TOKEN_MAX_AGE_SECONDS = 15 * 60;
+const TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 function setPortalTokenCookie(token: string) {
   document.cookie = `${PORTAL_TOKEN_COOKIE}=${token}; path=/; max-age=${TOKEN_MAX_AGE_SECONDS}; SameSite=Lax`;
