@@ -1,21 +1,23 @@
 export const homeImages = {
   destinations: {
-    tayBac:
-      "https://images.unsplash.com/photo-1464822759844-d150ad6d1dff?auto=format&fit=crop&w=900&q=80",
+    caoBang:
+      "https://booking.muongthanh.com/upload_images/images/H%60/thac-ban-gioc-cao-bang.jpg",
     quangNinh:
-      "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=900&q=80",
-    haLong:
-      "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=900&q=80",
-    hoiAn:
-      "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=900&q=80",
+      "https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/%E1%BA%A3nh%20%C4%91%E1%BA%B9p%20Qu%E1%BA%A3ng%20Ninh/anh-dep-quang-ninh-11.jpg",
+    phuQuoc:
+      "https://go2joy.s3.ap-southeast-1.amazonaws.com/blog/wp-content/uploads/2022/07/14151347/gioi-thieu-canh-dep-phu-quoc-768x511.jpg",
+    daNang:
+      "https://static.vinwonders.com/production/pho-co-hoi-an-5f9ef85735ef8.jpg",
+    daLat:
+      "https://sakos.vn/wp-content/uploads/2023/05/kham-pha-ve-dep-thien-nhien-rung-thong-da-lat-3.jpg",
   },
   stayTypes: {
     hotel:
-      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80",
+      "https://www.vietnambooking.com/wp-content/uploads/2020/12/Khach-san-Vinpearl-Tay-Ninh.jpg",
     apartment:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+      "https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2022/2/23/1016904/274014168_9628637010.jpg",
     resort:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      "https://product.hstatic.net/200000504041/product/fusion-resort-da-nang-joys-holiday-6_4d0ef53549d44395a46c2fd54b42a311_master.jpg",
     villa:
       "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80",
   },
@@ -30,8 +32,7 @@ export const homeImages = {
   uniqueStays: {
     mekong:
       "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=900&q=80",
-    sapa:
-      "https://images.unsplash.com/photo-1464822759844-d150ad6d1dff?auto=format&fit=crop&w=900&q=80",
+    sapa: "https://images.unsplash.com/photo-1464822759844-d150ad6d1dff?auto=format&fit=crop&w=900&q=80",
     lantern:
       "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=900&q=80",
     coral:
