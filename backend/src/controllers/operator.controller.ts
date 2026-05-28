@@ -11,8 +11,8 @@ export const operatorController = {
 
   async createOperatorProvince(req: Request, res: Response) {
     const { email, password, phone, provinceIds } = req.body ?? {};
-    if (!email || !password || !Array.isArray(provinceIds) || provinceIds.length === 0) {
-      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "email, password and provinceIds are required" } });
+    if (!Array.isArray(provinceIds) || provinceIds.length === 0) {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "provinceIds are required" } });
     }
     try {
       const op = await operatorService.createOperatorProvince({

@@ -52,44 +52,44 @@ async function main() {
 
   console.log(`  ✓ Admin: admin@tripnest.vn`);
 
-  // ── 34 Đơn vị hành chính VN (sau sát nhập 2025) ─────────────────────────────
+  // ── 34 đơn vị hành chính cấp tỉnh (danh sách mới) ──────────────────────────
   const provinces = await Promise.all([
     // 6 Thành phố trực thuộc TW
     prisma.province.create({ data: { name: "Hà Nội", code: "HN", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Hồ Chí Minh", code: "HCM", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Đà Nẵng", code: "DNA", type: "THANH_PHO" } }),
     prisma.province.create({ data: { name: "Hải Phòng", code: "HP", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Cần Thơ", code: "CT", type: "THANH_PHO" } }),
     prisma.province.create({ data: { name: "Huế", code: "HUE", type: "THANH_PHO" } }),
+    prisma.province.create({ data: { name: "Đà Nẵng", code: "DNA", type: "THANH_PHO" } }),
+    prisma.province.create({ data: { name: "Cần Thơ", code: "CT", type: "THANH_PHO" } }),
+    prisma.province.create({ data: { name: "Thành phố Hồ Chí Minh", code: "HCM", type: "THANH_PHO" } }),
     // 28 Tỉnh
     prisma.province.create({ data: { name: "An Giang", code: "AG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bà Rịa - Vũng Tàu", code: "BRVT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bắc Giang", code: "BG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bắc Kạn", code: "BK", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bình Dương", code: "BD", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bình Định", code: "BDH", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bình Thuận", code: "BTH", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Cà Mau", code: "CM", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Bắc Ninh", code: "BN", type: "TINH" } }),
     prisma.province.create({ data: { name: "Cao Bằng", code: "CB", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Đắk Lắk", code: "DLK", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Cà Mau", code: "CM", type: "TINH" } }),
     prisma.province.create({ data: { name: "Điện Biên", code: "DB", type: "TINH" } }),
     prisma.province.create({ data: { name: "Đồng Nai", code: "DN", type: "TINH" } }),
     prisma.province.create({ data: { name: "Đồng Tháp", code: "DT", type: "TINH" } }),
     prisma.province.create({ data: { name: "Gia Lai", code: "GL", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Hà Giang", code: "HG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Hà Nam", code: "HN2", type: "TINH" } }),
     prisma.province.create({ data: { name: "Hà Tĩnh", code: "HT", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Hưng Yên", code: "HY", type: "TINH" } }),
     prisma.province.create({ data: { name: "Khánh Hòa", code: "KH", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Lai Châu", code: "LAI", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Lâm Đồng", code: "LD", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Lạng Sơn", code: "LS", type: "TINH" } }),
     prisma.province.create({ data: { name: "Lào Cai", code: "LC", type: "TINH" } }),
     prisma.province.create({ data: { name: "Long An", code: "LA", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Nam Định", code: "ND", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Nghệ An", code: "NA", type: "TINH" } }),
     prisma.province.create({ data: { name: "Ninh Bình", code: "NB", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Ninh Thuận", code: "NT", type: "TINH" } }),
     prisma.province.create({ data: { name: "Phú Thọ", code: "PT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Quảng Bình", code: "QB", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Quảng Ngãi", code: "QNG", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Quảng Ninh", code: "QN", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Quảng Trị", code: "QT", type: "TINH" } }),
     prisma.province.create({ data: { name: "Sơn La", code: "SL", type: "TINH" } }),
     prisma.province.create({ data: { name: "Tây Ninh", code: "TN", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Thái Nguyên", code: "TNG", type: "TINH" } }),
     prisma.province.create({ data: { name: "Thanh Hóa", code: "TH", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Trà Vinh", code: "TV", type: "TINH" } }),
+    prisma.province.create({ data: { name: "Vĩnh Long", code: "VL", type: "TINH" } }),
   ]);
 
   console.log(`  ✓ ${provinces.length} tỉnh/thành phố`);
