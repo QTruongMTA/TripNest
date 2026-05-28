@@ -1,6 +1,34 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma";
 
+function formatOperatorNumber(value: number) {
+  return value.toString().padStart(2, "0");
+}
+
+async function getNextOperatorCredential() {
+  const operators = await prisma.user.findMany({
+    where: { email: { startsWith: "operator", endsWith: "@tripnest.vn" } },
+    select: { email: true },
+  });
+
+  const usedNumbers = new Set(
+    operators
+      .map((operator) => operator.email.match(/^operator(\d{2})@tripnest\.vn$/)?.[1])
+      .filter((value): value is string => Boolean(value))
+      .map((value) => Number(value))
+  );
+
+  let nextNumber = 1;
+  while (usedNumbers.has(nextNumber)) nextNumber += 1;
+
+  const id = formatOperatorNumber(nextNumber);
+  return {
+    id,
+    email: `operator${id}@tripnest.vn`,
+    password: `operator${id}`,
+  };
+}
+
 export const operatorService = {
   // ── Admin: quản lý Operator ──────────────────────────────────────────────────
 
@@ -20,13 +48,16 @@ export const operatorService = {
   },
 
   async createOperatorProvince(data: {
-    email: string;
-    password: string;
+    email?: string;
+    password?: string;
     phone?: string;
     provinceIds: string[];
     createdBy: string;
   }) {
-    const email = data.email.trim().toLowerCase();
+    const credential = data.email && data.password
+      ? { email: data.email.trim().toLowerCase(), password: data.password }
+      : await getNextOperatorCredential();
+    const email = credential.email;
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new Error("EMAIL_TAKEN");
 
@@ -36,7 +67,7 @@ export const operatorService = {
     });
     if (occupied) throw new Error("PROVINCE_ALREADY_ASSIGNED");
 
-    const hashed = await bcrypt.hash(data.password, 12);
+    const hashed = await bcrypt.hash(credential.password, 12);
     const user = await prisma.user.create({
       data: {
         email,
