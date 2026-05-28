@@ -18,8 +18,6 @@ function formatVND(amount: number): string {
 }
 
 export function WeekendDealsSection({ properties }: { properties: PropertyItem[] }) {
-  if (properties.length === 0) return null;
-
   return (
     <section id="uu-dai" className="animate-fade-up mx-auto max-w-6xl px-5 md:px-6">
       <SectionHeading
@@ -27,6 +25,7 @@ export function WeekendDealsSection({ properties }: { properties: PropertyItem[]
         title="Những lựa chọn đang được đặt nhiều"
         description="Các chỗ nghỉ chất lượng cao đang sẵn sàng đón khách — từ biệt thự ven biển đến retreat giữa núi rừng."
       />
+      {properties.length > 0 ? (
       <div className="grid gap-4 lg:grid-cols-3">
         {properties.map((property) => (
           <Link key={property.id} href={`/properties/${property.id}`}>
@@ -58,6 +57,7 @@ export function WeekendDealsSection({ properties }: { properties: PropertyItem[]
           </Link>
         ))}
       </div>
+      ) : null}
     </section>
   );
 }

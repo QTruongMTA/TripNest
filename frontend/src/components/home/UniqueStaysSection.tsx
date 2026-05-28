@@ -18,8 +18,6 @@ function formatVND(amount: number): string {
 }
 
 export function UniqueStaysSection({ properties }: { properties: PropertyItem[] }) {
-  if (properties.length === 0) return null;
-
   return (
     <section className="animate-fade-up mx-auto max-w-6xl px-5 md:px-6">
       <SectionHeading
@@ -27,6 +25,7 @@ export function UniqueStaysSection({ properties }: { properties: PropertyItem[] 
         title="Những chỗ nghỉ được đánh giá cao"
         description="Từ nhà ven sông miền Tây đến biệt thự nhìn ra núi, đây là các lựa chọn nổi bật cho du khách muốn trải nghiệm khác biệt."
       />
+      {properties.length > 0 ? (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {properties.map((property) => (
           <Link key={property.id} href={`/properties/${property.id}`}>
@@ -68,6 +67,7 @@ export function UniqueStaysSection({ properties }: { properties: PropertyItem[] 
           </Link>
         ))}
       </div>
+      ) : null}
     </section>
   );
 }
