@@ -18,11 +18,10 @@ function formatVND(amount: number): string {
 }
 
 export function GuestFavoritesSection({ properties }: { properties: PropertyItem[] }) {
-  if (properties.length === 0) return null;
-
   return (
     <section className="animate-fade-up mx-auto max-w-6xl px-5 md:px-6">
       <SectionHeading eyebrow="Nhà ở khách yêu thích" title="Những nơi được đặt nhiều gần đây" />
+      {properties.length > 0 ? (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {properties.map((property) => (
           <Link key={property.id} href={`/properties/${property.id}`}>
@@ -56,6 +55,7 @@ export function GuestFavoritesSection({ properties }: { properties: PropertyItem
           </Link>
         ))}
       </div>
+      ) : null}
     </section>
   );
 }

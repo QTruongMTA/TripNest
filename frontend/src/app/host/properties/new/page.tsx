@@ -117,6 +117,13 @@ type AddressState = {
   longitude: number;
 };
 
+type ProvinceOption = {
+  id: string;
+  name: string;
+  code: string;
+  type: "TINH" | "THANH_PHO";
+};
+
 type MapLibreLngLat = { lat: number; lng: number };
 type MapLibreMapMouseEvent = { lngLat: MapLibreLngLat };
 type MapLibreMapInstance = {
@@ -160,71 +167,6 @@ const amenitySections = [
 
 const languageOptions = ["Tiếng Anh", "Tiếng Pháp", "Tiếng Trung", "Tiếng Tây Ban Nha", "Tiếng Việt"];
 const extraLanguageOptions = ["Tiếng Ba Lan", "Tiếng Bulgari", "Tiếng Bồ Đào Nha", "Tiếng Catalan", "Tiếng Croatia", "Tiếng Do Thái", "Tiếng Estonia", "Tiếng Gruzia", "Tiếng Hàn", "Tiếng Indonesia", "Tiếng Nhật", "Tiếng Nga", "Tiếng Thái", "Tiếng Ý"];
-const cityOptions = [
-  "An Giang",
-  "Bà Rịa - Vũng Tàu",
-  "Bắc Giang",
-  "Bắc Kạn",
-  "Bạc Liêu",
-  "Bắc Ninh",
-  "Bến Tre",
-  "Bình Định",
-  "Bình Dương",
-  "Bình Phước",
-  "Bình Thuận",
-  "Cà Mau",
-  "Cần Thơ",
-  "Cao Bằng",
-  "Đà Nẵng",
-  "Đắk Lắk",
-  "Đắk Nông",
-  "Điện Biên",
-  "Đồng Nai",
-  "Đồng Tháp",
-  "Gia Lai",
-  "Hà Giang",
-  "Hà Nam",
-  "Hà Nội",
-  "Hà Tĩnh",
-  "Hải Dương",
-  "Hải Phòng",
-  "Hậu Giang",
-  "Hòa Bình",
-  "Hưng Yên",
-  "Khánh Hòa",
-  "Kiên Giang",
-  "Kon Tum",
-  "Lai Châu",
-  "Lâm Đồng",
-  "Lạng Sơn",
-  "Lào Cai",
-  "Long An",
-  "Nam Định",
-  "Nghệ An",
-  "Ninh Bình",
-  "Ninh Thuận",
-  "Phú Thọ",
-  "Phú Yên",
-  "Quảng Bình",
-  "Quảng Nam",
-  "Quảng Ngãi",
-  "Quảng Ninh",
-  "Quảng Trị",
-  "Sóc Trăng",
-  "Sơn La",
-  "Tây Ninh",
-  "Thái Bình",
-  "Thái Nguyên",
-  "Thanh Hóa",
-  "Thừa Thiên Huế",
-  "Tiền Giang",
-  "TP. Hồ Chí Minh",
-  "Trà Vinh",
-  "Tuyên Quang",
-  "Vĩnh Long",
-  "Vĩnh Phúc",
-  "Yên Bái",
-];
 const timeOptions = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
 
 const defaultBedroomBeds: BedCounts = {
@@ -298,7 +240,6 @@ export default function Page() {
   const [legalType, setLegalType] = useState("individual");
   const [businessLegal, setBusinessLegal] = useState<BusinessLegalInfo>({ legalName: "", address: "", postalCode: "", city: "", country: "Việt Nam", tradeName: "" });
   const [owners, setOwners] = useState<OwnerInfo[]>([{ id: 1, firstName: "", lastName: "", birthDate: "" }]);
-  const [ownerAlias, setOwnerAlias] = useState("");
   const [legalSubmitted, setLegalSubmitted] = useState(false);
   const [review, setReview] = useState<ReviewState>({
     firstName: "",
@@ -315,6 +256,42 @@ export default function Page() {
     termsAccepted: false,
   });
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [provinceOptions, setProvinceOptions] = useState<ProvinceOption[]>([]);
+  const [provincesLoading, setProvincesLoading] = useState(true);
+  const [provincesError, setProvincesError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setProvincesLoading(true);
+    setProvincesError("");
+    api
+      .get("/provinces")
+      .then((response) => {
+        const data = response.data?.data;
+        const provinces = Array.isArray(data)
+          ? data
+              .filter((item): item is ProvinceOption => (
+                typeof item?.id === "string" &&
+                typeof item?.name === "string" &&
+                typeof item?.code === "string" &&
+                (item?.type === "TINH" || item?.type === "THANH_PHO")
+              ))
+              .map((item) => ({ id: item.id, name: item.name, code: item.code, type: item.type }))
+          : [];
+        if (!cancelled) setProvinceOptions(provinces);
+      })
+      .catch(() => {
+        if (!cancelled) setProvincesError("Không tải được danh sách tỉnh/thành. Vui lòng thử lại.");
+      })
+      .finally(() => {
+        if (!cancelled) setProvincesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!sessionUser || owners.some((owner) => owner.firstName || owner.lastName || owner.birthDate)) return;
@@ -331,27 +308,28 @@ export default function Page() {
   }, [sessionUser, owners]);
 
   const selectedType = useMemo(() => propertyTypes.find((type) => type.value === propertyType) ?? propertyTypes[0], [propertyType]);
+  const cityOptions = useMemo(() => provinceOptions.map((province) => province.name), [provinceOptions]);
   const activeIndex = steps.indexOf(step);
   const setupIndex = setupSteps.indexOf(step);
-  const canContinue =
-    (step === "type" && Boolean(propertyType)) ||
-    (step === "name" && title.trim().length >= 3) ||
-    (step === "address" && address.line1.trim() && address.city.trim()) ||
-    (step === "setup-details" && details.guests > 0 && details.bathrooms > 0 && Number(details.size) > 0) ||
-    (step === "amenities" && amenities.length > 0) ||
-    step === "services" ||
-    (step === "languages" && languages.length > 0) ||
-    step === "rules" ||
-    (step === "photos" && photos.length >= 5) ||
-    step === "booking-method" ||
-    (step === "nightly-price" && Number(nightlyPrice) > 0) ||
-    step === "rate-plans" ||
-    step === "availability" ||
-    (step === "legal" &&
-      (legalType !== "business" || (businessLegal.legalName.trim() && businessLegal.postalCode.trim())) &&
+  const stepValidity: Record<Step, boolean> = {
+    type: Boolean(propertyType),
+    name: title.trim().length >= 3,
+    address: Boolean(address.line1.trim() && address.city.trim()),
+    "setup-details": details.guests > 0 && details.bathrooms > 0 && Number(details.size) > 0,
+    amenities: amenities.length > 0,
+    services: true,
+    languages: languages.length > 0,
+    rules: true,
+    photos: photos.length >= 5,
+    "booking-method": true,
+    "nightly-price": Number(nightlyPrice) > 0,
+    "rate-plans": true,
+    availability: true,
+    legal:
+      (legalType !== "business" || Boolean(businessLegal.legalName.trim() && businessLegal.postalCode.trim())) &&
       owners.length > 0 &&
-      owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim())) ||
-    (step === "review" &&
+      owners.every((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate.trim()),
+    review: Boolean(
       review.firstName.trim() &&
       review.lastName.trim() &&
       review.email.trim() &&
@@ -360,7 +338,16 @@ export default function Page() {
       review.addressLine1.trim() &&
       review.city.trim() &&
       review.legalBusiness &&
-      review.termsAccepted);
+      review.termsAccepted
+    ),
+  };
+  const canContinue = stepValidity[step];
+
+  function canAccessStep(targetStep: Step) {
+    const targetIndex = steps.indexOf(targetStep);
+    if (targetIndex <= activeIndex) return true;
+    return steps.slice(0, targetIndex).every((item) => stepValidity[item]);
+  }
 
   function continueFlow(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
@@ -391,13 +378,24 @@ export default function Page() {
           </div>
         </div>
 
-        <ProgressNav activeIndex={activeIndex} setupIndex={setupIndex} onSelectStep={setStep} />
+        <ProgressNav activeIndex={activeIndex} setupIndex={setupIndex} canAccessStep={canAccessStep} onSelectStep={setStep} />
 
         <div className="bg-[#f7fbfa] px-5 py-8 md:px-8 md:py-12">
           {step === "type" ? <TypeStep propertyType={propertyType} setPropertyType={setPropertyType} onContinue={() => continueFlow()} canContinue={Boolean(canContinue)} /> : null}
           {step === "name" ? <NameStep title={title} setTitle={setTitle} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
           {step === "address" ? (
-            <AddressStep address={address} setAddress={setAddress} selectedType={selectedType.title} title={title} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} />
+            <AddressStep
+              address={address}
+              setAddress={setAddress}
+              cityOptions={cityOptions}
+              citiesLoading={provincesLoading}
+              citiesError={provincesError}
+              selectedType={selectedType.title}
+              title={title}
+              onBack={goBack}
+              onSubmit={continueFlow}
+              canContinue={Boolean(canContinue)}
+            />
           ) : null}
           {step === "setup-details" ? (
             <DetailsStep details={details} setDetails={setDetails} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} />
@@ -441,10 +439,11 @@ export default function Page() {
               setBusinessLegal={setBusinessLegal}
               owners={owners}
               setOwners={setOwners}
-              ownerAlias={ownerAlias}
-              setOwnerAlias={setOwnerAlias}
               submitted={legalSubmitted}
               setSubmitted={setLegalSubmitted}
+              cityOptions={cityOptions}
+              citiesLoading={provincesLoading}
+              citiesError={provincesError}
               onBack={goBack}
               onSubmit={continueFlow}
               canContinue={Boolean(canContinue)}
@@ -458,6 +457,9 @@ export default function Page() {
               setReview={setReview}
               submitted={reviewSubmitted}
               setSubmitted={setReviewSubmitted}
+              cityOptions={cityOptions}
+              citiesLoading={provincesLoading}
+              citiesError={provincesError}
               onBack={goBack}
               onSubmit={continueFlow}
               canContinue={Boolean(canContinue)}
@@ -469,7 +471,7 @@ export default function Page() {
   );
 }
 
-function ProgressNav({ activeIndex, setupIndex, onSelectStep }: { activeIndex: number; setupIndex: number; onSelectStep: (step: Step) => void }) {
+function ProgressNav({ activeIndex, setupIndex, canAccessStep, onSelectStep }: { activeIndex: number; setupIndex: number; canAccessStep: (step: Step) => boolean; onSelectStep: (step: Step) => void }) {
   const stages = [
     { label: "Thông tin cơ bản", step: "type" as Step, done: activeIndex > 2, active: activeIndex <= 2, progress: activeIndex > 2 ? 100 : ((activeIndex + 1) / 3) * 100 },
     { label: "Cài đặt chỗ nghỉ", step: "setup-details" as Step, done: activeIndex > 7, active: activeIndex >= 3 && activeIndex <= 7, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 7 ? 100 : 0 },
@@ -482,8 +484,19 @@ function ProgressNav({ activeIndex, setupIndex, onSelectStep }: { activeIndex: n
   return (
     <nav className="border-b border-slate-200 bg-white px-4 md:px-8" aria-label="Tiến trình đăng chỗ nghỉ">
       <div className="grid gap-3 py-5 md:grid-cols-6">
-        {stages.map((stage) => (
-          <button key={stage.label} type="button" onClick={() => onSelectStep(stage.step)} className="min-w-0 text-left">
+        {stages.map((stage) => {
+          const canAccess = canAccessStep(stage.step);
+          return (
+          <button
+            key={stage.label}
+            type="button"
+            onClick={() => {
+              if (canAccess) onSelectStep(stage.step);
+            }}
+            disabled={!canAccess}
+            title={canAccess ? stage.label : "Hoàn tất các bước trước trước khi chuyển tới phần này"}
+            className={`min-w-0 text-left transition ${canAccess ? "cursor-pointer" : "cursor-not-allowed opacity-55"}`}
+          >
             <div className="grid grid-cols-[1fr_auto] items-start gap-2 text-sm">
               <span className={stage.active || stage.done ? "font-semibold text-teal-900" : "text-slate-400"}>{stage.label}</span>
               {stage.done ? <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-xs text-white">✓</span> : null}
@@ -492,7 +505,8 @@ function ProgressNav({ activeIndex, setupIndex, onSelectStep }: { activeIndex: n
               <div className={`h-full rounded-full ${stage.done ? "bg-emerald-400" : stage.active ? "bg-teal-600" : "bg-slate-300"}`} style={{ width: `${stage.progress}%` }} />
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
     </nav>
   );
@@ -552,7 +566,29 @@ function NameStep({ title, setTitle, onBack, onSubmit, canContinue }: { title: s
   );
 }
 
-function AddressStep({ address, setAddress, selectedType, title, onBack, onSubmit, canContinue }: { address: AddressState; setAddress: (value: AddressState) => void; selectedType: string; title: string; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
+function AddressStep({
+  address,
+  setAddress,
+  cityOptions,
+  citiesLoading,
+  citiesError,
+  selectedType,
+  title,
+  onBack,
+  onSubmit,
+  canContinue,
+}: {
+  address: AddressState;
+  setAddress: (value: AddressState) => void;
+  cityOptions: string[];
+  citiesLoading: boolean;
+  citiesError: string;
+  selectedType: string;
+  title: string;
+  onBack: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  canContinue: boolean;
+}) {
   const mapLabel = [address.line1, address.city].filter(Boolean).join(", ") || "Vị trí chỗ nghỉ";
   const mapPosition = { lat: address.latitude, lng: address.longitude };
   const updateMapPosition = (position: { lat: number; lng: number }) => {
@@ -573,10 +609,11 @@ function AddressStep({ address, setAddress, selectedType, title, onBack, onSubmi
             <Field label="Địa chỉ dòng 2"><input value={address.line2} onChange={(event) => setAddress({ ...address, line2: event.target.value })} className={inputClass} placeholder="Số căn hộ, tầng, tòa nhà" /></Field>
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="Thị trấn/thành phố">
-                <select value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} className={inputClass}>
-                  <option value="" disabled>Chọn thành phố</option>
+                <select value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} className={inputClass} disabled={citiesLoading || cityOptions.length === 0}>
+                  <option value="" disabled>{citiesLoading ? "Đang tải tỉnh/thành" : "Chọn tỉnh/thành"}</option>
                   {cityOptions.map((city) => <option key={city}>{city}</option>)}
                 </select>
+                {citiesError ? <p className="mt-2 text-xs font-normal text-rose-600">{citiesError}</p> : null}
               </Field>
               <Field label="Mã bưu điện"><input value={address.postalCode} onChange={(event) => setAddress({ ...address, postalCode: event.target.value })} className={inputClass} /></Field>
             </div>
@@ -1832,10 +1869,11 @@ function LegalStep({
   setBusinessLegal,
   owners,
   setOwners,
-  ownerAlias,
-  setOwnerAlias,
   submitted,
   setSubmitted,
+  cityOptions,
+  citiesLoading,
+  citiesError,
   onBack,
   onSubmit,
   canContinue,
@@ -1846,10 +1884,11 @@ function LegalStep({
   setBusinessLegal: (value: BusinessLegalInfo) => void;
   owners: OwnerInfo[];
   setOwners: (value: OwnerInfo[]) => void;
-  ownerAlias: string;
-  setOwnerAlias: (value: string) => void;
   submitted: boolean;
   setSubmitted: (value: boolean) => void;
+  cityOptions: string[];
+  citiesLoading: boolean;
+  citiesError: string;
   onBack: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   canContinue: boolean;
@@ -1895,7 +1934,14 @@ function LegalStep({
           <BusinessField label="Tên đầy đủ của pháp nhân doanh nghiệp" required value={businessLegal.legalName} error={submitted && !businessLegal.legalName.trim()} onChange={(legalName) => setBusinessLegal({ ...businessLegal, legalName })} />
           <BusinessField label="Địa chỉ của pháp nhân doanh nghiệp" value={businessLegal.address} onChange={(address) => setBusinessLegal({ ...businessLegal, address })} />
           <BusinessField label="Mã bưu điện" required value={businessLegal.postalCode} error={submitted && !businessLegal.postalCode.trim()} onChange={(postalCode) => setBusinessLegal({ ...businessLegal, postalCode })} />
-          <BusinessField label="Thành phố" value={businessLegal.city} onChange={(city) => setBusinessLegal({ ...businessLegal, city })} />
+          <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
+            Tỉnh/thành phố
+            <select value={businessLegal.city} onChange={(event) => setBusinessLegal({ ...businessLegal, city: event.target.value })} className={inputClass} disabled={citiesLoading || cityOptions.length === 0}>
+              <option value="">{citiesLoading ? "Đang tải tỉnh/thành" : "Chọn tỉnh/thành"}</option>
+              {cityOptions.map((city) => <option key={city}>{city}</option>)}
+            </select>
+            {citiesError ? <span className="text-xs font-normal text-rose-600">{citiesError}</span> : null}
+          </label>
           <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
             Quốc gia
             <select value={businessLegal.country} onChange={(event) => setBusinessLegal({ ...businessLegal, country: event.target.value })} className={inputClass}>
@@ -1929,13 +1975,6 @@ function LegalStep({
           <span className="grid h-8 w-8 place-items-center rounded-full border border-current text-2xl leading-none">+</span>
           Thêm
         </button>
-        <div className="mt-7">
-          <label className="grid gap-2 text-base font-semibold text-slate-950">
-            Nếu một chủ sở hữu nào đó có tên khác, vui lòng cung cấp chi tiết.
-            <span className="text-sm font-normal text-slate-500">- không bắt buộc</span>
-            <input value={ownerAlias} onChange={(event) => setOwnerAlias(event.target.value)} className={inputClass} />
-          </label>
-        </div>
       </Panel>
       <WizardActions onBack={onBack} canContinue />
     </form>
@@ -1949,6 +1988,9 @@ function ReviewCompleteStep({
   setReview,
   submitted,
   setSubmitted,
+  cityOptions,
+  citiesLoading,
+  citiesError,
   onBack,
   onSubmit,
   canContinue,
@@ -1959,6 +2001,9 @@ function ReviewCompleteStep({
   setReview: (value: ReviewState) => void;
   submitted: boolean;
   setSubmitted: (value: boolean) => void;
+  cityOptions: string[];
+  citiesLoading: boolean;
+  citiesError: string;
   onBack: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   canContinue: boolean;
@@ -2013,7 +2058,7 @@ function ReviewCompleteStep({
           <ReviewField label="Họ theo đúng giấy tờ tùy thân" required value={review.lastName} error={submitted && !review.lastName.trim()} onChange={(value) => updateReview({ lastName: value })} />
           <ReviewField label="Email" required value={review.email} error={submitted && !review.email.trim()} onChange={(value) => updateReview({ email: value })} />
           <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
-            Số điện thoại <span className="text-rose-600">*</span>
+            <RequiredLabel label="Số điện thoại" required />
             <div className={`grid grid-cols-[72px_1fr] overflow-hidden rounded-md border bg-white ${phoneInvalid ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-400 focus-within:border-teal-600 focus-within:ring-4 focus-within:ring-teal-100"}`}>
               <span className="grid place-items-center border-r border-slate-300 text-sm text-slate-700">+84</span>
               <input value={review.phone} onChange={(event) => updateReview({ phone: event.target.value.replace(/\D/g, "").slice(0, 11) })} className="min-w-0 px-3 py-2 outline-none" inputMode="numeric" />
@@ -2025,8 +2070,8 @@ function ReviewCompleteStep({
         <h2 className="mt-8 text-lg font-semibold text-slate-950">Nơi cư trú chính của bên ký kết hợp đồng</h2>
         <div className="mt-5 border-t border-slate-200 pt-4">
           <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
-            Quốc gia/Vùng <span className="text-rose-600">*</span>
-            <select value={review.country} onChange={(event) => updateReview({ country: event.target.value })} className="rounded-md border border-slate-400 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100">
+            <RequiredLabel label="Quốc gia/Vùng" required />
+            <select value={review.country} onChange={(event) => updateReview({ country: event.target.value })} className="w-full rounded-md border border-slate-400 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100">
               <option>Việt Nam</option>
               <option>Thái Lan</option>
               <option>Singapore</option>
@@ -2036,7 +2081,20 @@ function ReviewCompleteStep({
           <ReviewField label="Địa chỉ dòng 1" required value={review.addressLine1} error={submitted && !review.addressLine1.trim()} onChange={(value) => updateReview({ addressLine1: value })} />
           <ReviewField label="Địa chỉ dòng 2" value={review.addressLine2} onChange={(value) => updateReview({ addressLine2: value })} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <ReviewField label="Thành phố" required value={review.city} error={submitted && !review.city.trim()} onChange={(value) => updateReview({ city: value })} />
+            <label className="mt-4 grid min-w-0 gap-2 text-sm font-semibold text-slate-950 sm:col-span-2">
+              <RequiredLabel label="Tỉnh/thành phố" required />
+              <select
+                value={review.city}
+                onChange={(event) => updateReview({ city: event.target.value })}
+                className={`w-full min-w-0 rounded-md border bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-100 ${submitted && !review.city.trim() ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-400"}`}
+                disabled={citiesLoading || cityOptions.length === 0}
+              >
+                <option value="" disabled>{citiesLoading ? "Đang tải tỉnh/thành" : "Chọn tỉnh/thành"}</option>
+                {cityOptions.map((city) => <option key={city}>{city}</option>)}
+              </select>
+              {submitted && !review.city.trim() ? <span className="text-xs font-normal text-rose-600">Vui lòng chọn tỉnh/thành phố.</span> : null}
+              {citiesError ? <span className="text-xs font-normal text-rose-600">{citiesError}</span> : null}
+            </label>
             <ReviewField label="Mã bưu chính" value={review.postalCode} onChange={(value) => updateReview({ postalCode: value })} />
           </div>
         </div>
@@ -2091,10 +2149,19 @@ function ReviewCompleteStep({
 function ReviewField({ label, value, onChange, error = false, required = false }: { label: string; value: string; onChange: (value: string) => void; error?: boolean; required?: boolean }) {
   return (
     <label className="mt-4 grid gap-2 text-sm font-semibold text-slate-950">
-      <span>{label} {required ? <span className="text-rose-600">*</span> : null}</span>
+      <RequiredLabel label={label} required={required} />
       <input value={value} onChange={(event) => onChange(event.target.value)} className={`rounded-md border bg-white px-3 py-2 outline-none transition ${error ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"}`} />
       {error ? <span className="text-xs font-normal text-rose-600">Mục bắt buộc</span> : null}
     </label>
+  );
+}
+
+function RequiredLabel({ label, required }: { label: string; required?: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span>{label}</span>
+      {required ? <span className="text-rose-600">*</span> : null}
+    </span>
   );
 }
 
@@ -2113,7 +2180,7 @@ function InfoLine({ title, children }: { title: string; children: React.ReactNod
 function LegalField({ label, value, onChange, error, type = "text", required = false }: { label: string; value: string; onChange: (value: string) => void; error: boolean; type?: string; required?: boolean }) {
   return (
     <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
-      <span>{label} {required ? <span className="text-rose-600">*</span> : null}</span>
+      <RequiredLabel label={label} required={required} />
       <div className="relative">
         <input type={type} value={value} onChange={(event) => onChange(event.target.value)} className={`w-full rounded-xl border bg-white px-4 py-3 pr-12 text-base text-slate-950 outline-none transition ${error ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"}`} />
         {error ? <span className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-rose-600 text-lg font-semibold text-rose-600">!</span> : null}
@@ -2388,7 +2455,10 @@ function BedCounterRow({ icon, title, subtitle, value, onChange }: { icon: BedIc
 function BusinessField({ label, value, onChange, error = false, required = false, optional = false }: { label: string; value: string; onChange: (value: string) => void; error?: boolean; required?: boolean; optional?: boolean }) {
   return (
     <label className="mt-4 grid gap-2 text-base font-semibold text-slate-950">
-      <span>{label} {required ? <span className="text-rose-600">*</span> : null} {optional ? <span className="text-sm font-normal text-slate-500">- không bắt buộc</span> : null}</span>
+      <span className="inline-flex flex-wrap items-center gap-x-1">
+        <RequiredLabel label={label} required={required} />
+        {optional ? <span className="text-sm font-normal text-slate-500">- không bắt buộc</span> : null}
+      </span>
       <input value={value} onChange={(event) => onChange(event.target.value)} className={`w-full rounded-xl border bg-white px-4 py-3 text-base text-slate-950 outline-none transition ${error ? "border-rose-600 ring-2 ring-rose-100" : "border-slate-300 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"}`} />
       {error ? <span className="text-sm font-normal text-rose-600">Mục bắt buộc</span> : null}
     </label>

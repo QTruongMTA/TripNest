@@ -90,7 +90,7 @@ Repository: [https://github.com/QTruongMTA/TripNest](https://github.com/QTruongM
 
 - PostgreSQL la database chinh.
 - Prisma schema da co cac model cho user, property, tour, booking, payment, review, promotion, commission, notification, audit log, province, operator task va dispute.
-- Seed du lieu mau co admin, tinh/thanh pho, tien nghi, khuyen mai, property, tour va hinh anh mau.
+- Seed du lieu mau co admin, tinh/thanh pho, tien nghi, khuyen mai, tour va hinh anh tour mau. Seed khong tao property/cho o mau.
 
 ## Tinh nang dang phat trien hoac moi o muc placeholder
 

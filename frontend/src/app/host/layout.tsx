@@ -1,9 +1,7 @@
 "use client";
 
-import { getStatusClass, getStatusLabel, hostProperties } from "@/components/host/host-dashboard-data";
 import { useAuthStore } from "@/store/authStore";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 
 const navItems = [
   { label: "Trang chủ", href: "/host/properties" },
@@ -12,83 +10,6 @@ const navItems = [
   { label: "Tài chính", href: "/host/revenue" },
   { label: "Dữ liệu thị trường", href: "/host/market" },
 ];
-
-function SwitchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M7 7h11l-3-3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M17 17H6l3 3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18 7l-3 3" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6 17l3-3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function PropertySwitcher() {
-  const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(hostProperties[0]?.id ?? "");
-  const ref = useRef<HTMLDivElement>(null);
-  const selected = hostProperties.find((property) => property.id === selectedId) ?? hostProperties[0];
-
-  useEffect(() => {
-    function handleClick(event: MouseEvent) {
-      if (!ref.current?.contains(event.target as Node)) setOpen(false);
-    }
-
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-white/10 text-white transition hover:bg-white/20"
-        aria-label="Chuyển chỗ nghỉ"
-        title="Chuyển chỗ nghỉ"
-      >
-        <SwitchIcon />
-      </button>
-
-      {open ? (
-        <div className="absolute right-0 top-[calc(100%+12px)] z-40 w-[360px] overflow-hidden rounded-lg border border-slate-200 bg-white text-slate-950 shadow-2xl shadow-slate-950/20">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-sm font-semibold">Danh sách chỗ nghỉ</p>
-            <p className="mt-1 text-xs text-slate-500">Chọn chỗ nghỉ để xem nhanh trạng thái vận hành.</p>
-          </div>
-          <div className="max-h-80 overflow-y-auto">
-            {hostProperties.map((property) => (
-              <button
-                key={property.id}
-                type="button"
-                onClick={() => {
-                  setSelectedId(property.id);
-                  setOpen(false);
-                }}
-                className={`grid w-full grid-cols-[1fr_auto] gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-teal-50 ${
-                  selected?.id === property.id ? "bg-teal-50/80" : "bg-white"
-                }`}
-              >
-                <span>
-                  <span className="block text-sm font-semibold">{property.name}</span>
-                  <span className="mt-1 block text-xs text-slate-500">ID {property.id} · {property.city}</span>
-                </span>
-                <span className="mt-1 flex items-center gap-2 text-xs text-slate-600">
-                  <span className={`h-2.5 w-2.5 rounded-full ${getStatusClass(property.status)}`} />
-                  {getStatusLabel(property.status)}
-                </span>
-              </button>
-            ))}
-          </div>
-          <a href="/host/properties/new" className="block bg-slate-50 px-4 py-3 text-sm font-semibold text-teal-800 hover:bg-teal-50">
-            Thêm chỗ nghỉ mới
-          </a>
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 export default function HostLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -109,7 +30,6 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           <div className="flex items-center gap-3">
-            <PropertySwitcher />
             <a href="/" className="rounded-md border border-white/20 px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10">
               Trang người dùng
             </a>

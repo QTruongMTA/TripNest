@@ -2,7 +2,7 @@
 import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { propertyImageUrls, tourImageUrls } from "./seed-images";
+import { tourImageUrls } from "./seed-images";
 
 const adapter = new PrismaPg({ connectionString: process.env["DATABASE_URL"]! });
 const prisma = new PrismaClient({ adapter });
@@ -112,14 +112,6 @@ async function main() {
     amenityNames.map((a) => prisma.amenity.create({ data: a }))
   );
 
-  const [wifi, pool, ac, parking, kitchen, washer, tv, balcony, gym, heater] =
-    amenities as [
-      typeof amenities[0], typeof amenities[1], typeof amenities[2],
-      typeof amenities[3], typeof amenities[4], typeof amenities[5],
-      typeof amenities[6], typeof amenities[7], typeof amenities[8],
-      typeof amenities[9],
-    ];
-
   console.log(`  ✓ ${amenities.length} amenities`);
 
   // ── Mã khuyến mãi ────────────────────────────────────────────────────────────
@@ -224,251 +216,6 @@ async function main() {
   });
 
   console.log(`  ✓ 3 commission rules`);
-
-  // ── Chỗ ở (gán cho admin) ────────────────────────────────────────────────────
-  const prop1 = await prisma.property.create({
-    data: {
-      title: "Villa Biển Đà Nẵng – View Biển Tuyệt Đẹp",
-      description: "Villa sang trọng ngay mặt biển Mỹ Khê với view biển toàn cảnh. Không gian rộng rãi, hồ bơi riêng và sân vườn xanh mát. Phù hợp cho gia đình hoặc nhóm bạn muốn trải nghiệm kỳ nghỉ đẳng cấp.",
-      addressLine1: "24 Võ Nguyên Giáp, Phước Mỹ, Sơn Trà", city: "Đà Nẵng", country: "Việt Nam",
-      latitude: 16.0544, longitude: 108.2242, pricePerNight: 3500000, cleaningFee: 300000,
-      maxGuests: 8, bedroomCount: 3, bathrooms: 2, type: "VILLA", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, parking, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop2 = await prisma.property.create({
-    data: {
-      title: "Căn Hộ Studio Tây Hồ – Gần Hồ Tây",
-      description: "Căn hộ studio hiện đại tại khu vực Tây Hồ yên tĩnh. Thiết kế tối giản, đầy đủ nội thất cao cấp, phù hợp cho cặp đôi hay khách công tác.",
-      addressLine1: "15 Xuân Diệu, Tây Hồ", city: "Hà Nội", country: "Việt Nam",
-      latitude: 21.0553, longitude: 105.8262, pricePerNight: 850000, cleaningFee: 100000,
-      maxGuests: 2, bedroomCount: 1, bathrooms: 1, type: "APARTMENT", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "15:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, tv, kitchen].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop3 = await prisma.property.create({
-    data: {
-      title: "Homestay Bản Làng Sapa – Trải Nghiệm Văn Hóa H'Mông",
-      description: "Nhà sàn truyền thống của người H'Mông giữa lòng bản Hầu Thào, nhìn ra ruộng bậc thang tuyệt đẹp. Bữa sáng tự nấu được bao gồm.",
-      addressLine1: "Thôn Hầu Thào, Sapa", city: "Sapa", country: "Việt Nam",
-      latitude: 22.3363, longitude: 103.8438, pricePerNight: 650000, cleaningFee: 80000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "HOMESTAY", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "13:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, heater, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop4 = await prisma.property.create({
-    data: {
-      title: "Resort Ven Biển Phú Quốc – Sang Trọng Đẳng Cấp",
-      description: "Resort 5 sao tư nhân nằm trên bãi biển riêng tại Phú Quốc. Hồ bơi vô cực, phòng gym hiện đại, bếp đầy đủ.",
-      addressLine1: "Bãi Trường, Dương Tơ, Phú Quốc", city: "Phú Quốc", country: "Việt Nam",
-      latitude: 10.2899, longitude: 103.9840, pricePerNight: 6500000, cleaningFee: 500000,
-      maxGuests: 10, bedroomCount: 4, bathrooms: 3, type: "RESORT", status: "ACTIVE",
-      cancellationPolicy: "STRICT", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, parking, kitchen, gym, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop5 = await prisma.property.create({
-    data: {
-      title: "Khách Sạn Vịnh Hạ Long – Gần Bến Tàu",
-      description: "Khách sạn hiện đại tại Bãi Cháy, thuận tiện di chuyển ra cảng tàu. Phòng sáng, ban công thoáng.",
-      addressLine1: "Bãi Cháy, Hạ Long", city: "Hạ Long", country: "Việt Nam",
-      latitude: 20.9517, longitude: 107.0808, pricePerNight: 1200000, cleaningFee: 120000,
-      maxGuests: 3, bedroomCount: 1, bathrooms: 1, type: "HOTEL", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, parking, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop6 = await prisma.property.create({
-    data: {
-      title: "Lodge Đá Hà Giang – View Núi",
-      description: "Lodge nhỏ giữa cao nguyên đá, cửa sổ lớn nhìn ra thung lũng. Phù hợp khách thích không khí mộc mạc.",
-      addressLine1: "Quản Bạ, Hà Giang", city: "Hà Giang", country: "Việt Nam",
-      latitude: 23.0686, longitude: 105.0113, pricePerNight: 780000, cleaningFee: 80000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "HOMESTAY", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "13:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, heater, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop7 = await prisma.property.create({
-    data: {
-      title: "Farmstay Mộc Châu – Giữa Đồi Chè",
-      description: "Farmstay xanh mát giữa đồi chè, sân vườn rộng và khu bếp chung.",
-      addressLine1: "Tân Lập, Mộc Châu", city: "Mộc Châu", country: "Việt Nam",
-      latitude: 20.9228, longitude: 104.7525, pricePerNight: 920000, cleaningFee: 90000,
-      maxGuests: 5, bedroomCount: 2, bathrooms: 1, type: "HOMESTAY", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "14:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, kitchen, parking, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop8 = await prisma.property.create({
-    data: {
-      title: "Retreat Tam Cốc – Ven Núi",
-      description: "Khu nghỉ nhỏ gần Tam Cốc với sân hiên nhìn ra núi đá vôi.",
-      addressLine1: "Tam Cốc, Ninh Bình", city: "Ninh Bình", country: "Việt Nam",
-      latitude: 20.2157, longitude: 105.9372, pricePerNight: 1450000, cleaningFee: 120000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "RESORT", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, parking, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop9 = await prisma.property.create({
-    data: {
-      title: "Villa Vườn Hội An – Gần Phố Cổ",
-      description: "Villa yên tĩnh có hồ bơi nhỏ, sân vườn và xe đạp miễn phí, cách phố cổ vài phút.",
-      addressLine1: "Cẩm Châu, Hội An", city: "Hội An", country: "Việt Nam",
-      latitude: 15.8801, longitude: 108.3380, pricePerNight: 1850000, cleaningFee: 150000,
-      maxGuests: 5, bedroomCount: 2, bathrooms: 2, type: "VILLA", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, kitchen, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop10 = await prisma.property.create({
-    data: {
-      title: "Cabin Thông Đà Lạt – Săn Mây Sáng Sớm",
-      description: "Cabin gỗ giữa đồi thông, có lò sưởi và ban công rộng nhìn xuống thung lũng.",
-      addressLine1: "Trại Mát, Đà Lạt", city: "Đà Lạt", country: "Việt Nam",
-      latitude: 11.9450, longitude: 108.4810, pricePerNight: 1350000, cleaningFee: 120000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "HOUSE", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "14:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, heater, balcony, kitchen].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop11 = await prisma.property.create({
-    data: {
-      title: "Khách Sạn Biển Nha Trang – View Vịnh",
-      description: "Khách sạn sát biển, phòng sáng, có hồ bơi tầng thượng và buffet sáng.",
-      addressLine1: "Trần Phú, Nha Trang", city: "Nha Trang", country: "Việt Nam",
-      latitude: 12.2388, longitude: 109.1967, pricePerNight: 1650000, cleaningFee: 100000,
-      maxGuests: 3, bedroomCount: 1, bathrooms: 1, type: "HOTEL", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, balcony, gym].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop12 = await prisma.property.create({
-    data: {
-      title: "Nhà Sông Cần Thơ – Bến Ninh Kiều",
-      description: "Nhà nghỉ phong cách địa phương gần bến Ninh Kiều, phù hợp gia đình nhỏ.",
-      addressLine1: "Ninh Kiều, Cần Thơ", city: "Cần Thơ", country: "Việt Nam",
-      latitude: 10.0342, longitude: 105.7832, pricePerNight: 780000, cleaningFee: 70000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "HOUSE", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "13:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, kitchen].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop13 = await prisma.property.create({
-    data: {
-      title: "Căn Hộ Ven Biển Vũng Tàu",
-      description: "Căn hộ hiện đại gần Bãi Sau, có bếp riêng và ban công nhìn biển.",
-      addressLine1: "Thùy Vân, Vũng Tàu", city: "Vũng Tàu", country: "Việt Nam",
-      latitude: 10.3460, longitude: 107.0843, pricePerNight: 1150000, cleaningFee: 100000,
-      maxGuests: 4, bedroomCount: 2, bathrooms: 1, type: "APARTMENT", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, kitchen, washer, balcony].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop14 = await prisma.property.create({
-    data: {
-      title: "Khách Sạn Cố Đô Huế",
-      description: "Khách sạn boutique gần Đại Nội, thiết kế pha nét truyền thống và hiện đại.",
-      addressLine1: "Lê Lợi, Huế", city: "Huế", country: "Việt Nam",
-      latitude: 16.4637, longitude: 107.5909, pricePerNight: 980000, cleaningFee: 80000,
-      maxGuests: 3, bedroomCount: 1, bathrooms: 1, type: "HOTEL", status: "ACTIVE",
-      cancellationPolicy: "FLEXIBLE", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, parking].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop15 = await prisma.property.create({
-    data: {
-      title: "Nhà Phố Hải Phòng – Gần Nhà Hát Lớn",
-      description: "Nhà phố tiện nghi cho nhóm bạn, gần trung tâm và nhiều quán ăn địa phương.",
-      addressLine1: "Hồng Bàng, Hải Phòng", city: "Hải Phòng", country: "Việt Nam",
-      latitude: 20.8449, longitude: 106.6881, pricePerNight: 1280000, cleaningFee: 100000,
-      maxGuests: 6, bedroomCount: 3, bathrooms: 2, type: "HOUSE", status: "ACTIVE",
-      cancellationPolicy: "MODERATE", checkInFrom: "14:00", checkOutTo: "11:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, ac, kitchen, washer, parking].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  const prop16 = await prisma.property.create({
-    data: {
-      title: "Resort Ghềnh Ráng Quy Nhơn",
-      description: "Resort ven biển với hồ bơi, nhà hàng và khu vườn nhiệt đới.",
-      addressLine1: "Ghềnh Ráng, Quy Nhơn", city: "Quy Nhơn", country: "Việt Nam",
-      latitude: 13.7563, longitude: 109.2193, pricePerNight: 2450000, cleaningFee: 180000,
-      maxGuests: 5, bedroomCount: 2, bathrooms: 2, type: "RESORT", status: "ACTIVE",
-      cancellationPolicy: "STRICT", checkInFrom: "14:00", checkOutTo: "12:00",
-      hostId: admin.id,
-      amenities: { connect: [wifi, pool, ac, parking, balcony, gym].map((a) => ({ id: a.id })) },
-    },
-  });
-
-  console.log(`  ✓ 16 properties`);
-
-  // ── Ảnh chỗ ở ────────────────────────────────────────────────────────────────
-  await prisma.propertyImage.createMany({
-    data: [
-      ...propertyImageUrls.daNangVilla.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop1.id })),
-      ...propertyImageUrls.tayHoStudio.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop2.id })),
-      ...propertyImageUrls.sapaHomestay.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop3.id })),
-      ...propertyImageUrls.phuQuocResort.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop4.id })),
-      ...propertyImageUrls.haLongHotel.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop5.id })),
-      ...propertyImageUrls.haGiangLodge.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop6.id })),
-      ...propertyImageUrls.mocChauFarmstay.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop7.id })),
-      ...propertyImageUrls.ninhBinhRetreat.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop8.id })),
-      ...propertyImageUrls.hoiAnVilla.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop9.id })),
-      ...propertyImageUrls.daLatCabin.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop10.id })),
-      ...propertyImageUrls.nhaTrangHotel.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop11.id })),
-      ...propertyImageUrls.canThoHouse.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop12.id })),
-      ...propertyImageUrls.vungTauApartment.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop13.id })),
-      ...propertyImageUrls.hueHotel.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop14.id })),
-      ...propertyImageUrls.haiPhongHouse.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop15.id })),
-      ...propertyImageUrls.quyNhonResort.map((url, i) => ({ url, isPrimary: i === 0, propertyId: prop16.id })),
-    ],
-  });
-
-  console.log(`  ✓ property images`);
-
-  // ── Chặn lịch mẫu ────────────────────────────────────────────────────────────
-  await prisma.propertyAvailability.createMany({
-    data: [
-      { propertyId: prop1.id, date: new Date("2026-06-14"), status: "BLOCKED", reason: "Chủ nhà giữ chỗ cho gia đình" },
-      { propertyId: prop1.id, date: new Date("2026-06-15"), status: "MAINTENANCE", reason: "Bảo trì hồ bơi" },
-      { propertyId: prop2.id, date: new Date("2026-06-20"), status: "BLOCKED", reason: "Không nhận khách ngày này" },
-      { propertyId: prop4.id, date: new Date("2026-07-01"), status: "MAINTENANCE", reason: "Bảo trì hệ thống điều hòa" },
-    ],
-  });
 
   // ── Tours ─────────────────────────────────────────────────────────────────────
   const tour1 = await prisma.tour.create({
@@ -613,7 +360,7 @@ async function main() {
 
   console.log("\n✅ Seed hoàn tất!");
   console.log("   Admin: admin@tripnest.vn / tripnest");
-  console.log(`   ${provinces.length} tỉnh/thành phố | 16 properties | 7 tours`);
+  console.log(`   ${provinces.length} tỉnh/thành phố | 0 properties | 7 tours`);
 }
 
 main()

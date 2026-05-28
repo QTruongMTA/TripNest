@@ -1,6 +1,6 @@
 "use client";
 
-import { generatePropertyId, getStatusClass, getStatusLabel, hostProperties, type HostProperty } from "@/components/host/host-dashboard-data";
+import { getStatusClass, getStatusLabel, hostProperties, type HostProperty } from "@/components/host/host-dashboard-data";
 import { useMemo, useState } from "react";
 
 const metricCards = [
@@ -18,12 +18,7 @@ export function HostManagementHome() {
   const [status, setStatus] = useState("all");
   const [query, setQuery] = useState("");
 
-  const properties = useMemo(() => {
-    return hostProperties.map((property) => ({
-      ...property,
-      id: property.id || generatePropertyId(property.name),
-    }));
-  }, []);
+  const properties = useMemo(() => hostProperties, []);
 
   const filteredProperties = properties.filter((property) => {
     const matchesLocation = location === "all" || property.city === location;
