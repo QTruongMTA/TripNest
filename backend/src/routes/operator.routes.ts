@@ -13,13 +13,15 @@ router.get("/dashboard", operatorController.dashboard);
 router.get("/provinces", operatorController.provinces);
 router.get("/listings", operatorController.listings);
 router.patch("/listings/:id/status", requireRole(...provinceOnly), operatorController.updateListingStatus);
+router.get("/payments", operatorController.payments);
+router.get("/bookings", operatorController.bookings);
+router.patch("/bookings/:id/status", requireRole(...provinceOnly), operatorController.updateBookingStatus);
 
 router.get("/host-approvals", operatorController.hostApprovals);
 router.post("/host-approvals/:id/approve", requireRole(...provinceOnly), operatorController.approveHost);
 router.post("/host-approvals/:id/reject", requireRole(...provinceOnly), operatorController.rejectHost);
 
 router.get("/sub-operators", requireRole(...provinceOnly), operatorController.subOperators);
-router.post("/sub-operators", requireRole(...provinceOnly), operatorController.createSubOperator);
 
 router.get("/tasks", operatorController.tasks);
 router.post("/tasks", requireRole(...provinceOnly), operatorController.createTask);

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { getAccessToken } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
 
 type PropertyType = "APARTMENT" | "HOUSE" | "HOTEL" | "UNIQUE";
@@ -27,8 +28,55 @@ type PhotoItem = {
   name: string;
   size: number;
   url: string;
+  file: File;
   isMain: boolean;
 };
+
+function compressImageToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      const maxSide = 1200;
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+      const width = Math.max(1, Math.round(image.naturalWidth * scale));
+      const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        URL.revokeObjectURL(imageUrl);
+        reject(new Error("Cannot prepare image"));
+        return;
+      }
+
+      context.drawImage(image, 0, 0, width, height);
+      URL.revokeObjectURL(imageUrl);
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      reject(new Error("Cannot load image"));
+    };
+
+    image.src = imageUrl;
+  });
+}
+
+async function uploadPropertyImage(file: File, token: string) {
+  const imageData = await compressImageToDataUrl(file);
+  const response = await api.post<{ data: { url: string } }>(
+    "/host/property-images",
+    { imageData },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return response.data.data.url;
+}
 
 type ChildPricingState = {
   enabled: boolean;
@@ -259,6 +307,9 @@ export default function Page() {
   const [provinceOptions, setProvinceOptions] = useState<ProvinceOption[]>([]);
   const [provincesLoading, setProvincesLoading] = useState(true);
   const [provincesError, setProvincesError] = useState("");
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState("");
+  const [publishSuccess, setPublishSuccess] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -354,6 +405,54 @@ export default function Page() {
     if (!canContinue) return;
     const nextStep = steps[activeIndex + 1];
     if (nextStep) setStep(nextStep);
+  }
+
+  async function publishProperty(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canContinue || publishing) return;
+
+    const token = getAccessToken();
+    if (!token) {
+      setPublishError("Vui lòng đăng nhập để gửi yêu cầu duyệt cơ sở lưu trú.");
+      return;
+    }
+
+    setPublishing(true);
+    setPublishError("");
+    setPublishSuccess(false);
+
+    try {
+      const mainPhoto = photos.find((photo) => photo.isMain) ?? photos[0];
+      const thumbnailUrl = mainPhoto ? await uploadPropertyImage(mainPhoto.file, token) : undefined;
+
+      await api.post(
+        "/host/properties",
+        {
+          title: title.trim(),
+          description: `${selectedType.title} tại ${address.city}`,
+          addressLine1: address.line1.trim(),
+          addressLine2: address.line2.trim() || undefined,
+          city: address.city.trim(),
+          postalCode: address.postalCode.trim() || undefined,
+          country: address.country.trim() || "Việt Nam",
+          pricePerNight: Number(nightlyPrice),
+          maxGuests: details.guests,
+          bedroomCount: details.bedrooms.length,
+          bathrooms: details.bathrooms,
+          type: propertyType,
+          thumbnailUrl,
+          legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
+          ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPublishSuccess(true);
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      setPublishError(message ?? "Không thể gửi yêu cầu duyệt cơ sở lưu trú. Vui lòng thử lại.");
+    } finally {
+      setPublishing(false);
+    }
   }
 
   function goBack() {
@@ -461,8 +560,11 @@ export default function Page() {
               citiesLoading={provincesLoading}
               citiesError={provincesError}
               onBack={goBack}
-              onSubmit={continueFlow}
+              onSubmit={publishProperty}
               canContinue={Boolean(canContinue)}
+              publishing={publishing}
+              publishError={publishError}
+              publishSuccess={publishSuccess}
             />
           ) : null}
         </div>
@@ -1131,6 +1233,7 @@ function PhotosStep({ photos, setPhotos, onBack, onSubmit, canContinue }: { phot
       name: file.name,
       size: file.size,
       url: URL.createObjectURL(file),
+      file,
       isMain: photos.length === 0 && index === 0,
     }));
 
@@ -1994,6 +2097,9 @@ function ReviewCompleteStep({
   onBack,
   onSubmit,
   canContinue,
+  publishing,
+  publishError,
+  publishSuccess,
 }: {
   legalType: string;
   setLegalType: (value: string) => void;
@@ -2007,6 +2113,9 @@ function ReviewCompleteStep({
   onBack: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   canContinue: boolean;
+  publishing: boolean;
+  publishError: string;
+  publishSuccess: boolean;
 }) {
   const [termsOpen, setTermsOpen] = useState(false);
   const termsDocxUrl = "/terms/dieu-khoan-chung.docx";
@@ -2124,7 +2233,19 @@ function ReviewCompleteStep({
       </Panel>
 
       <div className="mt-8 grid gap-3">
-        <button type="submit" disabled={!canContinue} className="h-14 rounded-md bg-teal-700 px-6 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">Mở để nhận đặt phòng</button>
+        {publishSuccess ? (
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+            Yêu cầu duyệt cơ sở lưu trú đã được gửi. Bộ phận vận hành tại địa bàn sẽ kiểm tra trước khi cơ sở được mở nhận đặt phòng.
+          </div>
+        ) : null}
+        {publishError ? (
+          <div className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+            {publishError}
+          </div>
+        ) : null}
+        <button type="submit" disabled={!canContinue || publishing || publishSuccess} className="h-14 rounded-md bg-teal-700 px-6 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">
+          {publishing ? "Đang gửi yêu cầu duyệt..." : publishSuccess ? "Đã gửi yêu cầu duyệt" : "Mở để nhận đặt phòng"}
+        </button>
         <button type="button" onClick={onBack} className="h-12 rounded-md text-sm font-semibold text-teal-700 transition hover:bg-teal-50">Tôi chưa sẵn sàng</button>
       </div>
 

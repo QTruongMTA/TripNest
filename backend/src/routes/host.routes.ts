@@ -5,7 +5,9 @@ import { requireRole } from "../middlewares/rbac.middleware";
 
 const router = Router();
 
+router.post("/property-images", authMiddleware, hostController.uploadPropertyImage);
 router.post("/properties", authMiddleware, hostController.createProperty);
+router.get("/properties", authMiddleware, hostController.listProperties);
 router.use(authMiddleware, requireRole("HOST", "ADMIN"));
 router.get("/bookings", hostController.listBookings);
 router.patch("/bookings/:id/confirm", hostController.confirmBooking);
