@@ -1,6 +1,7 @@
 "use client";
 import { Bell, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 
@@ -15,16 +16,30 @@ const roleLabel: Record<string, string> = {
   OPERATOR_SUB: "Operator thực địa",
 };
 
+type NotificationMetadata = {
+  propertyId?: string;
+  action?: string;
+};
+
 type NotificationItem = {
   id: string;
   title: string;
   message: string;
   isRead: boolean;
+  metadata?: NotificationMetadata | null;
   createdAt: string;
 };
 
+function getNotificationTarget(item: NotificationItem) {
+  if (item.metadata?.propertyId && item.metadata?.action === "PROPERTY_APPROVAL_REQUESTED") {
+    return `/operator/listings?status=PENDING&focus=${item.metadata.propertyId}`;
+  }
+  return null;
+}
+
 export function Header({ title, onMenuClick }: HeaderProps) {
   const { user } = useAuthStore();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -62,6 +77,17 @@ export function Header({ title, onMenuClick }: HeaderProps) {
     setItems((current) => current.map((item) => ({ ...item, isRead: true })));
     setUnreadCount(0);
     await api.patch("/notifications/mine/read-all").catch(() => undefined);
+  }
+
+  async function openNotification(item: NotificationItem) {
+    const target = getNotificationTarget(item);
+    if (!item.isRead) {
+      setItems((current) => current.map((value) => value.id === item.id ? { ...value, isRead: true } : value));
+      setUnreadCount((value) => Math.max(0, value - 1));
+      await api.patch(`/notifications/mine/${item.id}/read`).catch(() => undefined);
+    }
+    setOpen(false);
+    if (target) router.push(target);
   }
 
   return (
@@ -120,9 +146,11 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                     </p>
                   ) : (
                     items.map((item) => (
-                      <div
+                      <button
+                        type="button"
                         key={item.id}
-                        className={`border-b border-slate-100 px-4 py-3 last:border-0 ${
+                        onClick={() => openNotification(item)}
+                        className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-0 hover:bg-teal-50/60 ${
                           item.isRead ? "bg-white" : "bg-amber-50/60"
                         }`}
                       >
@@ -131,7 +159,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                         <p className="mt-2 text-xs text-slate-400">
                           {new Date(item.createdAt).toLocaleString("vi-VN")}
                         </p>
-                      </div>
+                      </button>
                     ))
                   )}
                 </div>

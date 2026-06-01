@@ -5,6 +5,7 @@ import {
   PropertyType,
 } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
+import { normalizePropertyImageUrl } from "../utils/property-image.utils";
 
 export type PublicPropertyQuery = {
   page: number;
@@ -150,7 +151,7 @@ export const propertyService = {
         bedroomCount: property.bedroomCount,
         bathrooms: property.bathrooms,
         amenityNames: property.amenities.map((amenity) => amenity.name),
-        thumbnailUrl: property.images[0]?.url ?? null,
+        thumbnailUrl: normalizePropertyImageUrl(property.images[0]?.url, property.type),
         rating: buildRating(property.bookings),
       })),
       meta: {
@@ -223,7 +224,10 @@ export const propertyService = {
       childrenAllowed: property.childrenAllowed,
       cribsAvailable: property.cribsAvailable,
       sizeM2: property.sizeM2,
-      thumbnailUrl: property.images.find((image) => image.isPrimary)?.url ?? null,
+      thumbnailUrl: normalizePropertyImageUrl(
+        property.images.find((image) => image.isPrimary)?.url,
+        property.type
+      ),
       rating: buildRating(property.bookings),
       description: property.description,
       address: {
@@ -285,7 +289,7 @@ export const propertyService = {
         : null,
       images: property.images.map((image) => ({
         id: image.id,
-        url: image.url,
+        url: normalizePropertyImageUrl(image.url, property.type),
         isPrimary: image.isPrimary,
       })),
       amenities: property.amenities.map((amenity) => ({

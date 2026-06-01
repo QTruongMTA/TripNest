@@ -1,7 +1,30 @@
 "use client";
 
-import { getStatusClass, getStatusLabel, hostProperties, type HostProperty } from "@/components/host/host-dashboard-data";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "@/lib/api";
+import { getAccessToken } from "@/lib/auth";
+
+type HostProperty = {
+  id: string;
+  code: string;
+  title: string;
+  address: string;
+  city: string;
+  status: "PENDING" | "ACTIVE" | "INACTIVE" | "SUSPENDED";
+  type: string;
+  pricePerNight: number;
+  maxGuests: number;
+  bedroomCount: number;
+  bathrooms: number;
+  thumbnailUrl?: string | null;
+  bookings: number;
+  arrivals: number;
+  departures: number;
+  reviews: number;
+  cancellations: number;
+  revenue: number;
+  occupancy: number;
+};
 
 const metricCards = [
   { key: "bookings", label: "Đặt phòng", icon: ListIcon },
@@ -13,12 +36,59 @@ const metricCards = [
 
 type MetricKey = (typeof metricCards)[number]["key"];
 
+const statusOptions = [
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "ACTIVE", label: "Đang hoạt động" },
+  { value: "PENDING", label: "Đang chờ duyệt" },
+  { value: "INACTIVE", label: "Từ chối" },
+  { value: "SUSPENDED", label: "Đã khóa" },
+];
+
+const statusLabel: Record<HostProperty["status"], string> = {
+  ACTIVE: "Đang hoạt động",
+  PENDING: "Đang chờ duyệt",
+  INACTIVE: "Từ chối",
+  SUSPENDED: "Đã khóa",
+};
+
+const statusDot: Record<HostProperty["status"], string> = {
+  ACTIVE: "bg-emerald-500",
+  PENDING: "bg-amber-500",
+  INACTIVE: "bg-slate-400",
+  SUSPENDED: "bg-rose-500",
+};
+
+const typeLabel: Record<string, string> = {
+  HOUSE: "Nhà riêng",
+  APARTMENT: "Căn hộ",
+  VILLA: "Biệt thự",
+  HOMESTAY: "Homestay",
+  HOTEL: "Khách sạn",
+  RESORT: "Resort",
+  UNIQUE: "Chỗ nghỉ độc đáo",
+};
+
 export function HostManagementHome() {
+  const [properties, setProperties] = useState<HostProperty[]>([]);
   const [location, setLocation] = useState("all");
   const [status, setStatus] = useState("all");
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const properties = useMemo(() => hostProperties, []);
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) {
+      setLoading(false);
+      setError("Vui lòng đăng nhập để xem danh sách chỗ nghỉ.");
+      return;
+    }
+
+    api.get("/host/properties", { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => setProperties(response.data.data ?? []))
+      .catch((err) => setError(err.response?.data?.error?.message ?? "Không thể tải danh sách chỗ nghỉ."))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredProperties = properties.filter((property) => {
     const matchesLocation = location === "all" || property.city === location;
@@ -26,8 +96,8 @@ export function HostManagementHome() {
     const normalizedQuery = query.trim().toLowerCase();
     const matchesQuery =
       !normalizedQuery ||
-      property.id.includes(normalizedQuery) ||
-      property.name.toLowerCase().includes(normalizedQuery) ||
+      property.code.toLowerCase().includes(normalizedQuery) ||
+      property.title.toLowerCase().includes(normalizedQuery) ||
       property.address.toLowerCase().includes(normalizedQuery);
 
     return matchesLocation && matchesStatus && matchesQuery;
@@ -46,7 +116,7 @@ export function HostManagementHome() {
     { bookings: 0, arrivals: 0, departures: 0, reviews: 0, cancellations: 0, revenue: 0, occupancy: 0 }
   );
 
-  const cities = Array.from(new Set(properties.map((property) => property.city)));
+  const cities = useMemo(() => Array.from(new Set(properties.map((property) => property.city))), [properties]);
   const averageOccupancy = filteredProperties.length ? Math.round(totals.occupancy / filteredProperties.length) : 0;
 
   return (
@@ -56,13 +126,15 @@ export function HostManagementHome() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Host workspace</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">Chỗ nghỉ của Quý vị</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Quản lý toàn bộ chỗ nghỉ, trạng thái đặt phòng và hiệu suất vận hành trong một giao diện chung.
+            Theo dõi toàn bộ chỗ nghỉ đã đăng, trạng thái xét duyệt và hiệu suất vận hành trong một giao diện chung.
           </p>
         </div>
         <a href="/host/properties/new" className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800">
           Thêm chỗ nghỉ mới
         </a>
       </div>
+
+      {error ? <div className="mt-6 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
       <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_auto]">
         <div>
@@ -84,7 +156,7 @@ export function HostManagementHome() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Lọc theo ID chỗ nghỉ, tên"
+                placeholder="Lọc theo ID, tên, địa chỉ"
                 className="h-11 w-72 rounded-md border border-slate-300 bg-white pl-3 pr-10 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
               />
               <SearchIcon />
@@ -93,15 +165,7 @@ export function HostManagementHome() {
         </div>
       </div>
 
-      <div className="mt-7 border-b border-slate-200">
-        <div className="flex gap-7 text-sm">
-          <button type="button" className="border-b-2 border-teal-700 px-1 pb-3 font-semibold text-teal-700">Hoạt động</button>
-          <button type="button" className="px-1 pb-3 text-slate-600 hover:text-slate-950">Hiệu suất</button>
-          <button type="button" className="px-1 pb-3 text-slate-600 hover:text-slate-950">Cài đặt</button>
-        </div>
-      </div>
-
-      <section className="mt-5">
+      <section className="mt-7">
         <h2 className="text-xl font-semibold text-slate-950">Tổng quan hôm nay</h2>
         <div className="mt-4 grid overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-teal-950/5 sm:grid-cols-2 lg:grid-cols-5">
           {metricCards.map((metric) => {
@@ -120,7 +184,7 @@ export function HostManagementHome() {
       <section className="mt-7 grid gap-4 md:grid-cols-3">
         <InsightCard label="Doanh thu tháng này" value={`${totals.revenue.toLocaleString("vi-VN")} ₫`} hint="Tổng doanh thu theo các chỗ nghỉ đang lọc" />
         <InsightCard label="Công suất trung bình" value={`${averageOccupancy}%`} hint="Tỷ lệ đêm đã bán trên lịch mở bán" />
-        <InsightCard label="Chỗ nghỉ đang mở" value={String(filteredProperties.filter((property) => property.status === "open").length)} hint="Sẵn sàng nhận đặt phòng từ khách" />
+        <InsightCard label="Chỗ nghỉ đang mở" value={String(filteredProperties.filter((property) => property.status === "ACTIVE").length)} hint="Đã được duyệt và có thể nhận đặt phòng" />
       </section>
 
       <section className="mt-8">
@@ -132,40 +196,38 @@ export function HostManagementHome() {
               onChange={(event) => setStatus(event.target.value)}
               className="h-11 min-w-56 rounded-md border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-teal-600 focus:ring-4 focus:ring-teal-100"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="open">Mở / Có thể đặt phòng</option>
-              <option value="review">Đang chờ duyệt</option>
-              <option value="paused">Tạm dừng nhận đặt phòng</option>
+              {statusOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <div className="flex flex-wrap gap-4 text-sm text-slate-500">
-            <button type="button" className="hover:text-teal-700">Tải xuống</button>
-            <button type="button" className="hover:text-teal-700">Tùy chỉnh dữ liệu</button>
-            <button type="button" className="hover:text-teal-700">Tùy chỉnh chế độ xem</button>
-          </div>
         </div>
 
         <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-teal-950/5">
           <div className="overflow-x-auto">
-            <table className="min-w-[980px] w-full border-collapse text-left text-sm">
+            <table className="min-w-[1040px] w-full border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-[0.08em] text-slate-500">
                 <tr>
-                  <th className="px-4 py-4 font-semibold">ID</th>
                   <th className="px-4 py-4 font-semibold">Chỗ nghỉ</th>
-                  <th className="px-4 py-4 font-semibold">Trạng thái trên TripNest</th>
-                  <th className="px-4 py-4 font-semibold text-right">Đến trong 48 giờ tới</th>
-                  <th className="px-4 py-4 font-semibold text-right">Rời đi trong 48 giờ tới</th>
-                  <th className="px-4 py-4 font-semibold text-right">Tin nhắn từ khách</th>
-                  <th className="px-4 py-4 font-semibold text-right">Đánh giá</th>
+                  <th className="px-4 py-4 font-semibold">Trạng thái</th>
+                  <th className="px-4 py-4 font-semibold">Loại</th>
+                  <th className="px-4 py-4 font-semibold text-right">Giá/đêm</th>
+                  <th className="px-4 py-4 font-semibold text-right">Sức chứa</th>
+                  <th className="px-4 py-4 font-semibold text-right">Đến 48h tới</th>
+                  <th className="px-4 py-4 font-semibold text-right">Rời 48h tới</th>
+                  <th className="px-4 py-4 font-semibold text-right">Đặt phòng</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredProperties.map((property) => (
+                {loading ? (
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500">Đang tải danh sách chỗ nghỉ...</td></tr>
+                ) : null}
+                {!loading && filteredProperties.map((property) => (
                   <PropertyRow key={property.id} property={property} />
                 ))}
-                {filteredProperties.length === 0 ? (
+                {!loading && filteredProperties.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">Không tìm thấy chỗ nghỉ phù hợp với bộ lọc.</td>
+                    <td colSpan={8} className="px-4 py-12 text-center text-slate-500">
+                      Chưa có chỗ nghỉ phù hợp. Nếu Quý vị vừa gửi cơ sở mới, cơ sở sẽ hiển thị tại đây với trạng thái đang chờ duyệt.
+                    </td>
                   </tr>
                 ) : null}
               </tbody>
@@ -180,21 +242,30 @@ export function HostManagementHome() {
 function PropertyRow({ property }: { property: HostProperty }) {
   return (
     <tr className="align-top hover:bg-teal-50/40">
-      <td className="px-4 py-4 font-medium text-slate-700">{property.id}</td>
       <td className="px-4 py-4">
-        <p className="font-semibold text-slate-950">{property.name}</p>
-        <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{property.address}</p>
+        <div className="flex gap-3">
+          <div className="h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
+            {property.thumbnailUrl ? <img src={property.thumbnailUrl} alt={property.title} className="h-full w-full object-cover" /> : null}
+          </div>
+          <div>
+            <p className="font-semibold text-slate-950">{property.title}</p>
+            <p className="mt-1 text-xs text-slate-400">{property.code}</p>
+            <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{property.address}</p>
+          </div>
+        </div>
       </td>
       <td className="px-4 py-4">
         <span className="inline-flex items-center gap-2 text-sm text-slate-700">
-          <span className={`h-2.5 w-2.5 rounded-full ${getStatusClass(property.status)}`} />
-          {getStatusLabel(property.status)}
+          <span className={`h-2.5 w-2.5 rounded-full ${statusDot[property.status]}`} />
+          {statusLabel[property.status]}
         </span>
       </td>
+      <td className="px-4 py-4 text-slate-600">{typeLabel[property.type] ?? property.type}</td>
+      <td className="px-4 py-4 text-right font-medium">{property.pricePerNight.toLocaleString("vi-VN")} ₫</td>
+      <td className="px-4 py-4 text-right tabular-nums">{property.maxGuests} khách</td>
       <td className="px-4 py-4 text-right tabular-nums">{property.arrivals}</td>
       <td className="px-4 py-4 text-right tabular-nums">{property.departures}</td>
       <td className="px-4 py-4 text-right tabular-nums">{property.bookings}</td>
-      <td className="px-4 py-4 text-right tabular-nums">{property.reviews}</td>
     </tr>
   );
 }

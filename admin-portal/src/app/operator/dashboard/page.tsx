@@ -13,6 +13,7 @@ interface DashboardData {
     pendingApprovals?: number;
     openDisputes?: number;
     activeTasks?: number;
+    pendingBookings?: number;
     completedThisMonth?: number;
     totalCompleted?: number;
   };
@@ -51,14 +52,14 @@ export default function OperatorDashboard() {
   const stats = data.stats ?? {};
 
   return (
-    <PortalShell title="Dashboard">
+    <PortalShell title="Dashboard tỉnh">
       <div className="space-y-6">
         <section className="rounded-lg bg-teal-900 p-5 text-white shadow-sm shadow-teal-950/10">
-          <p className="text-sm uppercase tracking-[0.24em] text-teal-100/75">Điều hành địa phương</p>
+          <p className="text-sm uppercase tracking-[0.24em] text-teal-100/75">Trung tâm vận hành địa phương</p>
           <div className="mt-3">
-            <h2 className="text-3xl font-semibold">{isProvince ? "Quản lý tỉnh được phân công" : "Theo dõi nhiệm vụ thực địa"}</h2>
+            <h2 className="text-3xl font-semibold">{isProvince ? "Tổng quan hiệu suất khu vực" : "Bảng công việc thực địa"}</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-              Nắm nhanh listing, host approval, tranh chấp và tiến độ nhiệm vụ trong khu vực phụ trách.
+              Theo dõi tình trạng cơ sở lưu trú, hồ sơ cần duyệt, tranh chấp phát sinh và tiến độ xử lý trong ngày. Các chỉ số được tổng hợp theo địa bàn phụ trách để đội vận hành ưu tiên đúng việc, đúng thời điểm.
             </p>
           </div>
         </section>
@@ -66,7 +67,7 @@ export default function OperatorDashboard() {
         {data.provinces && data.provinces.length > 0 ? (
           <div className="portal-card flex flex-wrap items-center gap-2 p-4">
             <MapPin size={16} className="text-teal-800" />
-            <span className="text-sm font-medium text-slate-500">Phụ trách:</span>
+            <span className="text-sm font-medium text-slate-500">Khu vực phụ trách:</span>
             {data.provinces.map((p) => (
               <span key={p.id} className="rounded-md bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-800">{p.name}</span>
             ))}
@@ -81,10 +82,11 @@ export default function OperatorDashboard() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {isProvince ? (
               <>
-                <StatCard title="Chỗ ở trong tỉnh" value={stats.totalListings ?? 0} icon={<Building2 size={20} />} tone="teal" />
-                <StatCard title="Chờ duyệt" value={stats.pendingListings ?? 0} icon={<ClipboardList size={20} />} tone="amber" />
-                <StatCard title="Host chờ xét duyệt" value={stats.pendingApprovals ?? 0} icon={<CheckSquare size={20} />} tone="slate" />
-                <StatCard title="Tranh chấp đang mở" value={stats.openDisputes ?? 0} icon={<AlertCircle size={20} />} tone="amber" />
+                <StatCard title="Cơ sở trong tỉnh" value={stats.totalListings ?? 0} icon={<Building2 size={20} />} tone="teal" />
+                <StatCard title="Cơ sở chờ duyệt" value={stats.pendingListings ?? 0} icon={<ClipboardList size={20} />} tone="amber" />
+                <StatCard title="Đặt phòng chờ duyệt" value={stats.pendingBookings ?? 0} icon={<ClipboardList size={20} />} tone="slate" />
+                <StatCard title="Hồ sơ host chờ duyệt" value={stats.pendingApprovals ?? 0} icon={<CheckSquare size={20} />} tone="slate" />
+                <StatCard title="Tranh chấp đang xử lý" value={stats.openDisputes ?? 0} icon={<AlertCircle size={20} />} tone="amber" />
                 <StatCard title="Nhiệm vụ đang chạy" value={stats.activeTasks ?? 0} icon={<ClipboardList size={20} />} tone="teal" />
               </>
             ) : (

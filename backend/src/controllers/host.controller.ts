@@ -1,9 +1,66 @@
 import type { Request, Response } from "express";
+import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import { bookingService } from "../services/booking.service";
 import { prisma } from "../lib/prisma";
 import { CancellationPolicy, PropertyType } from "../generated/prisma/enums";
+import { normalizePropertyImageUrl } from "../utils/property-image.utils";
 
 export const hostController = {
+  async uploadPropertyImage(req: Request, res: Response) {
+    const imageData = req.body?.imageData;
+
+    if (typeof imageData !== "string") {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_IMAGE_PAYLOAD",
+          message: "imageData is required",
+        },
+      });
+    }
+
+    const match = imageData.match(/^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_IMAGE_FORMAT",
+          message: "Only jpeg, png, and webp images are supported",
+        },
+      });
+    }
+
+    const mimeExtension = match[1];
+    const base64Payload = match[2];
+    if (!mimeExtension || !base64Payload) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_IMAGE_FORMAT",
+          message: "Invalid image payload",
+        },
+      });
+    }
+
+    const extension = mimeExtension === "jpeg" ? "jpg" : mimeExtension;
+    const buffer = Buffer.from(base64Payload, "base64");
+    if (buffer.length > 4 * 1024 * 1024) {
+      return res.status(400).json({
+        error: {
+          code: "IMAGE_TOO_LARGE",
+          message: "Image must be 4MB or smaller after compression",
+        },
+      });
+    }
+
+    const uploadDir = path.join(process.cwd(), "uploads", "properties");
+    await mkdir(uploadDir, { recursive: true });
+    const filename = `${randomUUID()}.${extension}`;
+    await writeFile(path.join(uploadDir, filename), buffer);
+
+    const publicUrl = `${req.protocol}://${req.get("host")}/uploads/properties/${filename}`;
+    return res.status(201).json({ data: { url: publicUrl } });
+  },
+
   async createProperty(req: Request, res: Response) {
     const body = req.body ?? {};
 
@@ -24,6 +81,8 @@ export const hostController = {
       });
     }
 
+    const thumbnailUrl = normalizePropertyImageUrl(body.thumbnailUrl, body.type);
+
     const property = await prisma.$transaction(async (tx) => {
       const created = await tx.property.create({
         data: {
@@ -41,16 +100,13 @@ export const hostController = {
           bathrooms: body.bathrooms,
           type: body.type,
           hostId: req.user!.id,
-          ...(typeof body.thumbnailUrl === "string" && body.thumbnailUrl.trim()
-            ? {
-                images: {
-                  create: {
-                    url: body.thumbnailUrl.trim(),
-                    isPrimary: true,
-                  },
-                },
-              }
-            : {}),
+          status: "PENDING",
+          images: {
+            create: {
+              url: thumbnailUrl,
+              isPrimary: true,
+            },
+          },
         },
       });
 
@@ -59,10 +115,93 @@ export const hostController = {
         data: { role: "HOST" },
       });
 
+      const province = await tx.province.findUnique({
+        where: { name: body.city.trim() },
+        select: { id: true, name: true },
+      });
+      const assignments = province
+        ? await tx.operatorProvinceAssignment.findMany({
+            where: { provinceId: province.id, operator: { isActive: true } },
+            select: { operatorId: true },
+          })
+        : [];
+
+      if (assignments.length > 0) {
+        await tx.notification.createMany({
+          data: assignments.map((assignment) => ({
+            userId: assignment.operatorId,
+            type: "SYSTEM",
+            title: "Yêu cầu duyệt cơ sở lưu trú mới",
+            message: `${created.title} tại ${created.city} vừa được gửi để xét duyệt trước khi mở nhận đặt phòng.`,
+            metadata: {
+              propertyId: created.id,
+              action: "PROPERTY_APPROVAL_REQUESTED",
+            },
+          })),
+        });
+      }
+
       return created;
     });
 
     return res.status(201).json({ data: property });
+  },
+
+  async listProperties(req: Request, res: Response) {
+    const properties = await prisma.property.findMany({
+      where: { hostId: req.user!.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        images: {
+          where: { isPrimary: true },
+          take: 1,
+          select: { url: true },
+        },
+        bookings: {
+          select: { id: true, status: true, checkIn: true, checkOut: true },
+        },
+        _count: {
+          select: { bookings: true },
+        },
+      },
+    });
+
+    return res.json({
+      data: properties.map((property) => {
+        const upcomingWindowEnd = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        const now = new Date();
+        const arrivals = property.bookings.filter((booking) =>
+          booking.checkIn && booking.checkIn >= now && booking.checkIn <= upcomingWindowEnd
+        ).length;
+        const departures = property.bookings.filter((booking) =>
+          booking.checkOut && booking.checkOut >= now && booking.checkOut <= upcomingWindowEnd
+        ).length;
+
+        return {
+          id: property.id,
+          code: `PR-${property.id.slice(-6).toUpperCase()}`,
+          title: property.title,
+          address: [property.addressLine1, property.city, property.country].filter(Boolean).join(", "),
+          city: property.city,
+          country: property.country,
+          status: property.status,
+          type: property.type,
+          pricePerNight: property.pricePerNight.toNumber(),
+          maxGuests: property.maxGuests,
+          bedroomCount: property.bedroomCount,
+          bathrooms: property.bathrooms,
+          thumbnailUrl: normalizePropertyImageUrl(property.images[0]?.url, property.type),
+          bookings: property._count.bookings,
+          arrivals,
+          departures,
+          reviews: 0,
+          cancellations: property.bookings.filter((booking) => booking.status === "CANCELLED").length,
+          revenue: 0,
+          occupancy: 0,
+          createdAt: property.createdAt.toISOString(),
+        };
+      }),
+    });
   },
 
   async listBookings(req: Request, res: Response) {

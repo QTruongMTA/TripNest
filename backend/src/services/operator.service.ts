@@ -5,6 +5,41 @@ function formatOperatorNumber(value: number) {
   return value.toString().padStart(2, "0");
 }
 
+function formatVND(amount: number): string {
+  return `₫${amount.toLocaleString("vi-VN")}`;
+}
+
+function mapPaymentStatus(status: string): string {
+  const map: Record<string, string> = {
+    UNPAID: "Chưa thanh toán",
+    PAID: "Đã thanh toán",
+    REFUNDED: "Đã hoàn tiền",
+  };
+  return map[status] ?? status;
+}
+
+function mapPaymentMethod(method: string): string {
+  const map: Record<string, string> = {
+    CASH: "Tiền mặt",
+    BANK_TRANSFER: "Chuyển khoản",
+    MOMO: "MoMo",
+    VNPAY: "VNPay",
+    ZALOPAY: "ZaloPay",
+    CREDIT_CARD: "Thẻ tín dụng",
+  };
+  return map[method] ?? method;
+}
+
+function mapBookingStatus(status: string): string {
+  const map: Record<string, string> = {
+    PENDING: "Chờ duyệt",
+    CONFIRMED: "Đã xác nhận",
+    CANCELLED: "Đã hủy",
+    COMPLETED: "Hoàn tất",
+  };
+  return map[status] ?? status;
+}
+
 async function getNextOperatorCredential() {
   const operators = await prisma.user.findMany({
     where: { email: { startsWith: "operator", endsWith: "@tripnest.vn" } },
@@ -172,18 +207,27 @@ export const operatorService = {
     const provinces = await this.getOperatorProvinces(operatorId);
     const cities = provinces.map((p) => p.name);
 
-    const [totalListings, pendingListings, pendingApprovals, openDisputes, activeTasks] =
+    const [totalListings, pendingListings, pendingApprovals, openDisputes, activeTasks, pendingBookings] =
       await Promise.all([
         prisma.property.count({ where: { city: { in: cities } } }),
         prisma.property.count({ where: { city: { in: cities }, status: "PENDING" } }),
         prisma.hostApprovalRequest.count({ where: { provinceId: { in: provinces.map((p) => p.id) }, status: "PENDING" } }),
         prisma.dispute.count({ where: { provinceId: { in: provinces.map((p) => p.id) }, status: { in: ["OPEN", "INVESTIGATING"] } } }),
         prisma.operatorTask.count({ where: { assignedTo: operatorId, status: { in: ["PENDING", "IN_PROGRESS"] } } }),
+        prisma.booking.count({
+          where: {
+            status: "PENDING",
+            OR: [
+              { property: { city: { in: cities } } },
+              { tour: { city: { in: cities } } },
+            ],
+          },
+        }),
       ]);
 
     return {
       provinces,
-      stats: { totalListings, pendingListings, pendingApprovals, openDisputes, activeTasks },
+      stats: { totalListings, pendingListings, pendingApprovals, openDisputes, activeTasks, pendingBookings },
     };
   },
 
@@ -230,6 +274,165 @@ export const operatorService = {
     ]);
 
     return { items, total, page, totalPages: Math.ceil(total / take) };
+  },
+
+  async listProvincePayments(cities: string[]) {
+    const payments = await prisma.payment.findMany({
+      where: {
+        booking: {
+          OR: [
+            { property: { city: { in: cities } } },
+            { tour: { city: { in: cities } } },
+          ],
+        },
+      },
+      include: {
+        booking: {
+          include: {
+            user: { select: { email: true } },
+            property: { select: { title: true, city: true } },
+            tour: { select: { title: true, city: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const paidTotal = payments
+      .filter((payment) => payment.status === "PAID")
+      .reduce((total, payment) => total + payment.amount.toNumber(), 0);
+
+    return {
+      total: payments.length,
+      paidTotal: formatVND(paidTotal),
+      items: payments.map((payment) => {
+        const listing = payment.booking.property ?? payment.booking.tour;
+        return {
+          id: `PM-${payment.id.slice(-6).toUpperCase()}`,
+          fullId: payment.id,
+          booking: `BK-${payment.booking.id.slice(-8).toUpperCase()}`,
+          guest: payment.booking.user.email,
+          listing: listing?.title ?? "-",
+          province: listing?.city ?? "-",
+          method: mapPaymentMethod(payment.method),
+          amount: formatVND(payment.amount.toNumber()),
+          status: mapPaymentStatus(payment.status),
+          rawStatus: payment.status,
+          paidAt: payment.paidAt ? payment.paidAt.toLocaleDateString("vi-VN") : "-",
+        };
+      }),
+    };
+  },
+
+  async listProvinceBookings(cities: string[], status?: string) {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        ...(status && { status: status as never }),
+        OR: [
+          { property: { city: { in: cities } } },
+          { tour: { city: { in: cities } } },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { email: true, name: true, phone: true } },
+        property: { select: { title: true, city: true } },
+        tour: { select: { title: true, city: true } },
+        payment: { select: { method: true, status: true } },
+      },
+    });
+
+    return bookings.map((booking) => {
+      const listing = booking.property ?? booking.tour;
+      let dateRange = "";
+      if (booking.checkIn && booking.checkOut) {
+        const checkIn = booking.checkIn.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+        const checkOut = booking.checkOut.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+        dateRange = `${checkIn}-${checkOut}`;
+      } else if (booking.tourDate) {
+        dateRange = booking.tourDate.toLocaleDateString("vi-VN");
+      }
+
+      return {
+        id: `BK-${booking.id.slice(-8).toUpperCase()}`,
+        fullId: booking.id,
+        guest: booking.user.email,
+        guestName: booking.user.name,
+        guestPhone: booking.user.phone,
+        item: listing?.title ?? "-",
+        province: listing?.city ?? "-",
+        type: booking.type,
+        date: dateRange,
+        guests: booking.numGuests,
+        amount: formatVND(booking.totalPrice.toNumber()),
+        status: mapBookingStatus(booking.status),
+        rawStatus: booking.status,
+        paymentMethod: booking.payment ? mapPaymentMethod(booking.payment.method) : "-",
+        paymentStatus: booking.payment ? mapPaymentStatus(booking.payment.status) : "-",
+        notes: booking.notes,
+        createdAt: booking.createdAt.toISOString(),
+      };
+    });
+  },
+
+  async updateProvinceBookingStatus(input: {
+    cities: string[];
+    bookingId: string;
+    status: "CONFIRMED" | "CANCELLED";
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.findFirst({
+        where: {
+          id: input.bookingId,
+          OR: [
+            { property: { city: { in: input.cities } } },
+            { tour: { city: { in: input.cities } } },
+          ],
+        },
+        select: {
+          id: true,
+          status: true,
+          userId: true,
+          property: { select: { title: true } },
+          tour: { select: { title: true } },
+        },
+      });
+
+      if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
+      if (booking.status !== "PENDING") return { kind: "BOOKING_NOT_PENDING" as const };
+
+      const updated = await tx.booking.update({
+        where: { id: input.bookingId },
+        data: { status: input.status },
+        select: { id: true, status: true, updatedAt: true },
+      });
+
+      const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";
+      await tx.notification.create({
+        data: {
+          userId: booking.userId,
+          type: input.status === "CONFIRMED" ? "BOOKING_CONFIRMED" : "BOOKING_CANCELLED",
+          title: input.status === "CONFIRMED" ? "Đặt phòng thành công" : "Đặt phòng đã bị hủy",
+          message:
+            input.status === "CONFIRMED"
+              ? `Đơn đặt ${itemTitle} của bạn đã được xác nhận.`
+              : `Đơn đặt ${itemTitle} của bạn đã bị hủy.`,
+          metadata: {
+            bookingId: booking.id,
+            action: input.status === "CONFIRMED" ? "BOOKING_APPROVED" : "BOOKING_CANCELLED",
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: {
+          id: updated.id,
+          status: updated.status,
+          updatedAt: updated.updatedAt.toISOString(),
+        },
+      };
+    });
   },
 
   // ── Host approval ────────────────────────────────────────────────────────────

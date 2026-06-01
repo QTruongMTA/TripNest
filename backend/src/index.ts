@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import path from "path";
 import { prisma } from "./lib/prisma";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { rateLimitMiddleware } from "./middlewares/rateLimit.middleware";
@@ -48,7 +49,13 @@ const corsOptions = {
   },
   credentials: true,
 };
-app.use(helmet(), cors(corsOptions), express.json({ limit: "1mb" }), rateLimitMiddleware);
+app.use(
+  helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }),
+  cors(corsOptions),
+  express.json({ limit: "5mb" }),
+  rateLimitMiddleware
+);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/availability", availabilityRouter);
