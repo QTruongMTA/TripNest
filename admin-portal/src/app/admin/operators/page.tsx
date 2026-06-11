@@ -82,6 +82,7 @@ export default function OperatorsPage() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [selectedProvinceIds, setSelectedProvinceIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -93,14 +94,32 @@ export default function OperatorsPage() {
     };
   }, [showForm]);
 
-  function load() {
+  async function load() {
     setLoading(true);
-    Promise.all([api.get("/admin/operators"), api.get("/provinces")])
-      .then(([opRes, prvRes]) => {
-        setOperators(opRes.data.data ?? []);
-        setProvinces(prvRes.data.data ?? []);
-      })
-      .finally(() => setLoading(false));
+    setLoadError("");
+
+    const [operatorResult, provinceResult] = await Promise.allSettled([
+      api.get("/admin/operators"),
+      api.get("/provinces"),
+    ]);
+
+    if (operatorResult.status === "fulfilled") {
+      setOperators(operatorResult.value.data.data ?? []);
+    } else {
+      setLoadError("Không thể tải danh sách tài khoản nhân viên.");
+    }
+
+    if (provinceResult.status === "fulfilled") {
+      setProvinces(provinceResult.value.data.data ?? []);
+    } else {
+      setLoadError((current) =>
+        current
+          ? `${current} Không thể tải danh sách tỉnh thành.`
+          : "Không thể tải danh sách tỉnh thành."
+      );
+    }
+
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -215,6 +234,12 @@ export default function OperatorsPage() {
   return (
     <PortalShell title="Tài khoản nhân viên">
       <div className="space-y-6">
+        {loadError && (
+          <p className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {loadError}
+          </p>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-slate-500">
             {operators.length} tài khoản nhân viên trong hệ thống • còn {unmanagedCount} tỉnh thành chưa có nhân viên quản lý

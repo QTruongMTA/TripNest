@@ -108,6 +108,7 @@ export type BookingType = (typeof BookingType)[keyof typeof BookingType]
 export const BookingStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
+  CHECKED_IN: 'CHECKED_IN',
   CANCELLED: 'CANCELLED',
   COMPLETED: 'COMPLETED'
 } as const
@@ -134,6 +135,16 @@ export const PaymentMethod = {
 } as const
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
+export const SettlementStatus = {
+  PENDING: 'PENDING',
+  AVAILABLE: 'AVAILABLE',
+  PAID: 'PAID',
+  HELD: 'HELD'
+} as const
+
+export type SettlementStatus = (typeof SettlementStatus)[keyof typeof SettlementStatus]
 
 
 export const TokenType = {

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "Trang chủ", href: "/host/properties" },
+  { label: "Hồ sơ host", href: "/host/profile" },
   { label: "Đặt phòng", href: "/host/bookings" },
   { label: "Đánh giá", href: "/host/reviews" },
   { label: "Tài chính", href: "/host/revenue" },

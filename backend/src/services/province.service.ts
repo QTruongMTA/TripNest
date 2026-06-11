@@ -1,8 +1,43 @@
 import { prisma } from "../lib/prisma";
+import { CURRENT_VIETNAM_PROVINCES } from "../constants/vietnam-provinces";
+
+const currentProvinceNames = new Set(CURRENT_VIETNAM_PROVINCES.map((province) => province.name));
+
+async function ensureCurrentVietnamProvinces() {
+  await prisma.$transaction(async (tx) => {
+    for (const province of CURRENT_VIETNAM_PROVINCES) {
+      const [existingByCode, existingByName] = await Promise.all([
+        tx.province.findUnique({ where: { code: province.code } }),
+        tx.province.findUnique({ where: { name: province.name } }),
+      ]);
+
+      if (existingByCode && existingByName && existingByCode.id !== existingByName.id) {
+        throw new Error(`Province conflict for ${province.name} (${province.code})`);
+      }
+
+      const existing = existingByCode ?? existingByName;
+      if (existing) {
+        await tx.province.update({
+          where: { id: existing.id },
+          data: {
+            name: province.name,
+            code: province.code,
+            type: province.type,
+          },
+        });
+        continue;
+      }
+
+      await tx.province.create({ data: province });
+    }
+  });
+}
 
 export const provinceService = {
   async listAll() {
+    await ensureCurrentVietnamProvinces();
     return prisma.province.findMany({
+      where: { name: { in: [...currentProvinceNames] } },
       orderBy: [{ type: "asc" }, { name: "asc" }],
       include: {
         operatorAssignments: {
@@ -15,8 +50,12 @@ export const provinceService = {
   },
 
   async listAvailable() {
+    await ensureCurrentVietnamProvinces();
     return prisma.province.findMany({
-      where: { operatorAssignments: { none: {} } },
+      where: {
+        name: { in: [...currentProvinceNames] },
+        operatorAssignments: { none: {} },
+      },
       orderBy: [{ type: "asc" }, { name: "asc" }],
     });
   },

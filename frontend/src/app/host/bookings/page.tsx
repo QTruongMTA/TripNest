@@ -10,12 +10,21 @@ type HostBooking = {
   id: string;
   status: string;
   paymentStatus: string;
+  paymentMethod: string | null;
+  paidAt: string | null;
   checkIn: string | null;
   checkOut: string | null;
   numGuests: number;
   totalPrice: number;
   notes: string | null;
   createdAt: string;
+  settlement: {
+    status: string;
+    platformFee: number;
+    hostAmount: number;
+    availableAt: string;
+    paidAt: string | null;
+  } | null;
   guest: {
     id: string;
     name: string;
@@ -34,6 +43,7 @@ type HostBooking = {
 const statusLabel: Record<string, string> = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
+  CHECKED_IN: "Đã nhận phòng",
   CANCELLED: "Đã hủy",
   COMPLETED: "Hoàn thành",
 };
@@ -114,6 +124,46 @@ export default function HostBookingsPage() {
       setBookings((current) =>
         current.map((booking) =>
           booking.id === id ? { ...booking, status: payload.data.status } : booking
+        )
+      );
+    } catch {
+      setError("Không thể kết nối tới máy chủ.");
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function updateFlow(id: string, action: "check-in" | "check-out") {
+    const accessToken = getAccessToken();
+    if (!accessToken) return;
+
+    setUpdatingId(id);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/bookings/${id}/${action}`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setError(payload.error?.message ?? "Không thể cập nhật booking.");
+        return;
+      }
+
+      setBookings((current) =>
+        current.map((booking) =>
+          booking.id === id
+            ? {
+                ...booking,
+                status: payload.data.status,
+                settlement: payload.data.settlement ?? booking.settlement,
+              }
+            : booking
         )
       );
     } catch {
@@ -212,6 +262,12 @@ export default function HostBookingsPage() {
                   </div>
                 </div>
 
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-3 py-1">Thanh toán: {booking.paymentStatus}</span>
+                  {booking.paymentMethod ? <span className="rounded-full bg-slate-100 px-3 py-1">Phương thức: {booking.paymentMethod}</span> : null}
+                  {booking.settlement ? <span className="rounded-full bg-slate-100 px-3 py-1">Quyết toán: {booking.settlement.status}</span> : null}
+                </div>
+
                 {booking.status === "PENDING" ? (
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
@@ -229,6 +285,26 @@ export default function HostBookingsPage() {
                     >
                       Hủy
                     </button>
+                  </div>
+                ) : booking.status === "CONFIRMED" && booking.paymentStatus === "PAID" ? (
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => updateFlow(booking.id, "check-in")}
+                      disabled={updatingId === booking.id}
+                    >
+                      Check-in
+                    </Button>
+                  </div>
+                ) : booking.status === "CHECKED_IN" ? (
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => updateFlow(booking.id, "check-out")}
+                      disabled={updatingId === booking.id}
+                    >
+                      Check-out
+                    </Button>
                   </div>
                 ) : null}
               </div>

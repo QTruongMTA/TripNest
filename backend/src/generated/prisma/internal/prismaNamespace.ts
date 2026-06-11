@@ -407,6 +407,7 @@ export const ModelName = {
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
   Payment: 'Payment',
+  Settlement: 'Settlement',
   Review: 'Review',
   Promotion: 'Promotion',
   PromotionRedemption: 'PromotionRedemption',
@@ -428,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
+    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "settlement" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2134,6 +2135,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Settlement: {
+      payload: Prisma.$SettlementPayload<ExtArgs>
+      fields: Prisma.SettlementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SettlementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SettlementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        findFirst: {
+          args: Prisma.SettlementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SettlementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        findMany: {
+          args: Prisma.SettlementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        create: {
+          args: Prisma.SettlementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        createMany: {
+          args: Prisma.SettlementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SettlementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        delete: {
+          args: Prisma.SettlementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        update: {
+          args: Prisma.SettlementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        deleteMany: {
+          args: Prisma.SettlementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SettlementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SettlementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        upsert: {
+          args: Prisma.SettlementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        aggregate: {
+          args: Prisma.SettlementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSettlement>
+        }
+        groupBy: {
+          args: Prisma.SettlementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettlementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SettlementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettlementCountAggregateOutputType> | number
+        }
+      }
+    }
     Review: {
       payload: Prisma.$ReviewPayload<ExtArgs>
       fields: Prisma.ReviewFieldRefs
@@ -2958,6 +3033,10 @@ export const BookingScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   promotionId: 'promotionId',
   notes: 'notes',
+  confirmedAt: 'confirmedAt',
+  checkedInAt: 'checkedInAt',
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2979,6 +3058,25 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const SettlementScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  propertyId: 'propertyId',
+  grossAmount: 'grossAmount',
+  platformFee: 'platformFee',
+  hostAmount: 'hostAmount',
+  currency: 'currency',
+  status: 'status',
+  availableAt: 'availableAt',
+  recognizedAt: 'recognizedAt',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementScalarFieldEnum = (typeof SettlementScalarFieldEnum)[keyof typeof SettlementScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {
@@ -3501,6 +3599,20 @@ export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'SettlementStatus'
+ */
+export type EnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus'>
+
+
+
+/**
+ * Reference to a field of type 'SettlementStatus[]'
+ */
+export type ListEnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'DiscountType'
  */
 export type EnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscountType'>
@@ -3660,6 +3772,7 @@ export type GlobalOmitConfig = {
   tourAvailability?: Prisma.TourAvailabilityOmit
   booking?: Prisma.BookingOmit
   payment?: Prisma.PaymentOmit
+  settlement?: Prisma.SettlementOmit
   review?: Prisma.ReviewOmit
   promotion?: Prisma.PromotionOmit
   promotionRedemption?: Prisma.PromotionRedemptionOmit
@@ -3728,4 +3841,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-

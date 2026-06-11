@@ -133,6 +133,11 @@ export type Booking = Prisma.BookingModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model Settlement
+ *
+ */
+export type Settlement = Prisma.SettlementModel
+/**
  * Model Review
  * 
  */

@@ -40,6 +40,74 @@ function mapBookingStatus(status: string): string {
   return map[status] ?? status;
 }
 
+type ListingRiskInput = {
+  description?: string | null;
+  addressLine1?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  pricePerNight?: { toNumber(): number } | number | null;
+  maxGuests: number;
+  bedroomCount: number;
+  bathrooms: number;
+  images?: unknown[];
+  owners?: unknown[];
+  host?: { hostApprovalRequests?: { status: string }[] };
+};
+
+function getNumberValue(value: ListingRiskInput["pricePerNight"]) {
+  if (typeof value === "number") return value;
+  return value ? value.toNumber() : 0;
+}
+
+function scoreListingRisk(property: ListingRiskInput) {
+  const reasons: string[] = [];
+  let score = 0;
+
+  if (!property.owners?.length && !property.host?.hostApprovalRequests?.some((request) => request.status === "APPROVED")) {
+    score += 25;
+    reasons.push("Hồ sơ host chưa được duyệt");
+  }
+  if (!property.latitude || !property.longitude) {
+    score += 20;
+    reasons.push("Chưa có tọa độ/map pin để đối chiếu vị trí");
+  }
+  if (!property.addressLine1?.trim()) {
+    score += 15;
+    reasons.push("Địa chỉ chi tiết còn thiếu");
+  }
+  if (!property.images?.length || property.images.length < 3) {
+    score += 20;
+    reasons.push("Ảnh cơ sở chưa đủ để đối chiếu từ xa");
+  }
+  if (!property.description?.trim() || property.description.trim().length < 120) {
+    score += 10;
+    reasons.push("Mô tả còn ngắn, khó đánh giá tính nhất quán");
+  }
+  if (!property.owners?.length) {
+    score += 10;
+    reasons.push("Chưa có thông tin chủ sở hữu/người hưởng lợi");
+  }
+  if (property.maxGuests >= 10 || property.bedroomCount >= 5 || getNumberValue(property.pricePerNight) >= 5000000) {
+    score += 15;
+    reasons.push("Cơ sở quy mô hoặc giá trị cao, nên kiểm tra kỹ hơn");
+  }
+  if (property.bathrooms <= 0 || property.bedroomCount <= 0) {
+    score += 10;
+    reasons.push("Thông tin sức chứa/phòng chưa hợp lệ");
+  }
+
+  const normalizedScore = Math.min(100, score);
+  return {
+    score: normalizedScore,
+    level: normalizedScore >= 60 ? "HIGH" : normalizedScore >= 30 ? "MEDIUM" : "LOW",
+    reasons,
+  };
+}
+
+function readAuditValue(value: unknown) {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
 async function getNextOperatorCredential() {
   const operators = await prisma.user.findMany({
     where: { email: { startsWith: "operator", endsWith: "@tripnest.vn" } },
@@ -263,8 +331,34 @@ export const operatorService = {
       prisma.property.findMany({
         where,
         include: {
-          host: { select: { id: true, email: true } },
-          images: { where: { isPrimary: true }, take: 1 },
+          host: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              displayName: true,
+              phone: true,
+              address: true,
+              nationality: true,
+              hostApprovalRequests: {
+                orderBy: { createdAt: "desc" },
+                take: 1,
+                select: {
+                  id: true,
+                  status: true,
+                  createdAt: true,
+                  reviewedAt: true,
+                  notes: true,
+                  documents: true,
+                },
+              },
+            },
+          },
+          images: { orderBy: { isPrimary: "desc" }, take: 8 },
+          owners: {
+            orderBy: { sortOrder: "asc" },
+            select: { firstName: true, lastName: true, birthDate: true },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * take,
@@ -273,7 +367,130 @@ export const operatorService = {
       prisma.property.count({ where }),
     ]);
 
-    return { items, total, page, totalPages: Math.ceil(total / take) };
+    const listingIds = items.map((item) => item.id);
+    const [revisionLogs, inspectionLogs, inspectionTasks] = listingIds.length
+      ? await Promise.all([
+          prisma.auditLog.findMany({
+            where: {
+              action: "LISTING_REVISION_REQUESTED",
+              entity: "Property",
+              entityId: { in: listingIds },
+            },
+            orderBy: { createdAt: "desc" },
+            select: { entityId: true, createdAt: true, newValue: true },
+          }),
+          prisma.auditLog.findMany({
+            where: {
+              action: "FIELD_INSPECTION_REQUIRED",
+              entity: "Property",
+              entityId: { in: listingIds },
+            },
+            orderBy: { createdAt: "desc" },
+            select: { entityId: true, createdAt: true, newValue: true },
+          }),
+          prisma.operatorTask.findMany({
+            where: {
+              entityType: "Property",
+              entityId: { in: listingIds },
+            },
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              entityId: true,
+              status: true,
+              reportResult: true,
+              reportNotes: true,
+              dueDate: true,
+              createdAt: true,
+              assignee: { select: { email: true } },
+            },
+          }),
+        ])
+      : [[], [], []] as const;
+
+    const latestRevisionByProperty = new Map<string, { createdAt: string; notes?: string; requestedItems: string[] }>();
+    for (const log of revisionLogs) {
+      if (!log.entityId || latestRevisionByProperty.has(log.entityId)) continue;
+      const value = readAuditValue(log.newValue);
+      const requestedItems = Array.isArray(value.requestedItems)
+        ? value.requestedItems.filter((item): item is string => typeof item === "string")
+        : [];
+      const latestRevision: { createdAt: string; notes?: string; requestedItems: string[] } = {
+        createdAt: log.createdAt.toISOString(),
+        requestedItems,
+      };
+      if (typeof value.notes === "string") latestRevision.notes = value.notes;
+      latestRevisionByProperty.set(log.entityId, latestRevision);
+    }
+
+    const latestInspectionLogByProperty = new Map<string, { createdAt: string; notes?: string }>();
+    for (const log of inspectionLogs) {
+      if (!log.entityId || latestInspectionLogByProperty.has(log.entityId)) continue;
+      const value = readAuditValue(log.newValue);
+      const latestInspectionLog: { createdAt: string; notes?: string } = {
+        createdAt: log.createdAt.toISOString(),
+      };
+      if (typeof value.notes === "string") latestInspectionLog.notes = value.notes;
+      latestInspectionLogByProperty.set(log.entityId, latestInspectionLog);
+    }
+
+    const latestTaskByProperty = new Map<string, (typeof inspectionTasks)[number]>();
+    for (const task of inspectionTasks) {
+      if (!task.entityId || latestTaskByProperty.has(task.entityId)) continue;
+      latestTaskByProperty.set(task.entityId, task);
+    }
+
+    return {
+      items: items.map((item) => {
+        const risk = scoreListingRisk(item);
+        const latestRevision = latestRevisionByProperty.get(item.id) ?? null;
+        const latestInspectionLog = latestInspectionLogByProperty.get(item.id) ?? null;
+        const latestInspectionTask = latestTaskByProperty.get(item.id) ?? null;
+        const openInspection = latestInspectionTask && ["PENDING", "IN_PROGRESS"].includes(latestInspectionTask.status);
+        const failedInspection = latestInspectionTask?.status === "COMPLETED" && latestInspectionTask.reportResult === "FAIL";
+        const verificationStatus =
+          item.status === "ACTIVE"
+            ? "APPROVED"
+            : item.status === "INACTIVE"
+              ? "REJECTED"
+              : item.status === "SUSPENDED"
+                ? "SUSPENDED"
+                : openInspection
+                  ? "FIELD_INSPECTION_REQUIRED"
+                  : failedInspection
+                    ? "FIELD_INSPECTION_FAILED"
+                    : latestRevision
+                      ? "NEEDS_MORE_INFO"
+                      : risk.level === "HIGH"
+                        ? "HIGH_RISK_REVIEW"
+                        : "PENDING_REVIEW";
+
+        return {
+          ...item,
+          verificationStatus,
+          riskScore: risk.score,
+          riskLevel: risk.level,
+          riskReasons: risk.reasons,
+          latestRevisionRequest: latestRevision,
+          latestFieldInspection: latestInspectionTask
+            ? {
+                id: latestInspectionTask.id,
+                status: latestInspectionTask.status,
+                reportResult: latestInspectionTask.reportResult,
+                reportNotes: latestInspectionTask.reportNotes,
+                dueDate: latestInspectionTask.dueDate?.toISOString() ?? null,
+                createdAt: latestInspectionTask.createdAt.toISOString(),
+                assigneeEmail: latestInspectionTask.assignee?.email ?? null,
+                requestedAt: latestInspectionLog?.createdAt ?? latestInspectionTask.createdAt.toISOString(),
+                notes: latestInspectionLog?.notes ?? null,
+              }
+            : null,
+        };
+      }),
+      total,
+      page,
+      totalPages: Math.ceil(total / take),
+    };
   },
 
   async listProvincePayments(cities: string[]) {
@@ -437,6 +654,362 @@ export const operatorService = {
 
   // ── Host approval ────────────────────────────────────────────────────────────
 
+  async updateProvinceListingStatus(input: {
+    cities: string[];
+    listingId: string;
+    status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+    reviewedBy: string;
+    notes?: string;
+    checklist?: Record<string, boolean>;
+    evidence?: Record<string, string>;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const property = await tx.property.findFirst({
+        where: {
+          id: input.listingId,
+          city: { in: input.cities },
+        },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          hostId: true,
+          city: true,
+          legalEntityType: true,
+          ownerAlias: true,
+          owners: {
+            orderBy: { sortOrder: "asc" },
+            select: { firstName: true, lastName: true, birthDate: true },
+          },
+          host: {
+            select: {
+              hostApprovalRequests: {
+                orderBy: { createdAt: "desc" },
+                take: 1,
+                select: { id: true, status: true, documents: true },
+              },
+            },
+          },
+        },
+      });
+
+      if (!property) return { kind: "LISTING_NOT_FOUND" as const };
+      if (input.status !== "SUSPENDED" && property.status !== "PENDING") {
+        return { kind: "LISTING_NOT_PENDING" as const };
+      }
+      if (input.status === "ACTIVE") {
+        if (!property.owners.length) {
+          return { kind: "LEGAL_INFO_INCOMPLETE" as const };
+        }
+
+        const latestInspectionTask = await tx.operatorTask.findFirst({
+          where: {
+            entityType: "Property",
+            entityId: property.id,
+          },
+          orderBy: { createdAt: "desc" },
+          select: { status: true, reportResult: true },
+        });
+
+        if (latestInspectionTask && ["PENDING", "IN_PROGRESS"].includes(latestInspectionTask.status)) {
+          return { kind: "FIELD_INSPECTION_OPEN" as const };
+        }
+
+        if (latestInspectionTask?.status === "COMPLETED" && latestInspectionTask.reportResult === "FAIL") {
+          return { kind: "FIELD_INSPECTION_FAILED" as const };
+        }
+      }
+
+      if (input.status === "ACTIVE") {
+        const documents = {
+          source: "listing-approval",
+          property: {
+            id: property.id,
+            title: property.title,
+            city: property.city,
+            legalEntityType: property.legalEntityType,
+            ownerAlias: property.ownerAlias,
+            owners: property.owners.map((owner) => ({
+              firstName: owner.firstName,
+              lastName: owner.lastName,
+              birthDate: owner.birthDate.toISOString(),
+            })),
+          },
+          checklist: input.checklist ?? null,
+          checklistEvidence: input.evidence ?? null,
+        };
+        const latestHostApproval = property.host.hostApprovalRequests[0];
+
+        if (latestHostApproval) {
+          await tx.hostApprovalRequest.update({
+            where: { id: latestHostApproval.id },
+            data: {
+              status: "APPROVED",
+              reviewedBy: input.reviewedBy,
+              reviewedAt: new Date(),
+              notes: input.notes ?? "Approved during listing opening review",
+              documents,
+            },
+          });
+        } else {
+          await tx.hostApprovalRequest.create({
+            data: {
+              userId: property.hostId,
+              status: "APPROVED",
+              reviewedBy: input.reviewedBy,
+              reviewedAt: new Date(),
+              notes: input.notes ?? "Approved during listing opening review",
+              documents,
+            },
+          });
+        }
+      }
+
+      const updated = await tx.property.update({
+        where: { id: input.listingId },
+        data: { status: input.status },
+        select: { id: true, title: true, status: true, updatedAt: true },
+      });
+
+      const action =
+        input.status === "ACTIVE"
+          ? "LISTING_APPROVED"
+          : input.status === "SUSPENDED"
+            ? "LISTING_SUSPENDED"
+            : "LISTING_REJECTED";
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.reviewedBy,
+          action,
+          entity: "Property",
+          entityId: property.id,
+          oldValue: { status: property.status },
+          newValue: {
+            status: input.status,
+            notes: input.notes ?? null,
+            checklist: input.checklist ?? null,
+            checklistEvidence: input.evidence ?? null,
+            city: property.city,
+          },
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: property.hostId,
+          type: input.status === "ACTIVE" ? "LISTING_APPROVED" : "LISTING_REJECTED",
+          title:
+            input.status === "ACTIVE"
+              ? "Cơ sở lưu trú đã được duyệt"
+              : input.status === "SUSPENDED"
+                ? "Cơ sở lưu trú đã bị khóa"
+                : "Cơ sở lưu trú bị từ chối",
+          message:
+            input.status === "ACTIVE"
+              ? `${property.title} đã được duyệt và mở bán trên TripNest.`
+              : input.notes
+                ? `${property.title}: ${input.notes}`
+                : `${property.title} cần được bổ sung thông tin trước khi mở bán.`,
+          metadata: {
+            propertyId: property.id,
+            action,
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: {
+          id: updated.id,
+          title: updated.title,
+          status: updated.status,
+          updatedAt: updated.updatedAt.toISOString(),
+        },
+      };
+    });
+  },
+
+  async requestListingRevision(input: {
+    cities: string[];
+    listingId: string;
+    reviewedBy: string;
+    notes: string;
+    requestedItems: string[];
+    evidence?: Record<string, string>;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const property = await tx.property.findFirst({
+        where: {
+          id: input.listingId,
+          city: { in: input.cities },
+        },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          hostId: true,
+          city: true,
+        },
+      });
+
+      if (!property) return { kind: "LISTING_NOT_FOUND" as const };
+      if (property.status !== "PENDING") return { kind: "LISTING_NOT_PENDING" as const };
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.reviewedBy,
+          action: "LISTING_REVISION_REQUESTED",
+          entity: "Property",
+          entityId: property.id,
+          oldValue: { status: property.status },
+          newValue: {
+            status: property.status,
+            notes: input.notes,
+            requestedItems: input.requestedItems,
+            evidence: input.evidence ?? null,
+            city: property.city,
+          },
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: property.hostId,
+          type: "SYSTEM",
+          title: "Bổ sung thông tin cơ sở lưu trú",
+          message: `${property.title} cần bổ sung thông tin trước khi TripNest mở bán. ${input.notes}`,
+          metadata: {
+            propertyId: property.id,
+            action: "LISTING_REVISION_REQUESTED",
+            requestedItems: input.requestedItems,
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: {
+          id: property.id,
+          title: property.title,
+          status: property.status,
+          requestedItems: input.requestedItems,
+        },
+      };
+    });
+  },
+
+  async requestFieldInspection(input: {
+    cities: string[];
+    listingId: string;
+    reviewedBy: string;
+    notes: string;
+    provinceId?: string;
+    dueDate?: Date;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const property = await tx.property.findFirst({
+        where: {
+          id: input.listingId,
+          city: { in: input.cities },
+        },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          hostId: true,
+          city: true,
+        },
+      });
+
+      if (!property) return { kind: "LISTING_NOT_FOUND" as const };
+      if (property.status !== "PENDING") return { kind: "LISTING_NOT_PENDING" as const };
+
+      const openTask = await tx.operatorTask.findFirst({
+        where: {
+          entityType: "Property",
+          entityId: property.id,
+          status: { in: ["PENDING", "IN_PROGRESS"] },
+        },
+        select: { id: true },
+      });
+
+      if (openTask) return { kind: "FIELD_INSPECTION_ALREADY_OPEN" as const };
+
+      const taskData: {
+        title: string;
+        description: string;
+        assignedTo: string;
+        assignedBy: string;
+        provinceId?: string;
+        entityType: string;
+        entityId: string;
+        dueDate?: Date;
+      } = {
+        title: `Kiểm tra thực địa: ${property.title}`,
+        description: [
+          input.notes,
+          "",
+          "Checklist thực địa: xác nhận địa chỉ/map pin, mặt tiền/lối vào, quyền tiếp cận của host, ảnh phòng chính và các tiện nghi trọng yếu.",
+        ].join("\n"),
+        assignedTo: input.reviewedBy,
+        assignedBy: input.reviewedBy,
+        entityType: "Property",
+        entityId: property.id,
+      };
+      if (input.provinceId) taskData.provinceId = input.provinceId;
+      if (input.dueDate) taskData.dueDate = input.dueDate;
+
+      const task = await tx.operatorTask.create({
+        data: taskData,
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          assignedTo: true,
+          dueDate: true,
+          createdAt: true,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.reviewedBy,
+          action: "FIELD_INSPECTION_REQUIRED",
+          entity: "Property",
+          entityId: property.id,
+          oldValue: { status: property.status },
+          newValue: {
+            status: property.status,
+            notes: input.notes,
+            assignedTo: input.reviewedBy,
+            taskId: task.id,
+            city: property.city,
+          },
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: property.hostId,
+          type: "SYSTEM",
+          title: "TripNest cần xác minh trực tiếp cơ sở lưu trú",
+          message: `${property.title} cần được operator xác minh thực địa trước khi mở bán. ${input.notes}`,
+          metadata: {
+            propertyId: property.id,
+            taskId: task.id,
+            action: "FIELD_INSPECTION_REQUIRED",
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: task,
+      };
+    });
+  },
+
   async listHostApprovals(provinceIds: string[], status?: string) {
     return prisma.hostApprovalRequest.findMany({
       where: {
@@ -447,6 +1020,7 @@ export const operatorService = {
         user: { select: { id: true, email: true, phone: true, createdAt: true } },
         province: { select: { name: true } },
         reviewer: { select: { email: true } },
+        documents: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -482,8 +1056,8 @@ export const operatorService = {
         ...(provinceId && { provinceId }),
       },
       include: {
-        assignee: { select: { email: true } },
-        assigner: { select: { email: true } },
+        assignee: { select: { id: true, email: true } },
+        assigner: { select: { id: true, email: true } },
         province: { select: { name: true } },
       },
       orderBy: { createdAt: "desc" },

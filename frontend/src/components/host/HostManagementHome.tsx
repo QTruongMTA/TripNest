@@ -24,6 +24,21 @@ type HostProperty = {
   cancellations: number;
   revenue: number;
   occupancy: number;
+  hostApprovalStatus?: "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | null;
+  hostApprovalReviewedAt?: string | null;
+  hostApprovalNotes?: string | null;
+  latestRevisionRequest?: {
+    createdAt: string;
+    notes?: string | null;
+    requestedItems: string[];
+  } | null;
+  latestFieldInspection?: {
+    status: string;
+    reportResult?: string | null;
+    reportNotes?: string | null;
+    dueDate?: string | null;
+    createdAt: string;
+  } | null;
 };
 
 const metricCards = [
@@ -68,6 +83,29 @@ const typeLabel: Record<string, string> = {
   UNIQUE: "Chỗ nghỉ độc đáo",
 };
 
+const hostApprovalLabel: Record<NonNullable<HostProperty["hostApprovalStatus"]>, string> = {
+  PENDING: "Hồ sơ host chờ duyệt",
+  UNDER_REVIEW: "Hồ sơ host đang xem xét",
+  APPROVED: "Hồ sơ host đã duyệt",
+  REJECTED: "Hồ sơ host bị từ chối",
+};
+
+const revisionItemLabel: Record<string, string> = {
+  addressInProvince: "Địa chỉ/map pin",
+  photosMatch: "Ảnh xác minh",
+  basicInfoComplete: "Thông tin niêm yết",
+  legalInfoReviewed: "Hồ sơ host/pháp lý",
+  noPolicyViolation: "Xác minh rủi ro/chính sách",
+  hostProfile: "Hoàn thiện hồ sơ host/pháp lý",
+};
+
+const fieldInspectionStatusLabel: Record<string, string> = {
+  PENDING: "TripNest đã lên lịch xác minh trực tiếp",
+  IN_PROGRESS: "TripNest đang xác minh trực tiếp",
+  COMPLETED: "TripNest đã hoàn tất xác minh trực tiếp",
+  CANCELLED: "Yêu cầu xác minh trực tiếp đã hủy",
+};
+
 export function HostManagementHome() {
   const [properties, setProperties] = useState<HostProperty[]>([]);
   const [location, setLocation] = useState("all");
@@ -84,7 +122,8 @@ export function HostManagementHome() {
       return;
     }
 
-    api.get("/host/properties", { headers: { Authorization: `Bearer ${token}` } })
+    api
+      .get("/host/properties", { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => setProperties(response.data.data ?? []))
       .catch((err) => setError(err.response?.data?.error?.message ?? "Không thể tải danh sách chỗ nghỉ."))
       .finally(() => setLoading(false));
@@ -113,11 +152,12 @@ export function HostManagementHome() {
       revenue: summary.revenue + property.revenue,
       occupancy: summary.occupancy + property.occupancy,
     }),
-    { bookings: 0, arrivals: 0, departures: 0, reviews: 0, cancellations: 0, revenue: 0, occupancy: 0 }
+    { bookings: 0, arrivals: 0, departures: 0, reviews: 0, cancellations: 0, revenue: 0, occupancy: 0 },
   );
 
   const cities = useMemo(() => Array.from(new Set(properties.map((property) => property.city))), [properties]);
   const averageOccupancy = filteredProperties.length ? Math.round(totals.occupancy / filteredProperties.length) : 0;
+  const pendingRevisionCount = filteredProperties.filter((property) => property.status === "PENDING" && property.latestRevisionRequest).length;
 
   return (
     <section>
@@ -126,7 +166,7 @@ export function HostManagementHome() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Host workspace</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">Chỗ nghỉ của Quý vị</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Theo dõi toàn bộ chỗ nghỉ đã đăng, trạng thái xét duyệt và hiệu suất vận hành trong một giao diện chung.
+            Theo dõi toàn bộ chỗ nghỉ đã đăng, trạng thái xét duyệt và các mục TripNest đang chờ Quý vị bổ sung trong một giao diện chung.
           </p>
         </div>
         <a href="/host/properties/new" className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-800">
@@ -135,6 +175,18 @@ export function HostManagementHome() {
       </div>
 
       {error ? <div className="mt-6 rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
+
+      {pendingRevisionCount > 0 ? (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+          <div>
+            <p className="font-semibold">TripNest đang chờ Quý vị bổ sung thông tin cho {pendingRevisionCount} cơ sở.</p>
+            <p className="mt-1">Mở trang hồ sơ host để cập nhật thông tin pháp lý và liên hệ trước khi gửi lại duyệt.</p>
+          </div>
+          <a href="/host/profile" className="rounded-md border border-amber-300 bg-white px-4 py-2 font-semibold text-amber-900 transition hover:bg-amber-100">
+            Bổ sung hồ sơ
+          </a>
+        </div>
+      ) : null}
 
       <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_auto]">
         <div>
@@ -240,6 +292,14 @@ export function HostManagementHome() {
 }
 
 function PropertyRow({ property }: { property: HostProperty }) {
+  const latestRevision = property.latestRevisionRequest;
+  const latestFieldInspection = property.latestFieldInspection;
+  const revisionItemsText = latestRevision?.requestedItems.length
+    ? latestRevision.requestedItems.map((item) => revisionItemLabel[item] ?? item).join(", ")
+    : null;
+  const needsHostProfileUpdate = latestRevision?.requestedItems.some((item) => item === "hostProfile" || item === "legalInfoReviewed");
+  const hostApprovalText = property.hostApprovalStatus ? hostApprovalLabel[property.hostApprovalStatus] : null;
+
   return (
     <tr className="align-top hover:bg-teal-50/40">
       <td className="px-4 py-4">
@@ -251,6 +311,47 @@ function PropertyRow({ property }: { property: HostProperty }) {
             <p className="font-semibold text-slate-950">{property.title}</p>
             <p className="mt-1 text-xs text-slate-400">{property.code}</p>
             <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{property.address}</p>
+            {property.status === "PENDING" ? (
+              <div className="mt-2 max-w-md rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900">
+                <p className="font-semibold">
+                  {latestRevision ? "TripNest đang chờ Quý vị bổ sung thông tin" : "TripNest đang xem xét cơ sở"}
+                </p>
+                {hostApprovalText ? (
+                  <p className="mt-1">
+                    {hostApprovalText}
+                    {property.hostApprovalReviewedAt ? ` • ${new Date(property.hostApprovalReviewedAt).toLocaleDateString("vi-VN")}` : ""}
+                  </p>
+                ) : null}
+                {latestRevision ? (
+                  <>
+                    {revisionItemsText ? <p className="mt-1">Cần bổ sung: {revisionItemsText}.</p> : null}
+                    {latestRevision.notes ? <p className="mt-1">{latestRevision.notes}</p> : null}
+                    {needsHostProfileUpdate ? (
+                      <div className="mt-3">
+                        <a href="/host/profile" className="inline-flex rounded-md border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100">
+                          Bổ sung hồ sơ host
+                        </a>
+                      </div>
+                    ) : null}
+                  </>
+                ) : latestFieldInspection ? (
+                  <>
+                    <p className="mt-1">{fieldInspectionStatusLabel[latestFieldInspection.status] ?? latestFieldInspection.status}.</p>
+                    {latestFieldInspection.dueDate ? <p className="mt-1">Dự kiến hoàn tất trước {new Date(latestFieldInspection.dueDate).toLocaleDateString("vi-VN")}.</p> : null}
+                    {latestFieldInspection.reportResult ? <p className="mt-1">Kết quả: {latestFieldInspection.reportResult}.</p> : null}
+                    {latestFieldInspection.reportNotes ? <p className="mt-1">{latestFieldInspection.reportNotes}</p> : null}
+                  </>
+                ) : (
+                  <p className="mt-1">Sau khi đủ căn cứ xác minh, TripNest sẽ mở bán cơ sở cho khách đặt.</p>
+                )}
+              </div>
+            ) : null}
+            {property.status === "INACTIVE" && property.hostApprovalNotes ? (
+              <div className="mt-2 max-w-md rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs leading-5 text-rose-800">
+                <p className="font-semibold">Lưu ý từ TripNest</p>
+                <p className="mt-1">{property.hostApprovalNotes}</p>
+              </div>
+            ) : null}
           </div>
         </div>
       </td>
@@ -319,7 +420,7 @@ function LogoutIcon() {
 function StarIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-700" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3Z" strokeLinejoin="round" />
+      <path d="m12 3 2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 16.8l-5.4 2.85 1.03-6.02-4.38-4.27 6.05-.88L12 3Z" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -327,8 +428,7 @@ function StarIcon() {
 function XIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-700" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="12" cy="12" r="9" />
-      <path d="m9 9 6 6M15 9l-6 6" strokeLinecap="round" />
+      <path d="m18 6-12 12M6 6l12 12" strokeLinecap="round" />
     </svg>
   );
 }

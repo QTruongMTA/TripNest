@@ -42,6 +42,28 @@ export interface HostApprovalRequest {
   id: string;
   status: "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
   notes?: string;
+  documents?: {
+    source?: string;
+    profile?: {
+      displayName?: string | null;
+      phone?: string | null;
+      address?: string | null;
+      nationality?: string | null;
+    };
+    latestProperty?: {
+      id: string;
+      title: string;
+      city: string;
+      status: string;
+      legalEntityType?: string | null;
+      ownerAlias?: string | null;
+      owners?: {
+        firstName: string;
+        lastName: string;
+        birthDate: string;
+      }[];
+    };
+  } | null;
   createdAt: string;
   user: { id: string; email: string; phone?: string };
   province?: { name: string };
@@ -59,8 +81,8 @@ export interface OperatorTask {
   reportResult?: string;
   entityType?: string;
   entityId?: string;
-  assignee?: { email: string };
-  assigner?: { email: string };
+  assignee?: { id?: string; email: string };
+  assigner?: { id?: string; email: string };
   province?: { name: string };
   createdAt: string;
 }

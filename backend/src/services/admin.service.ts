@@ -26,6 +26,7 @@ function mapBookingStatus(status: string): string {
   const map: Record<string, string> = {
     PENDING: "Chờ xử lý",
     CONFIRMED: "Đã xác nhận",
+    CHECKED_IN: "Đã nhận phòng",
     CANCELLED: "Đã huỷ",
     COMPLETED: "Hoàn tất",
   };
@@ -657,6 +658,9 @@ export const adminService = {
       actor: log.user?.email ?? "system",
       action: log.action,
       entity: log.entity,
+      entityId: log.entityId,
+      oldValue: log.oldValue,
+      newValue: log.newValue,
       time: log.createdAt.toLocaleString("vi-VN"),
     }));
   },

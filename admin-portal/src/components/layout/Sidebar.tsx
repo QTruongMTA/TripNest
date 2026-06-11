@@ -64,6 +64,7 @@ type OperatorStats = {
   pendingApprovals?: number;
   openDisputes?: number;
   pendingBookings?: number;
+  activeTasks?: number;
 };
 
 function Badge({ value }: { value?: number }) {
@@ -134,6 +135,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ],
     },
     {
+      label: "Nhiệm vụ",
+      href: "/operator/tasks",
+      icon: <ClipboardList size={18} />,
+      badge: stats.activeTasks,
+    },
+    {
       label: "Quản lý cơ sở",
       icon: <Building2 size={18} />,
       items: [
@@ -164,7 +171,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       href: "/operator/profile",
       icon: <User size={18} />,
     },
-  ], [stats.openDisputes, stats.pendingApprovals, stats.pendingBookings, stats.pendingListings]);
+  ], [stats.activeTasks, stats.openDisputes, stats.pendingApprovals, stats.pendingBookings, stats.pendingListings]);
 
   const roleLabel =
     user?.role === "ADMIN"

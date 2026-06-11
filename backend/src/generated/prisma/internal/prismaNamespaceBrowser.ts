@@ -74,6 +74,7 @@ export const ModelName = {
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
   Payment: 'Payment',
+  Settlement: 'Settlement',
   Review: 'Review',
   Promotion: 'Promotion',
   PromotionRedemption: 'PromotionRedemption',
@@ -439,6 +440,10 @@ export const BookingScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   promotionId: 'promotionId',
   notes: 'notes',
+  confirmedAt: 'confirmedAt',
+  checkedInAt: 'checkedInAt',
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -460,6 +465,25 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const SettlementScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  propertyId: 'propertyId',
+  grossAmount: 'grossAmount',
+  platformFee: 'platformFee',
+  hostAmount: 'hostAmount',
+  currency: 'currency',
+  status: 'status',
+  availableAt: 'availableAt',
+  recognizedAt: 'recognizedAt',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementScalarFieldEnum = (typeof SettlementScalarFieldEnum)[keyof typeof SettlementScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {

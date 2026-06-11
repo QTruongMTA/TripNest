@@ -9,6 +9,7 @@ type PropertyType = "APARTMENT" | "HOUSE" | "HOTEL" | "UNIQUE";
 type Step =
   | "type"
   | "name"
+  | "description"
   | "address"
   | "setup-details"
   | "amenities"
@@ -172,6 +173,52 @@ type ProvinceOption = {
   type: "TINH" | "THANH_PHO";
 };
 
+const currentVietnamProvinceOptions: ProvinceOption[] = [
+  { id: "HN", name: "Hà Nội", code: "HN", type: "THANH_PHO" },
+  { id: "HP", name: "Hải Phòng", code: "HP", type: "THANH_PHO" },
+  { id: "HUE", name: "Huế", code: "HUE", type: "THANH_PHO" },
+  { id: "DNA", name: "Đà Nẵng", code: "DNA", type: "THANH_PHO" },
+  { id: "CT", name: "Cần Thơ", code: "CT", type: "THANH_PHO" },
+  { id: "HCM", name: "Thành phố Hồ Chí Minh", code: "HCM", type: "THANH_PHO" },
+  { id: "AG", name: "An Giang", code: "AG", type: "TINH" },
+  { id: "BN", name: "Bắc Ninh", code: "BN", type: "TINH" },
+  { id: "CM", name: "Cà Mau", code: "CM", type: "TINH" },
+  { id: "CB", name: "Cao Bằng", code: "CB", type: "TINH" },
+  { id: "DL", name: "Đắk Lắk", code: "DL", type: "TINH" },
+  { id: "DB", name: "Điện Biên", code: "DB", type: "TINH" },
+  { id: "DN", name: "Đồng Nai", code: "DN", type: "TINH" },
+  { id: "DT", name: "Đồng Tháp", code: "DT", type: "TINH" },
+  { id: "GL", name: "Gia Lai", code: "GL", type: "TINH" },
+  { id: "HT", name: "Hà Tĩnh", code: "HT", type: "TINH" },
+  { id: "HY", name: "Hưng Yên", code: "HY", type: "TINH" },
+  { id: "KH", name: "Khánh Hòa", code: "KH", type: "TINH" },
+  { id: "LAI", name: "Lai Châu", code: "LAI", type: "TINH" },
+  { id: "LD", name: "Lâm Đồng", code: "LD", type: "TINH" },
+  { id: "LS", name: "Lạng Sơn", code: "LS", type: "TINH" },
+  { id: "LC", name: "Lào Cai", code: "LC", type: "TINH" },
+  { id: "NA", name: "Nghệ An", code: "NA", type: "TINH" },
+  { id: "NB", name: "Ninh Bình", code: "NB", type: "TINH" },
+  { id: "PT", name: "Phú Thọ", code: "PT", type: "TINH" },
+  { id: "QNG", name: "Quảng Ngãi", code: "QNG", type: "TINH" },
+  { id: "QN", name: "Quảng Ninh", code: "QN", type: "TINH" },
+  { id: "QT", name: "Quảng Trị", code: "QT", type: "TINH" },
+  { id: "SL", name: "Sơn La", code: "SL", type: "TINH" },
+  { id: "TN", name: "Tây Ninh", code: "TN", type: "TINH" },
+  { id: "TNG", name: "Thái Nguyên", code: "TNG", type: "TINH" },
+  { id: "TH", name: "Thanh Hóa", code: "TH", type: "TINH" },
+  { id: "TQ", name: "Tuyên Quang", code: "TQ", type: "TINH" },
+  { id: "VL", name: "Vĩnh Long", code: "VL", type: "TINH" },
+];
+
+function mergeCurrentProvinceOptions(provinces: ProvinceOption[]) {
+  const byName = new Map<string, ProvinceOption>();
+  currentVietnamProvinceOptions.forEach((province) => byName.set(province.name, province));
+  provinces.forEach((province) => {
+    if (byName.has(province.name)) byName.set(province.name, province);
+  });
+  return currentVietnamProvinceOptions.map((province) => byName.get(province.name) ?? province);
+}
+
 type MapLibreLngLat = { lat: number; lng: number };
 type MapLibreMapMouseEvent = { lngLat: MapLibreLngLat };
 type MapLibreMapInstance = {
@@ -203,7 +250,7 @@ const propertyTypes: Array<{ value: PropertyType; title: string; description: st
   { value: "UNIQUE", title: "Chỗ nghỉ khác", description: "Khu cắm trại, bungalow, thuyền nghỉ dưỡng hoặc mô hình đặc biệt.", marker: "C" },
 ];
 
-const steps: Step[] = ["type", "name", "address", "setup-details", "amenities", "services", "languages", "rules", "photos", "booking-method", "nightly-price", "rate-plans", "availability", "legal", "review"];
+const steps: Step[] = ["type", "name", "description", "address", "setup-details", "amenities", "services", "languages", "rules", "photos", "booking-method", "nightly-price", "rate-plans", "availability", "legal", "review"];
 const setupSteps: Step[] = ["setup-details", "amenities", "services", "languages", "rules"];
 
 const amenitySections = [
@@ -213,7 +260,7 @@ const amenitySections = [
   { title: "Không gian ngoài trời và tầm nhìn", items: ["Ban công", "Nhìn ra vườn", "Sân thượng / hiên", "Tầm nhìn ra khung cảnh"] },
 ];
 
-const languageOptions = ["Tiếng Anh", "Tiếng Pháp", "Tiếng Trung", "Tiếng Tây Ban Nha", "Tiếng Việt"];
+const languageOptions = ["Tiếng Việt", "Tiếng Anh", "Tiếng Pháp", "Tiếng Trung", "Tiếng Tây Ban Nha"];
 const extraLanguageOptions = ["Tiếng Ba Lan", "Tiếng Bulgari", "Tiếng Bồ Đào Nha", "Tiếng Catalan", "Tiếng Croatia", "Tiếng Do Thái", "Tiếng Estonia", "Tiếng Gruzia", "Tiếng Hàn", "Tiếng Indonesia", "Tiếng Nhật", "Tiếng Nga", "Tiếng Thái", "Tiếng Ý"];
 const timeOptions = ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
 
@@ -241,6 +288,42 @@ const inputClass =
   "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-4 focus:ring-teal-100 disabled:bg-slate-100 disabled:text-slate-500";
 
 const defaultMapCenter = { lat: 16.047079, lng: 108.20623 };
+const vietnamProvinceCenters: Record<string, { lat: number; lng: number }> = {
+  "Hà Nội": { lat: 21.028511, lng: 105.804817 },
+  "Hải Phòng": { lat: 20.844912, lng: 106.688084 },
+  "Huế": { lat: 16.463713, lng: 107.590866 },
+  "Đà Nẵng": { lat: 16.047079, lng: 108.20623 },
+  "Cần Thơ": { lat: 10.045162, lng: 105.746857 },
+  "Thành phố Hồ Chí Minh": { lat: 10.776889, lng: 106.700806 },
+  "An Giang": { lat: 10.38639, lng: 105.43518 },
+  "Bắc Ninh": { lat: 21.18608, lng: 106.07631 },
+  "Cà Mau": { lat: 9.17682, lng: 105.15242 },
+  "Cao Bằng": { lat: 22.66667, lng: 106.25 },
+  "Đắk Lắk": { lat: 12.710012, lng: 108.237751 },
+  "Điện Biên": { lat: 21.38602, lng: 103.02301 },
+  "Đồng Nai": { lat: 10.957413, lng: 106.842687 },
+  "Đồng Tháp": { lat: 10.46017, lng: 105.63294 },
+  "Gia Lai": { lat: 13.971835, lng: 108.015079 },
+  "Hà Tĩnh": { lat: 18.355953, lng: 105.887749 },
+  "Hưng Yên": { lat: 20.64637, lng: 106.05112 },
+  "Khánh Hòa": { lat: 12.238791, lng: 109.196749 },
+  "Lai Châu": { lat: 22.39643, lng: 103.45824 },
+  "Lâm Đồng": { lat: 11.940419, lng: 108.458313 },
+  "Lạng Sơn": { lat: 21.853708, lng: 106.761519 },
+  "Lào Cai": { lat: 22.480943, lng: 103.975495 },
+  "Nghệ An": { lat: 18.679585, lng: 105.681335 },
+  "Ninh Bình": { lat: 20.250614, lng: 105.974453 },
+  "Phú Thọ": { lat: 21.32274, lng: 105.40199 },
+  "Quảng Ngãi": { lat: 15.121387, lng: 108.804414 },
+  "Quảng Ninh": { lat: 20.971198, lng: 107.044806 },
+  "Quảng Trị": { lat: 16.818916, lng: 107.100304 },
+  "Sơn La": { lat: 21.327034, lng: 103.914128 },
+  "Tây Ninh": { lat: 11.335155, lng: 106.109885 },
+  "Thái Nguyên": { lat: 21.59422, lng: 105.84817 },
+  "Thanh Hóa": { lat: 19.806692, lng: 105.785181 },
+  "Tuyên Quang": { lat: 21.776724, lng: 105.22802 },
+  "Vĩnh Long": { lat: 10.25369, lng: 105.9722 },
+};
 const mapTilerApiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
 const mapStyleUrl = mapTilerApiKey ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerApiKey}` : "https://tiles.openfreemap.org/styles/positron";
 const today = new Date();
@@ -249,9 +332,11 @@ const todayIso = toIsoDate(todayDateOnly);
 
 export default function Page() {
   const sessionUser = useAuthStore((state) => state.user);
+  const didPrefillIdentity = useRef(false);
   const [step, setStep] = useState<Step>("type");
   const [propertyType, setPropertyType] = useState<PropertyType | null>(null);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [address, setAddress] = useState<AddressState>({ line1: "", line2: "", city: "", postalCode: "", country: "Việt Nam", latitude: defaultMapCenter.lat, longitude: defaultMapCenter.lng });
   const [details, setDetails] = useState<DetailsState>({
     bedrooms: [{ id: 1, beds: defaultBedroomBeds }],
@@ -330,10 +415,13 @@ export default function Page() {
               ))
               .map((item) => ({ id: item.id, name: item.name, code: item.code, type: item.type }))
           : [];
-        if (!cancelled) setProvinceOptions(provinces);
+        if (!cancelled) setProvinceOptions(mergeCurrentProvinceOptions(provinces));
       })
       .catch(() => {
-        if (!cancelled) setProvincesError("Không tải được danh sách tỉnh/thành. Vui lòng thử lại.");
+        if (!cancelled) {
+          setProvinceOptions(currentVietnamProvinceOptions);
+          setProvincesError("");
+        }
       })
       .finally(() => {
         if (!cancelled) setProvincesLoading(false);
@@ -358,6 +446,37 @@ export default function Page() {
     ]);
   }, [sessionUser, owners]);
 
+  useEffect(() => {
+    if (!sessionUser || didPrefillIdentity.current) return;
+    didPrefillIdentity.current = true;
+
+    const nameParts = (sessionUser.displayName || sessionUser.name || "").trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts.slice(0, -1).join(" ") || nameParts[0] || "";
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+    const birthDate = sessionUser.birthDate?.slice(0, 10) || "";
+
+    setReview((current) => ({
+      ...current,
+      firstName: current.firstName || firstName,
+      lastName: current.lastName || lastName,
+      email: current.email || sessionUser.email || "",
+      phone: current.phone || sessionUser.phone || "",
+      country: current.country || sessionUser.nationality || "Việt Nam",
+      addressLine1: current.addressLine1 || sessionUser.address || "",
+    }));
+
+    if (!owners.some((owner) => owner.firstName || owner.lastName || owner.birthDate) && (firstName || lastName || birthDate)) {
+      setOwners([
+        {
+          id: 1,
+          firstName,
+          lastName,
+          birthDate,
+        },
+      ]);
+    }
+  }, [owners, sessionUser]);
+
   const selectedType = useMemo(() => propertyTypes.find((type) => type.value === propertyType) ?? propertyTypes[0], [propertyType]);
   const cityOptions = useMemo(() => provinceOptions.map((province) => province.name), [provinceOptions]);
   const activeIndex = steps.indexOf(step);
@@ -365,6 +484,7 @@ export default function Page() {
   const stepValidity: Record<Step, boolean> = {
     type: Boolean(propertyType),
     name: title.trim().length >= 3,
+    description: description.trim().length >= 80,
     address: Boolean(address.line1.trim() && address.city.trim()),
     "setup-details": details.guests > 0 && details.bathrooms > 0 && Number(details.size) > 0,
     amenities: amenities.length > 0,
@@ -423,26 +543,104 @@ export default function Page() {
 
     try {
       const mainPhoto = photos.find((photo) => photo.isMain) ?? photos[0];
-      const thumbnailUrl = mainPhoto ? await uploadPropertyImage(mainPhoto.file, token) : undefined;
+      const uploadedPhotos = await Promise.all(
+        photos.map(async (photo) => ({
+          url: await uploadPropertyImage(photo.file, token),
+          isPrimary: photo.id === mainPhoto?.id,
+        }))
+      );
+      const thumbnailUrl = uploadedPhotos.find((photo) => photo.isPrimary)?.url ?? uploadedPhotos[0]?.url;
 
       await api.post(
         "/host/properties",
         {
           title: title.trim(),
-          description: `${selectedType.title} tại ${address.city}`,
+          description: description.trim(),
           addressLine1: address.line1.trim(),
           addressLine2: address.line2.trim() || undefined,
           city: address.city.trim(),
           postalCode: address.postalCode.trim() || undefined,
           country: address.country.trim() || "Việt Nam",
+          latitude: address.latitude,
+          longitude: address.longitude,
           pricePerNight: Number(nightlyPrice),
           maxGuests: details.guests,
           bedroomCount: details.bedrooms.length,
           bathrooms: details.bathrooms,
+          livingRoomSofaBeds: details.livingBeds,
+          childrenAllowed: details.children,
+          cribsAvailable: details.cribs,
+          sizeM2: toSquareMeters(Number(details.size), details.sizeUnit),
           type: propertyType,
           thumbnailUrl,
+          imageUrls: uploadedPhotos,
+          amenities,
+          breakfastIncluded: services.breakfast === "yes",
+          parkingType: services.parking === "free" ? "FREE" : services.parking === "paid" ? "PAID" : "NOT_AVAILABLE",
+          languages,
+          bookingMethod: bookingMethod === "request" ? "REQUEST" : "INSTANT",
+          launchDiscountEnabled: launchDiscount,
+          cancellationFreeDays: cancellationDays,
+          mistakeProtection,
+          groupPricingEnabled: groupPricing.enabled,
+          oneGuestDiscountPct: groupPricing.enabled ? groupPricing.oneGuestDiscount : 0,
+          availabilityWindow: availability.first18MonthsOnly ? 540 : availability.openWindow,
+          firstBookableDate: availability.firstBookableDate === "specific" ? availability.specificDate : undefined,
+          longStayAllowed: availability.longStayAllowed,
+          maxStayNights: availability.longStayAllowed ? availability.maxStayNights : undefined,
+          rules: {
+            smokingAllowed: rules.smoking,
+            partiesAllowed: rules.parties,
+            petsPolicy: rules.pets === "yes" ? "ALLOWED" : rules.pets === "request" ? "ON_REQUEST" : "NOT_ALLOWED",
+            checkInFrom: rules.checkInFrom,
+            checkInTo: rules.checkInTo,
+            checkOutFrom: rules.checkOutFrom,
+            checkOutTo: rules.checkOutTo,
+          },
+          bedrooms: details.bedrooms.map((bedroom, index) => ({
+            roomNumber: index + 1,
+            singleBeds: bedroom.beds.single,
+            doubleBeds: bedroom.beds.double,
+            kingBeds: bedroom.beds.king,
+            superKingBeds: bedroom.beds.superKing,
+            bunkBeds: bedroom.beds.bunk,
+            sofaBeds: bedroom.beds.sofa,
+            futonBeds: bedroom.beds.futon,
+          })),
+          childPricing: {
+            enabled: childPricing.enabled,
+            infantFree: childPricing.infantMode === "free",
+            infantPrice: childPricing.infantMode === "fixed" ? Number(childPricing.infantPrice) || 0 : undefined,
+            childMaxAge: childPricing.childToAge,
+            childFree: childPricing.childMode === "free",
+            childPrice: childPricing.childMode === "fixed" ? Number(childPricing.childPrice) || 0 : undefined,
+          },
+          ratePlans: [
+            { type: "NON_REFUNDABLE", enabled: nonRefundableRate.enabled, discountPct: nonRefundableRate.discount },
+            { type: "WEEKLY", enabled: weeklyRate.enabled, discountPct: weeklyRate.discount },
+          ],
           legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
           ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
+          contactProfile: {
+            displayName: [review.firstName, review.middleName, review.lastName].filter(Boolean).join(" ").trim(),
+            phone: review.phone.trim(),
+            address: [review.addressLine1, review.addressLine2, review.city, review.country].filter(Boolean).join(", "),
+            nationality: review.country.trim() || "Việt Nam",
+          },
+          legalVerification: {
+            legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
+            businessLegal: legalType === "business" ? businessLegal : null,
+            owners: owners.map((owner, index) => ({
+              firstName: owner.firstName.trim(),
+              lastName: owner.lastName.trim(),
+              birthDate: owner.birthDate,
+              sortOrder: index,
+            })),
+            declarations: {
+              legalBusiness: review.legalBusiness,
+              termsAccepted: review.termsAccepted,
+            },
+          },
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -482,6 +680,7 @@ export default function Page() {
         <div className="bg-[#f7fbfa] px-5 py-8 md:px-8 md:py-12">
           {step === "type" ? <TypeStep propertyType={propertyType} setPropertyType={setPropertyType} onContinue={() => continueFlow()} canContinue={Boolean(canContinue)} /> : null}
           {step === "name" ? <NameStep title={title} setTitle={setTitle} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
+          {step === "description" ? <DescriptionStep description={description} setDescription={setDescription} onBack={goBack} onSubmit={continueFlow} canContinue={Boolean(canContinue)} /> : null}
           {step === "address" ? (
             <AddressStep
               address={address}
@@ -575,12 +774,12 @@ export default function Page() {
 
 function ProgressNav({ activeIndex, setupIndex, canAccessStep, onSelectStep }: { activeIndex: number; setupIndex: number; canAccessStep: (step: Step) => boolean; onSelectStep: (step: Step) => void }) {
   const stages = [
-    { label: "Thông tin cơ bản", step: "type" as Step, done: activeIndex > 2, active: activeIndex <= 2, progress: activeIndex > 2 ? 100 : ((activeIndex + 1) / 3) * 100 },
-    { label: "Cài đặt chỗ nghỉ", step: "setup-details" as Step, done: activeIndex > 7, active: activeIndex >= 3 && activeIndex <= 7, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 7 ? 100 : 0 },
-    { label: "Ảnh", step: "photos" as Step, done: activeIndex > 8, active: activeIndex === 8, progress: activeIndex >= 8 ? 100 : 0 },
-    { label: "Giá và lịch", step: "booking-method" as Step, done: activeIndex > 12, active: activeIndex >= 9 && activeIndex <= 12, progress: activeIndex >= 9 ? Math.min(100, ((activeIndex - 8) / 4) * 100) : 0 },
-    { label: "Thông tin pháp lý", step: "legal" as Step, done: activeIndex > 13, active: activeIndex === 13, progress: activeIndex > 13 ? 100 : activeIndex === 13 ? 100 : 0 },
-    { label: "Xem lại và hoàn tất", step: "review" as Step, done: false, active: activeIndex === 14, progress: activeIndex === 14 ? 100 : 0 },
+    { label: "Thông tin cơ bản", step: "type" as Step, done: activeIndex > 3, active: activeIndex <= 3, progress: activeIndex > 3 ? 100 : ((activeIndex + 1) / 4) * 100 },
+    { label: "Cài đặt chỗ nghỉ", step: "setup-details" as Step, done: activeIndex > 8, active: activeIndex >= 4 && activeIndex <= 8, progress: setupIndex >= 0 ? ((setupIndex + 1) / 5) * 100 : activeIndex > 8 ? 100 : 0 },
+    { label: "Ảnh", step: "photos" as Step, done: activeIndex > 9, active: activeIndex === 9, progress: activeIndex >= 9 ? 100 : 0 },
+    { label: "Giá và lịch", step: "booking-method" as Step, done: activeIndex > 13, active: activeIndex >= 10 && activeIndex <= 13, progress: activeIndex >= 10 ? Math.min(100, ((activeIndex - 9) / 4) * 100) : 0 },
+    { label: "Thông tin pháp lý", step: "legal" as Step, done: activeIndex > 14, active: activeIndex === 14, progress: activeIndex > 14 ? 100 : activeIndex === 14 ? 100 : 0 },
+    { label: "Xem lại và hoàn tất", step: "review" as Step, done: false, active: activeIndex === 15, progress: activeIndex === 15 ? 100 : 0 },
   ];
 
   return (
@@ -668,6 +867,42 @@ function NameStep({ title, setTitle, onBack, onSubmit, canContinue }: { title: s
   );
 }
 
+function DescriptionStep({ description, setDescription, onBack, onSubmit, canContinue }: { description: string; setDescription: (value: string) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
+  const remaining = Math.max(0, 80 - description.trim().length);
+
+  return (
+    <form onSubmit={onSubmit} className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div>
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">Mô tả chỗ nghỉ</h1>
+        <Panel className="mt-8">
+          <label className="grid gap-2 text-base font-semibold text-slate-950">
+            Điều gì làm chỗ nghỉ này đáng đặt?
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              className={`${inputClass} min-h-[220px] resize-y leading-7`}
+              placeholder="Nêu không gian, điểm nổi bật, khu vực xung quanh và trải nghiệm phù hợp cho khách."
+            />
+          </label>
+          <p className={`mt-3 text-sm ${remaining ? "text-slate-500" : "text-emerald-700"}`}>
+            {remaining ? `Viết thêm ít nhất ${remaining} ký tự để khách hiểu rõ chỗ nghỉ.` : "Mô tả đã đủ rõ để tiếp tục."}
+          </p>
+        </Panel>
+        <WizardActions onBack={onBack} canContinue={canContinue} />
+      </div>
+      <aside className="space-y-5">
+        <InfoPanel title="Mô tả tốt nên có gì?">
+          <ul className="list-disc space-y-2 pl-5">
+            <li>Nêu đúng loại không gian, số phòng và nhóm khách phù hợp.</li>
+            <li>Nhắc đến tiện ích nổi bật, view, bếp, bãi đỗ xe hoặc hồ bơi nếu có.</li>
+            <li>Không hứa quá thực tế vì mô tả này sẽ được operator dùng khi duyệt.</li>
+          </ul>
+        </InfoPanel>
+      </aside>
+    </form>
+  );
+}
+
 function AddressStep({
   address,
   setAddress,
@@ -696,6 +931,15 @@ function AddressStep({
   const updateMapPosition = (position: { lat: number; lng: number }) => {
     setAddress({ ...address, latitude: position.lat, longitude: position.lng });
   };
+  const updateCity = (city: string) => {
+    const center = vietnamProvinceCenters[city];
+    setAddress({
+      ...address,
+      city,
+      latitude: center?.lat ?? address.latitude,
+      longitude: center?.lng ?? address.longitude,
+    });
+  };
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-6xl">
@@ -711,7 +955,7 @@ function AddressStep({
             <Field label="Địa chỉ dòng 2"><input value={address.line2} onChange={(event) => setAddress({ ...address, line2: event.target.value })} className={inputClass} placeholder="Số căn hộ, tầng, tòa nhà" /></Field>
             <div className="grid gap-5 md:grid-cols-2">
               <Field label="Thị trấn/thành phố">
-                <select value={address.city} onChange={(event) => setAddress({ ...address, city: event.target.value })} className={inputClass} disabled={citiesLoading || cityOptions.length === 0}>
+                <select value={address.city} onChange={(event) => updateCity(event.target.value)} className={inputClass} disabled={citiesLoading || cityOptions.length === 0}>
                   <option value="" disabled>{citiesLoading ? "Đang tải tỉnh/thành" : "Chọn tỉnh/thành"}</option>
                   {cityOptions.map((city) => <option key={city}>{city}</option>)}
                 </select>
@@ -1169,6 +1413,9 @@ function LanguagesStep({ languages, toggleLanguage, onBack, onSubmit, canContinu
       <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Quý vị hoặc nhân viên của mình sử dụng ngôn ngữ nào?</h1>
       <Panel className="mt-7 min-h-[520px]">
         <p className="font-semibold text-slate-950">Chọn ngôn ngữ</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Tiếng Anh là ngôn ngữ vận hành ưu tiên của TripNest, nhưng cơ sở chỉ nên chọn nếu thực sự hỗ trợ giao tiếp bằng ngôn ngữ này.
+        </p>
         <div className="mt-4 grid gap-3">
           {languageOptions.map((item) => <CheckRow key={item} label={item} checked={languages.includes(item)} onChange={() => toggleLanguage(item)} />)}
         </div>
@@ -2161,6 +2408,9 @@ function ReviewCompleteStep({
 
       <Panel className="mt-7">
         <h2 className="text-lg font-semibold text-slate-950">Thông tin cá nhân của bên ký kết hợp đồng</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          TripNest sẽ tự lấy sẵn họ tên, email, số điện thoại và ngày sinh từ hồ sơ đăng nhập của host khi có dữ liệu phù hợp.
+        </p>
         <div className="mt-5 border-t border-slate-200 pt-4">
           <ReviewField label="Tên gọi theo đúng giấy tờ tùy thân" required value={review.firstName} error={submitted && !review.firstName.trim()} onChange={(value) => updateReview({ firstName: value })} />
           <ReviewField label="Tên lót theo đúng giấy tờ tùy thân" value={review.middleName} onChange={(value) => updateReview({ middleName: value })} />
@@ -2370,6 +2620,11 @@ function toIsoDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function toSquareMeters(value: number, unit: "m2" | "ft2") {
+  if (!Number.isFinite(value) || value <= 0) return undefined;
+  return unit === "ft2" ? Number((value * 0.092903).toFixed(2)) : value;
 }
 
 function parseIsoDate(value: string) {

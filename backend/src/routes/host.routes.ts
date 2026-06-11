@@ -8,9 +8,14 @@ const router = Router();
 router.post("/property-images", authMiddleware, hostController.uploadPropertyImage);
 router.post("/properties", authMiddleware, hostController.createProperty);
 router.get("/properties", authMiddleware, hostController.listProperties);
+router.get("/profile-request", authMiddleware, hostController.getProfileRequest);
+router.post("/profile-request", authMiddleware, hostController.submitProfileRequest);
 router.use(authMiddleware, requireRole("HOST", "ADMIN"));
 router.get("/bookings", hostController.listBookings);
 router.patch("/bookings/:id/confirm", hostController.confirmBooking);
 router.patch("/bookings/:id/cancel", hostController.cancelBooking);
+router.patch("/bookings/:id/check-in", hostController.checkInBooking);
+router.patch("/bookings/:id/check-out", hostController.checkOutBooking);
+router.get("/finance", hostController.finance);
 
 export { router as hostRouter };

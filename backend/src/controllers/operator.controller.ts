@@ -154,15 +154,269 @@ export const operatorController = {
 
   async updateListingStatus(req: Request, res: Response) {
     const { id } = req.params;
-    const { status } = req.body ?? {};
-    if (!status) return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "status is required" } });
+    const { status, notes, checklist } = req.body ?? {};
 
-    const { prisma } = await import("../lib/prisma.js");
-    const property = await prisma.property.update({
-      where: { id: id as string },
-      data: { status },
-    });
-    return res.json({ data: property });
+    if (typeof id !== "string" || !id || !["ACTIVE", "INACTIVE", "SUSPENDED"].includes(status)) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_LISTING_STATUS_PAYLOAD",
+          message: "Invalid listing status payload",
+        },
+      });
+    }
+
+    if (status === "INACTIVE" && (typeof notes !== "string" || !notes.trim())) {
+      return res.status(400).json({
+        error: {
+          code: "REJECTION_REASON_REQUIRED",
+          message: "notes is required when rejecting a listing",
+        },
+      });
+    }
+
+    const requiredChecks = [
+      "addressInProvince",
+      "photosMatch",
+      "basicInfoComplete",
+      "legalInfoReviewed",
+      "noPolicyViolation",
+    ];
+
+    if (
+      status === "ACTIVE" &&
+      (!checklist ||
+        typeof checklist !== "object" ||
+        !requiredChecks.every((key) => checklist[key] === true) ||
+        typeof notes !== "string" ||
+        notes.trim().length < 20)
+    ) {
+      return res.status(400).json({
+        error: {
+          code: "APPROVAL_CHECKLIST_REQUIRED",
+          message: "All approval checklist items and a short review summary are required before approving a listing",
+        },
+      });
+    }
+
+    const provinces = await operatorService.getOperatorProvinces(req.user!.id);
+    const listingStatus = status as "ACTIVE" | "INACTIVE" | "SUSPENDED";
+    const listingReviewInput: {
+      cities: string[];
+      listingId: string;
+      status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
+      reviewedBy: string;
+      notes?: string;
+      checklist?: Record<string, boolean>;
+    } = {
+      cities: provinces.map((p) => p.name),
+      listingId: id,
+      status: listingStatus,
+      reviewedBy: req.user!.id,
+    };
+
+    if (typeof notes === "string" && notes.trim()) {
+      listingReviewInput.notes = notes.trim();
+    }
+
+    if (checklist && typeof checklist === "object") {
+      listingReviewInput.checklist = checklist as Record<string, boolean>;
+    }
+
+    const result = await operatorService.updateProvinceListingStatus(listingReviewInput);
+
+    if (result.kind === "LISTING_NOT_FOUND") {
+      return res.status(404).json({
+        error: {
+          code: "LISTING_NOT_FOUND",
+          message: "Listing not found in assigned provinces",
+        },
+      });
+    }
+
+    if (result.kind === "LISTING_NOT_PENDING") {
+      return res.status(409).json({
+        error: {
+          code: "LISTING_NOT_PENDING",
+          message: "Only pending listings can be approved or rejected",
+        },
+      });
+    }
+
+    if (result.kind === "LEGAL_INFO_INCOMPLETE") {
+      return res.status(409).json({
+        error: {
+          code: "LEGAL_INFO_INCOMPLETE",
+          message: "Host legal information is missing; request a revision before approving this listing",
+        },
+      });
+    }
+
+    if (result.kind === "FIELD_INSPECTION_OPEN") {
+      return res.status(409).json({
+        error: {
+          code: "FIELD_INSPECTION_OPEN",
+          message: "Field inspection must be completed before approving this listing",
+        },
+      });
+    }
+
+    if (result.kind === "FIELD_INSPECTION_FAILED") {
+      return res.status(409).json({
+        error: {
+          code: "FIELD_INSPECTION_FAILED",
+          message: "Latest field inspection failed; request revision or reject the listing",
+        },
+      });
+    }
+
+    return res.json({ data: result.data });
+  },
+
+  async requestListingRevision(req: Request, res: Response) {
+    const { id } = req.params;
+    const { notes, requestedItems, evidence } = req.body ?? {};
+
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_LISTING_ID",
+          message: "Listing id is required",
+        },
+      });
+    }
+
+    if (typeof notes !== "string" || notes.trim().length < 12) {
+      return res.status(400).json({
+        error: {
+          code: "REVISION_NOTES_REQUIRED",
+          message: "Detailed revision notes are required",
+        },
+      });
+    }
+
+    if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.some((item) => typeof item !== "string")) {
+      return res.status(400).json({
+        error: {
+          code: "REVISION_ITEMS_REQUIRED",
+          message: "At least one requested item is required",
+        },
+      });
+    }
+
+    const provinces = await operatorService.getOperatorProvinces(req.user!.id);
+    const revisionInput: {
+      cities: string[];
+      listingId: string;
+      reviewedBy: string;
+      notes: string;
+      requestedItems: string[];
+      evidence?: Record<string, string>;
+    } = {
+      cities: provinces.map((p) => p.name),
+      listingId: id,
+      reviewedBy: req.user!.id,
+      notes: notes.trim(),
+      requestedItems: requestedItems as string[],
+    };
+
+    if (evidence && typeof evidence === "object") {
+      revisionInput.evidence = evidence as Record<string, string>;
+    }
+
+    const result = await operatorService.requestListingRevision(revisionInput);
+
+    if (result.kind === "LISTING_NOT_FOUND") {
+      return res.status(404).json({
+        error: {
+          code: "LISTING_NOT_FOUND",
+          message: "Listing not found in assigned provinces",
+        },
+      });
+    }
+
+    if (result.kind === "LISTING_NOT_PENDING") {
+      return res.status(409).json({
+        error: {
+          code: "LISTING_NOT_PENDING",
+          message: "Only pending listings can be requested for revision",
+        },
+      });
+    }
+
+    return res.json({ data: result.data });
+  },
+
+  async requestFieldInspection(req: Request, res: Response) {
+    const { id } = req.params;
+    const { notes, dueDate } = req.body ?? {};
+
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_LISTING_ID",
+          message: "Listing id is required",
+        },
+      });
+    }
+
+    if (typeof notes !== "string" || notes.trim().length < 12) {
+      return res.status(400).json({
+        error: {
+          code: "FIELD_INSPECTION_NOTES_REQUIRED",
+          message: "Detailed field inspection notes are required",
+        },
+      });
+    }
+
+    const provinces = await operatorService.getOperatorProvinces(req.user!.id);
+    const province = provinces[0];
+    const fieldInspectionInput: {
+      cities: string[];
+      listingId: string;
+      reviewedBy: string;
+      notes: string;
+      provinceId?: string;
+      dueDate?: Date;
+    } = {
+      cities: provinces.map((p) => p.name),
+      listingId: id,
+      reviewedBy: req.user!.id,
+      notes: notes.trim(),
+    };
+
+    if (province?.id) fieldInspectionInput.provinceId = province.id;
+    if (typeof dueDate === "string" && dueDate) fieldInspectionInput.dueDate = new Date(dueDate);
+
+    const result = await operatorService.requestFieldInspection(fieldInspectionInput);
+
+    if (result.kind === "LISTING_NOT_FOUND") {
+      return res.status(404).json({
+        error: {
+          code: "LISTING_NOT_FOUND",
+          message: "Listing not found in assigned provinces",
+        },
+      });
+    }
+
+    if (result.kind === "LISTING_NOT_PENDING") {
+      return res.status(409).json({
+        error: {
+          code: "LISTING_NOT_PENDING",
+          message: "Only pending listings can be requested for field inspection",
+        },
+      });
+    }
+
+    if (result.kind === "FIELD_INSPECTION_ALREADY_OPEN") {
+      return res.status(409).json({
+        error: {
+          code: "FIELD_INSPECTION_ALREADY_OPEN",
+          message: "This listing already has an open field inspection task",
+        },
+      });
+    }
+
+    return res.status(201).json({ data: result.data });
   },
 
   async hostApprovals(req: Request, res: Response) {
@@ -228,11 +482,14 @@ export const operatorController = {
 
   async createTask(req: Request, res: Response) {
     const { title, description, assignedTo, provinceId, entityType, entityId, dueDate } = req.body ?? {};
-    if (!title || !assignedTo) {
-      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "title and assignedTo required" } });
+    if (!title) {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "title required" } });
     }
     const task = await operatorService.createTask({
-      title, description, assignedTo, assignedBy: req.user!.id,
+      title,
+      description,
+      assignedTo: typeof assignedTo === "string" && assignedTo ? assignedTo : req.user!.id,
+      assignedBy: req.user!.id,
       provinceId, entityType, entityId,
       ...(dueDate && { dueDate: new Date(dueDate as string) }),
     });
