@@ -16,6 +16,7 @@ router.post("/register", validateMiddleware(registerSchema), authController.regi
 router.post("/login", validateMiddleware(loginSchema), authController.login);
 router.post("/logout", authMiddleware, authController.logout);
 router.get("/me", authMiddleware, authController.me);
+router.get("/refresh", authMiddleware, authController.refresh);
 router.patch(
   "/me/avatar",
   authMiddleware,

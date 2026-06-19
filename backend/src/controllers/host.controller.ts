@@ -522,7 +522,6 @@ export const hostController = {
       const currentUser = await tx.user.update({
         where: { id: req.user!.id },
         data: {
-          role: "HOST",
           ...(contactDisplayName ? { displayName: contactDisplayName } : {}),
           ...(contactPhone ? { phone: contactPhone } : {}),
           ...(contactAddress ? { address: contactAddress } : {}),

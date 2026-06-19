@@ -1020,7 +1020,6 @@ export const operatorService = {
         user: { select: { id: true, email: true, phone: true, createdAt: true } },
         province: { select: { name: true } },
         reviewer: { select: { email: true } },
-        documents: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -1036,14 +1035,37 @@ export const operatorService = {
         data: { status: "APPROVED", reviewedBy, reviewedAt: new Date(), notes: notes ?? null },
       }),
       prisma.user.update({ where: { id: request.userId }, data: { role: "HOST" } }),
+      prisma.notification.create({
+        data: {
+          userId: request.userId,
+          type: "SYSTEM",
+          title: "Hồ sơ host đã được duyệt",
+          message: "Bạn đã được nâng quyền host. Hãy tải lại TripNest để cập nhật quyền truy cập mới.",
+          metadata: { requestId, action: "HOST_APPROVED" },
+        },
+      }),
     ]);
   },
 
   async rejectHost(requestId: string, reviewedBy: string, notes: string) {
-    return prisma.hostApprovalRequest.update({
-      where: { id: requestId },
-      data: { status: "REJECTED", reviewedBy, reviewedAt: new Date(), notes },
-    });
+    const request = await prisma.hostApprovalRequest.findUnique({ where: { id: requestId } });
+    if (!request) throw new Error("NOT_FOUND");
+
+    await prisma.$transaction([
+      prisma.hostApprovalRequest.update({
+        where: { id: requestId },
+        data: { status: "REJECTED", reviewedBy, reviewedAt: new Date(), notes },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: request.userId,
+          type: "SYSTEM",
+          title: "Hồ sơ host chưa được duyệt",
+          message: notes || "Hồ sơ host của bạn chưa đạt yêu cầu. Vui lòng xem lại chi tiết để bổ sung.",
+          metadata: { requestId, action: "HOST_REJECTED" },
+        },
+      }),
+    ]);
   },
 
   // ── Tasks ────────────────────────────────────────────────────────────────────

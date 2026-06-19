@@ -54,6 +54,7 @@ export default function HostBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     const accessToken = getAccessToken();
@@ -268,6 +269,25 @@ export default function HostBookingsPage() {
                   {booking.settlement ? <span className="rounded-full bg-slate-100 px-3 py-1">Quyết toán: {booking.settlement.status}</span> : null}
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => setExpandedId((current) => current === booking.id ? null : booking.id)}
+                  className="mt-4 text-sm font-semibold text-emerald-700 hover:underline"
+                >
+                  {expandedId === booking.id ? "Ẩn chi tiết" : "Xem chi tiết booking"}
+                </button>
+
+                {expandedId === booking.id ? (
+                  <div className="mt-4 grid gap-4 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                    <Detail label="Booking ID" value={booking.id} />
+                    <Detail label="Điện thoại khách" value={booking.guest.phone ?? "Chưa cung cấp"} />
+                    <Detail label="Ngày thanh toán" value={booking.paidAt ? new Date(booking.paidAt).toLocaleString("vi-VN") : "Chưa thanh toán"} />
+                    <Detail label="Ghi chú" value={booking.notes || "Không có ghi chú"} />
+                    <Detail label="Phí TripNest" value={booking.settlement ? `${booking.settlement.platformFee.toLocaleString("vi-VN")} ₫` : "Chưa quyết toán"} />
+                    <Detail label="Host thực nhận" value={booking.settlement ? `${booking.settlement.hostAmount.toLocaleString("vi-VN")} ₫` : "Chưa quyết toán"} />
+                  </div>
+                ) : null}
+
                 {booking.status === "PENDING" ? (
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
@@ -313,5 +333,14 @@ export default function HostBookingsPage() {
         ))}
       </div>
     </section>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-slate-400">{label}</p>
+      <p className="mt-1 break-all font-medium text-slate-800">{value}</p>
+    </div>
   );
 }

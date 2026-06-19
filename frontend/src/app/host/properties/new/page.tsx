@@ -353,7 +353,7 @@ export default function Page() {
   const [languages, setLanguages] = useState<string[]>(["Tiếng Việt"]);
   const [rules, setRules] = useState({ smoking: false, parties: false, pets: "no", checkInFrom: "15:00", checkInTo: "18:00", checkOutFrom: "08:00", checkOutTo: "11:00" });
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [bookingMethod, setBookingMethod] = useState("instant");
+  const [bookingMethod, setBookingMethod] = useState("request");
   const [nightlyPrice, setNightlyPrice] = useState("");
   const [launchDiscount, setLaunchDiscount] = useState(true);
   const [cancellationDays, setCancellationDays] = useState(1);
@@ -1579,11 +1579,11 @@ function BookingMethodStep({ bookingMethod, setBookingMethod, onBack, onSubmit }
           <label className="flex items-center gap-4 text-lg text-slate-900">
             <input type="radio" checked={bookingMethod === "instant"} onChange={() => setBookingMethod("instant")} className="h-7 w-7 accent-teal-700" />
             <span>Tất cả khách có thể đặt phòng ngay lập tức</span>
-            <span className="rounded-md bg-emerald-50 px-2 py-1 text-sm font-semibold text-emerald-700">Được đề xuất</span>
           </label>
           <label className="flex items-center gap-4 text-lg text-slate-900">
             <input type="radio" checked={bookingMethod === "request"} onChange={() => setBookingMethod("request")} className="h-7 w-7 accent-teal-700" />
             <span>Tất cả khách cần gửi yêu cầu đặt phòng</span>
+            <span className="rounded-md bg-emerald-50 px-2 py-1 text-sm font-semibold text-emerald-700">Được đề xuất</span>
           </label>
         </div>
       </Panel>

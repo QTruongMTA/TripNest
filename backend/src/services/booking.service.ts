@@ -259,6 +259,8 @@ export const bookingService = {
           pricePerNight: true,
           cleaningFee: true,
           maxGuests: true,
+          bookingMethod: true,
+          hostId: true,
         },
       });
 
@@ -313,6 +315,8 @@ export const bookingService = {
           numGuests: input.guests,
           totalPrice: pricing.totalPrice,
           notes: input.notes?.trim() || null,
+          status: property.bookingMethod === "INSTANT" ? "CONFIRMED" : "PENDING",
+          ...(property.bookingMethod === "INSTANT" ? { confirmedAt: new Date() } : {}),
         },
         select: {
           id: true,
@@ -328,26 +332,22 @@ export const bookingService = {
         },
       });
 
-      const admins = await tx.user.findMany({
-        where: { role: "ADMIN", isActive: true },
-        select: { id: true },
+      await tx.notification.create({
+        data: {
+          userId: property.hostId,
+          type: property.bookingMethod === "INSTANT" ? "BOOKING_CONFIRMED" : "SYSTEM",
+          title: property.bookingMethod === "INSTANT" ? "Có booking mới đã xác nhận" : "Có yêu cầu đặt phòng mới",
+          message:
+            property.bookingMethod === "INSTANT"
+              ? `Khách vừa đặt ${property.title}. Booking đã được hệ thống xác nhận tự động.`
+              : `Khách vừa gửi yêu cầu đặt ${property.title}. Vui lòng vào Quản lý đặt phòng để xác nhận hoặc từ chối.`,
+          metadata: {
+            bookingId: booking.id,
+            propertyId: input.propertyId,
+            action: property.bookingMethod === "INSTANT" ? "BOOKING_AUTO_CONFIRMED" : "BOOKING_REVIEW_REQUIRED",
+          },
+        },
       });
-
-      if (admins.length > 0) {
-        await tx.notification.createMany({
-          data: admins.map((admin) => ({
-            userId: admin.id,
-            type: "SYSTEM",
-            title: "Có đơn đặt phòng mới",
-            message: `Khách vừa đặt ${property.title}. Vui lòng kiểm tra và duyệt đơn.`,
-            metadata: {
-              bookingId: booking.id,
-              propertyId: input.propertyId,
-              action: "BOOKING_CREATED",
-            },
-          })),
-        });
-      }
 
       return {
         kind: "SUCCESS" as const,

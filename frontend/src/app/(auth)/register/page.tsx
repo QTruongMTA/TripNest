@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function EyeIcon() {
   return (
@@ -74,11 +74,18 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [purpose, setPurpose] = useState<"traveler" | "host">("traveler");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const strength = getPasswordStrength(password);
   const canSubmit = strength.score === 3;
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("intent") === "host") {
+      setPurpose("host");
+    }
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -103,7 +110,7 @@ export default function RegisterPage() {
       }
 
       setSession(payload.data.user, payload.data.accessToken);
-      router.push("/");
+      router.push(purpose === "host" ? "/host/properties/new" : "/");
     } catch {
       setError("Không thể kết nối tới máy chủ.");
     } finally {
@@ -127,6 +134,35 @@ export default function RegisterPage() {
         <p className="text-sm uppercase tracking-[0.2em] text-teal-600">TripNest</p>
         <h1 className="mt-2 text-3xl font-semibold">Đăng ký</h1>
         <p className="mt-1 text-sm text-slate-500">Tên hiển thị ban đầu sẽ là địa chỉ email của bạn.</p>
+        <div className="mt-6">
+          <p className="text-sm font-medium text-slate-700">Bạn muốn sử dụng TripNest để làm gì?</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setPurpose("traveler")}
+              className={`rounded-2xl border p-4 text-left transition ${
+                purpose === "traveler"
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-100"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <span className="block font-semibold text-slate-900">Đặt chỗ nghỉ</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">Tạo tài khoản khách để tìm và đặt phòng.</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPurpose("host")}
+              className={`rounded-2xl border p-4 text-left transition ${
+                purpose === "host"
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-100"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <span className="block font-semibold text-slate-900">Đăng chỗ nghỉ</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">Bắt đầu bằng tài khoản khách, sau đó gửi hồ sơ để TripNest duyệt thành host.</span>
+            </button>
+          </div>
+        </div>
         <div className="mt-6 grid gap-4">
           <label className="grid gap-2 text-sm">
             <span className="text-slate-500">Email</span>
@@ -172,7 +208,7 @@ export default function RegisterPage() {
               : "cursor-not-allowed bg-slate-200 text-slate-400"
           }`}
         >
-          {loading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+          {loading ? "Đang tạo tài khoản..." : purpose === "host" ? "Tạo tài khoản và đăng chỗ nghỉ" : "Tạo tài khoản"}
         </button>
         <p className="mt-4 text-center text-sm text-slate-500">
           Đã có tài khoản?{" "}
