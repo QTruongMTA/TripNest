@@ -74,6 +74,15 @@ export const bookingController = {
       });
     }
 
+    if (result.kind === "HOST_CONFIRMATION_REQUIRED") {
+      return res.status(403).json({
+        error: {
+          code: "HOST_CONFIRMATION_REQUIRED",
+          message: "Tiền mặt và chuyển khoản tại cơ sở phải do host xác nhận.",
+        },
+      });
+    }
+
     return res.json({ data: result.data });
   },
 };

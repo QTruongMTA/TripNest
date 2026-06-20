@@ -200,7 +200,15 @@ export const propertyService = {
           where: { review: { isNot: null } },
           select: {
             review: {
-              select: { rating: true },
+              select: {
+                id: true,
+                rating: true,
+                comment: true,
+                createdAt: true,
+                user: {
+                  select: { name: true, displayName: true, avatar: true },
+                },
+              },
             },
           },
         },
@@ -229,6 +237,19 @@ export const propertyService = {
         property.type
       ),
       rating: buildRating(property.bookings),
+      reviews: property.bookings
+        .flatMap((booking) => (booking.review ? [booking.review] : []))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .map((review) => ({
+          id: review.id,
+          rating: review.rating,
+          comment: review.comment,
+          createdAt: review.createdAt.toISOString(),
+          guest: {
+            name: review.user.displayName ?? review.user.name ?? "Khách TripNest",
+            avatar: review.user.avatar,
+          },
+        })),
       description: property.description,
       address: {
         line1: property.addressLine1,

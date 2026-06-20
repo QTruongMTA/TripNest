@@ -43,7 +43,8 @@ export default function Page() {
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">Tài chính</p>
         <h1 className="mt-2 text-3xl font-semibold text-slate-950">Báo cáo doanh thu</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-          TripNest tách rõ tiền khách đã trả, phí nền tảng, và phần host được nhận sau khi đối soát.
+          Báo cáo này chỉ dành cho host hiện tại: tổng booking đã hoàn tất, phí TripNest
+          và số tiền host được nhận. Booking chỉ xuất hiện sau khi host hoàn tất trả phòng.
         </p>
       </div>
 

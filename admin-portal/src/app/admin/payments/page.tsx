@@ -13,6 +13,12 @@ interface Payment {
   amount: string;
   status: string;
   paidAt?: string;
+  bookingStatus?: string;
+  platformFee?: string;
+  hostAmount?: string;
+  settlementStatus?: string | null;
+  revenueRecognizedAt?: string | null;
+  confirmedBy?: string;
 }
 
 export default function PaymentsPage() {
@@ -106,7 +112,15 @@ export default function PaymentsPage() {
               <Detail label="Phương thức" value={selected.method} />
               <Detail label="Trạng thái" value={selected.status} />
               <Detail label="Ngày thanh toán" value={selected.paidAt ?? "-"} />
+              <Detail label="Người xác nhận thu tiền" value={selected.confirmedBy ?? "Hệ thống"} />
               <Detail label="Số tiền khách trả" value={selected.amount} prominent />
+              <Detail label="Trạng thái booking" value={selected.bookingStatus ?? "-"} />
+              <Detail label="Doanh thu TripNest" value={selected.platformFee ?? "Chưa ghi nhận"} />
+              <Detail label="Host thực nhận" value={selected.hostAmount ?? "Chưa quyết toán"} />
+              <Detail
+                label="Ngày ghi nhận doanh thu"
+                value={selected.revenueRecognizedAt ?? "Sau khi khách trả phòng"}
+              />
             </dl>
           </div>
         </div>

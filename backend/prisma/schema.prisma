@@ -692,6 +692,8 @@ model Payment {
   method        PaymentMethod
   status        PaymentStatus @default(UNPAID)
   transactionId String?
+  confirmedById String?
+  confirmedByRole String?
   paidAt        DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

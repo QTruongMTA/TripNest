@@ -7,6 +7,7 @@ export type TravelerBooking = {
   paymentStatus: string;
   paymentMethod: string | null;
   paidAt: string | null;
+  paymentConfirmedBy: string | null;
   checkIn: string | null;
   checkOut: string | null;
   tourDate: string | null;
@@ -19,6 +20,13 @@ export type TravelerBooking = {
     availableAt: string;
     paidAt: string | null;
   } | null;
+  review: {
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+  } | null;
+  canReview: boolean;
   createdAt: string;
   item: {
     id: string;
@@ -89,6 +97,11 @@ export function BookingCard({ booking }: { booking: TravelerBooking }) {
                 Phương thức: {booking.paymentMethod}
               </span>
             ) : null}
+            {booking.paymentConfirmedBy ? (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                Xác nhận bởi: {booking.paymentConfirmedBy === "HOST" ? "Host" : "TripNest"}
+              </span>
+            ) : null}
             {booking.settlement ? (
               <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                 Quyết toán: {booking.settlement.status}
@@ -122,6 +135,14 @@ export function BookingCard({ booking }: { booking: TravelerBooking }) {
               </p>
             </div>
           </div>
+          {booking.review ? (
+            <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-slate-700">
+              <p className="font-semibold text-amber-700">
+                Đánh giá của bạn: {"★".repeat(booking.review.rating)}
+              </p>
+              <p className="mt-1">{booking.review.comment}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </article>

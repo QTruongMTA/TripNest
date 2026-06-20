@@ -9,6 +9,6 @@ export const createPropertyBookingSchema = Joi.object({
 });
 
 export const recordPaymentSchema = Joi.object({
-  method: Joi.string().valid("CASH", "BANK_TRANSFER", "MOMO", "VNPAY", "ZALOPAY", "CREDIT_CARD").required(),
+  method: Joi.string().valid("MOMO", "VNPAY", "ZALOPAY", "CREDIT_CARD").required(),
   transactionId: Joi.string().allow("", null).optional(),
 });

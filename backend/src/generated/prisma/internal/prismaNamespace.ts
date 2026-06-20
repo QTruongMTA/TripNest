@@ -3052,6 +3052,8 @@ export const PaymentScalarFieldEnum = {
   method: 'method',
   status: 'status',
   transactionId: 'transactionId',
+  confirmedById: 'confirmedById',
+  confirmedByRole: 'confirmedByRole',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -3602,14 +3604,14 @@ export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'SettlementStatus'
  */
 export type EnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'SettlementStatus[]'
  */
 export type ListEnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus[]'>
-
+    
 
 
 /**
@@ -3841,3 +3843,4 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
+

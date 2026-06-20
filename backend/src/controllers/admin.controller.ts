@@ -254,6 +254,34 @@ export const adminController = {
     return res.json({ data });
   },
 
+  async revenue(req: Request, res: Response) {
+    const mode = req.query.mode === "day" ? "day" : "month";
+    const value =
+      typeof req.query.value === "string" && req.query.value
+        ? req.query.value
+        : mode === "day"
+          ? new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
+          : new Date()
+              .toLocaleDateString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
+              .slice(0, 7);
+    const valid =
+      mode === "day"
+        ? /^\d{4}-\d{2}-\d{2}$/.test(value)
+        : /^\d{4}-\d{2}$/.test(value);
+
+    if (!valid) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_REVENUE_PERIOD",
+          message: "Khoảng thời gian doanh thu không hợp lệ.",
+        },
+      });
+    }
+
+    const data = await adminService.getRevenueReport({ mode, value });
+    return res.json({ data });
+  },
+
   async promotions(_req: Request, res: Response) {
     const data = await adminService.listAdminPromotions();
     return res.json({ data });

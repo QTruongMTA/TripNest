@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { bookingService } from "../services/booking.service";
+import { reviewService } from "../services/review.service";
 import { prisma } from "../lib/prisma";
 import {
   AvailabilityStatus,
@@ -770,6 +771,11 @@ export const hostController = {
     return res.json({ data });
   },
 
+  async reviews(req: Request, res: Response) {
+    const data = await reviewService.listHostReviews(req.user!.id);
+    return res.json({ data });
+  },
+
   async confirmBooking(req: Request, res: Response) {
     return handleUpdateStatus(req, res, "CONFIRMED");
   },
@@ -803,9 +809,50 @@ export const hostController = {
       });
     }
 
-    if (result.kind === "PAYMENT_REQUIRED") {
+    return res.json({ data: result.data });
+  },
+
+  async confirmPayment(req: Request, res: Response) {
+    const bookingId = typeof req.params.id === "string" ? req.params.id : "";
+    const method = req.body?.method;
+    if (
+      !bookingId ||
+      (method !== "CASH" && method !== "BANK_TRANSFER")
+    ) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_PAYMENT_CONFIRMATION",
+          message: "Vui lòng chọn tiền mặt hoặc chuyển khoản.",
+        },
+      });
+    }
+
+    const result = await bookingService.confirmHostPayment({
+      hostId: req.user!.id,
+      bookingId,
+      method,
+      transactionId: req.body?.transactionId,
+    });
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({
+        error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" },
+      });
+    }
+    if (result.kind === "BOOKING_NOT_PAYABLE") {
       return res.status(409).json({
-        error: { code: "PAYMENT_REQUIRED", message: "Payment must be completed before check-in" },
+        error: {
+          code: "BOOKING_NOT_PAYABLE",
+          message: "Booking chưa ở trạng thái có thể thu tiền.",
+        },
+      });
+    }
+    if (result.kind === "PAYMENT_ALREADY_RECORDED") {
+      return res.status(409).json({
+        error: {
+          code: "PAYMENT_ALREADY_RECORDED",
+          message: "Booking đã được thanh toán trước đó.",
+        },
       });
     }
 

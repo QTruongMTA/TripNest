@@ -14,7 +14,7 @@ export const bookingService = {
       orderBy: { createdAt: "desc" },
       include: {
         payment: {
-          select: { method: true, paidAt: true },
+          select: { method: true, paidAt: true, confirmedById: true, confirmedByRole: true },
         },
         settlement: {
           select: { status: true, platformFee: true, hostAmount: true, availableAt: true, paidAt: true },
@@ -49,6 +49,7 @@ export const bookingService = {
       paymentStatus: booking.paymentStatus,
       paymentMethod: booking.payment?.method ?? null,
       paidAt: booking.payment?.paidAt?.toISOString() ?? null,
+      paymentConfirmedBy: booking.payment?.confirmedByRole ?? null,
       settlement: booking.settlement
         ? {
             status: booking.settlement.status,
@@ -162,10 +163,13 @@ export const bookingService = {
       orderBy: { createdAt: "desc" },
         include: {
         payment: {
-          select: { method: true, paidAt: true },
+          select: { method: true, paidAt: true, confirmedByRole: true },
         },
         settlement: {
           select: { status: true, platformFee: true, hostAmount: true, availableAt: true, paidAt: true },
+        },
+        review: {
+          select: { id: true, rating: true, comment: true, createdAt: true },
         },
         property: {
           select: {
@@ -203,6 +207,7 @@ export const bookingService = {
       paymentStatus: booking.paymentStatus,
       paymentMethod: booking.payment?.method ?? null,
       paidAt: booking.payment?.paidAt?.toISOString() ?? null,
+      paymentConfirmedBy: booking.payment?.confirmedByRole ?? null,
       settlement: booking.settlement
         ? {
             status: booking.settlement.status,
@@ -212,6 +217,16 @@ export const bookingService = {
             paidAt: booking.settlement.paidAt?.toISOString() ?? null,
           }
         : null,
+      review: booking.review
+        ? {
+            ...booking.review,
+            createdAt: booking.review.createdAt.toISOString(),
+          }
+        : null,
+      canReview:
+        booking.status === "COMPLETED" &&
+        booking.paymentStatus === "PAID" &&
+        !booking.review,
       checkIn: booking.checkIn?.toISOString().slice(0, 10) ?? null,
       checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
       tourDate: booking.tourDate?.toISOString().slice(0, 10) ?? null,
@@ -448,13 +463,17 @@ export const bookingService = {
     transactionId?: string | null;
   }) {
     return prisma.$transaction(async (tx) => {
+      if (input.method === "CASH" || input.method === "BANK_TRANSFER") {
+        return { kind: "HOST_CONFIRMATION_REQUIRED" as const };
+      }
+
       const booking = await tx.booking.findFirst({
         where: { id: input.bookingId, userId: input.userId },
         include: { payment: true },
       });
 
       if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
-      if (booking.status === "CANCELLED" || booking.status === "COMPLETED") {
+      if (booking.status !== "CONFIRMED") {
         return { kind: "BOOKING_NOT_PAYABLE" as const };
       }
 
@@ -479,6 +498,8 @@ export const bookingService = {
           method: input.method,
           status: "PAID",
           transactionId: input.transactionId?.trim() || null,
+          confirmedById: input.userId,
+          confirmedByRole: "PAYMENT_GATEWAY",
           paidAt: now,
         },
         update: {
@@ -486,6 +507,8 @@ export const bookingService = {
           method: input.method,
           status: "PAID",
           transactionId: input.transactionId?.trim() || null,
+          confirmedById: input.userId,
+          confirmedByRole: "PAYMENT_GATEWAY",
           paidAt: now,
         },
       });
@@ -517,6 +540,105 @@ export const bookingService = {
     });
   },
 
+  async confirmHostPayment(input: {
+    hostId: string;
+    bookingId: string;
+    method: "CASH" | "BANK_TRANSFER";
+    transactionId?: string | null;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.findFirst({
+        where: {
+          id: input.bookingId,
+          type: "PROPERTY",
+          property: { hostId: input.hostId },
+        },
+        include: {
+          payment: true,
+          property: { select: { title: true } },
+        },
+      });
+
+      if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
+      if (booking.status !== "CONFIRMED" && booking.status !== "CHECKED_IN") {
+        return { kind: "BOOKING_NOT_PAYABLE" as const };
+      }
+      if (booking.payment?.status === "PAID") {
+        return { kind: "PAYMENT_ALREADY_RECORDED" as const };
+      }
+
+      const now = new Date();
+      const payment = await tx.payment.upsert({
+        where: { bookingId: booking.id },
+        create: {
+          bookingId: booking.id,
+          amount: booking.totalPrice,
+          method: input.method,
+          status: "PAID",
+          transactionId: input.transactionId?.trim() || null,
+          confirmedById: input.hostId,
+          confirmedByRole: "HOST",
+          paidAt: now,
+        },
+        update: {
+          amount: booking.totalPrice,
+          method: input.method,
+          status: "PAID",
+          transactionId: input.transactionId?.trim() || null,
+          confirmedById: input.hostId,
+          confirmedByRole: "HOST",
+          paidAt: now,
+        },
+      });
+
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { paymentStatus: "PAID" },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: booking.userId,
+          type: "PAYMENT_RECEIVED",
+          title: "Host đã xác nhận thanh toán",
+          message: `${booking.property?.title ?? "Booking"} đã được xác nhận thanh toán ${booking.totalPrice.toNumber().toLocaleString("vi-VN")} VND bằng ${input.method === "CASH" ? "tiền mặt" : "chuyển khoản"}.`,
+          metadata: {
+            bookingId: booking.id,
+            paymentId: payment.id,
+            confirmedBy: input.hostId,
+            action: "OFFLINE_PAYMENT_CONFIRMED",
+          },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.hostId,
+          action: "OFFLINE_PAYMENT_CONFIRMED",
+          entity: "Payment",
+          entityId: payment.id,
+          newValue: {
+            bookingId: booking.id,
+            method: input.method,
+            amount: booking.totalPrice.toNumber(),
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: {
+          id: payment.id,
+          status: payment.status,
+          method: payment.method,
+          amount: payment.amount.toNumber(),
+          paidAt: payment.paidAt?.toISOString() ?? null,
+          confirmedByRole: payment.confirmedByRole,
+        },
+      };
+    });
+  },
+
   async checkInHostBooking(input: { hostId: string; bookingId: string }) {
     return prisma.$transaction(async (tx) => {
       const booking = await tx.booking.findFirst({
@@ -526,13 +648,22 @@ export const bookingService = {
 
       if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
       if (booking.status !== "CONFIRMED") return { kind: "INVALID_BOOKING_STATUS" as const };
-      if (booking.paymentStatus !== "PAID") return { kind: "PAYMENT_REQUIRED" as const };
 
       const now = new Date();
       const updated = await tx.booking.update({
         where: { id: booking.id },
         data: { status: "CHECKED_IN", checkedInAt: now },
         select: { id: true, status: true, checkedInAt: true },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.hostId,
+          action: "BOOKING_CHECKED_IN",
+          entity: "Booking",
+          entityId: booking.id,
+          newValue: { paymentStatus: booking.paymentStatus },
+        },
       });
 
       return {
@@ -598,6 +729,21 @@ export const bookingService = {
           title: "Chuyến đi đã hoàn thành",
           message: "Booking đã được trả phòng và quyết toán thành công.",
           metadata: { bookingId: booking.id, settlementId: settlement.id, action: "BOOKING_CHECKED_OUT" },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.hostId,
+          action: "BOOKING_CHECKED_OUT",
+          entity: "Booking",
+          entityId: booking.id,
+          newValue: {
+            settlementId: settlement.id,
+            grossAmount,
+            platformFee,
+            hostAmount,
+          },
         },
       });
 

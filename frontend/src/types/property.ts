@@ -74,6 +74,16 @@ export type PropertyDetail = PropertyListItem & {
     name: string;
     avatar: string | null;
   };
+  reviews: Array<{
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    guest: {
+      name: string;
+      avatar: string | null;
+    };
+  }>;
   availability: {
     blockedDates: Array<{
       date: string;

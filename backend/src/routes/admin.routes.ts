@@ -18,6 +18,7 @@ router.delete("/listings/:kind/:id", adminController.deleteListing);
 router.get("/bookings", adminController.bookings);
 router.patch("/bookings/:id/status", adminController.updateBookingStatus);
 router.get("/payments", adminController.payments);
+router.get("/revenue", adminController.revenue);
 router.get("/promotions", adminController.promotions);
 router.get("/commissions", adminController.commissions);
 router.get("/reviews", adminController.adminReviews);
