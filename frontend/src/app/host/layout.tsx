@@ -7,6 +7,7 @@ const navItems = [
   { label: "Trang chủ", href: "/host/properties" },
   { label: "Hồ sơ host", href: "/host/profile" },
   { label: "Đặt phòng", href: "/host/bookings" },
+  { label: "Lịch phòng", href: "/host/calendar" },
   { label: "Đánh giá", href: "/host/reviews" },
   { label: "Tài chính", href: "/host/revenue" },
   { label: "Dữ liệu thị trường", href: "/host/market" },

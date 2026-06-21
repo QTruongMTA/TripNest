@@ -4,7 +4,10 @@ export const reviewService = {
   async create(input: {
     userId: string;
     bookingId: string;
-    rating: number;
+    cleanlinessRating: number;
+    locationRating: number;
+    serviceRating: number;
+    valueRating: number;
     comment: string;
   }) {
     return prisma.$transaction(async (tx) => {
@@ -23,11 +26,22 @@ export const reviewService = {
       }
       if (booking.review) return { kind: "REVIEW_ALREADY_EXISTS" as const };
 
+      const rating = Math.round(
+        (input.cleanlinessRating +
+          input.locationRating +
+          input.serviceRating +
+          input.valueRating) /
+          4
+      );
       const review = await tx.review.create({
         data: {
           userId: input.userId,
           bookingId: booking.id,
-          rating: input.rating,
+          rating,
+          cleanlinessRating: input.cleanlinessRating,
+          locationRating: input.locationRating,
+          serviceRating: input.serviceRating,
+          valueRating: input.valueRating,
           comment: input.comment.trim(),
         },
       });
@@ -40,7 +54,7 @@ export const reviewService = {
             userId: hostId,
             type: "REVIEW_RECEIVED",
             title: "Bạn có đánh giá mới",
-            message: `Khách đã đánh giá ${input.rating}/5 cho ${itemTitle}.`,
+            message: `Khách đã đánh giá ${rating}/5 cho ${itemTitle}.`,
             metadata: {
               bookingId: booking.id,
               reviewId: review.id,
@@ -72,7 +86,15 @@ export const reviewService = {
     return reviews.map((review) => ({
       id: review.id,
       rating: review.rating,
+      criteria: {
+        cleanliness: review.cleanlinessRating,
+        location: review.locationRating,
+        service: review.serviceRating,
+        value: review.valueRating,
+      },
       comment: review.comment,
+      hostResponse: review.hostResponse,
+      hostRespondedAt: review.hostRespondedAt?.toISOString() ?? null,
       createdAt: review.createdAt.toISOString(),
       guest: {
         name: review.user.displayName ?? review.user.name ?? "Khách TripNest",
@@ -105,7 +127,15 @@ export const reviewService = {
       id: review.id,
       bookingId: review.booking.id,
       rating: review.rating,
+      criteria: {
+        cleanliness: review.cleanlinessRating,
+        location: review.locationRating,
+        service: review.serviceRating,
+        value: review.valueRating,
+      },
       comment: review.comment,
+      hostResponse: review.hostResponse,
+      hostRespondedAt: review.hostRespondedAt?.toISOString() ?? null,
       createdAt: review.createdAt.toISOString(),
       guest: {
         name: review.user.displayName ?? review.user.name ?? review.user.email,
@@ -113,5 +143,33 @@ export const reviewService = {
       },
       item: review.booking.property ?? review.booking.tour,
     }));
+  },
+
+  async respondAsHost(input: { hostId: string; reviewId: string; response: string }) {
+    const review = await prisma.review.findFirst({
+      where: {
+        id: input.reviewId,
+        booking: {
+          OR: [{ property: { hostId: input.hostId } }, { tour: { hostId: input.hostId } }],
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!review) return null;
+
+    const updated = await prisma.review.update({
+      where: { id: review.id },
+      data: {
+        hostResponse: input.response.trim(),
+        hostRespondedAt: new Date(),
+      },
+    });
+
+    return {
+      id: updated.id,
+      hostResponse: updated.hostResponse,
+      hostRespondedAt: updated.hostRespondedAt?.toISOString() ?? null,
+    };
   },
 };

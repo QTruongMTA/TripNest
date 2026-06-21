@@ -43,6 +43,7 @@ export const propertyController = {
     const limit = parsePositiveInteger(req.query.limit, 12);
     const minPrice = parseNonNegativeNumber(req.query.minPrice);
     const maxPrice = parseNonNegativeNumber(req.query.maxPrice);
+    const minRating = parseNonNegativeNumber(req.query.minRating);
     const guests = parsePositiveInteger(req.query.guests, 0);
     const bedrooms = parsePositiveInteger(req.query.bedrooms, 0);
     const bathrooms = parsePositiveInteger(req.query.bathrooms, 0);
@@ -71,6 +72,8 @@ export const propertyController = {
       limit === null ||
       minPrice === null ||
       maxPrice === null ||
+      minRating === null ||
+      (minRating !== undefined && minRating > 5) ||
       guests === null ||
       bedrooms === null ||
       bathrooms === null ||
@@ -110,6 +113,7 @@ export const propertyController = {
       ...(type ? { type } : {}),
       ...(minPrice !== undefined ? { minPrice } : {}),
       ...(maxPrice !== undefined ? { maxPrice } : {}),
+      ...(minRating !== undefined ? { minRating } : {}),
       ...(guests ? { guests } : {}),
       ...(bedrooms ? { bedrooms } : {}),
       ...(bathrooms ? { bathrooms } : {}),

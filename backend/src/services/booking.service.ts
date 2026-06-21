@@ -63,6 +63,14 @@ export const bookingService = {
       checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
       numGuests: booking.numGuests,
       totalPrice: booking.totalPrice.toNumber(),
+      priceDetails: {
+        stayPrice: booking.stayPrice?.toNumber() ?? booking.totalPrice.toNumber(),
+        extrasPrice: booking.extrasPrice?.toNumber() ?? 0,
+        serviceFee: booking.serviceFee?.toNumber() ?? 0,
+        vatAmount: booking.vatAmount?.toNumber() ?? 0,
+        discountAmount: booking.discountAmount?.toNumber() ?? 0,
+        selectedServices: booking.selectedServices,
+      },
       notes: booking.notes,
       createdAt: booking.createdAt.toISOString(),
       guest: booking.user,
@@ -169,7 +177,18 @@ export const bookingService = {
           select: { status: true, platformFee: true, hostAmount: true, availableAt: true, paidAt: true },
         },
         review: {
-          select: { id: true, rating: true, comment: true, createdAt: true },
+          select: {
+            id: true,
+            rating: true,
+            cleanlinessRating: true,
+            locationRating: true,
+            serviceRating: true,
+            valueRating: true,
+            comment: true,
+            hostResponse: true,
+            hostRespondedAt: true,
+            createdAt: true,
+          },
         },
         property: {
           select: {
@@ -232,6 +251,15 @@ export const bookingService = {
       tourDate: booking.tourDate?.toISOString().slice(0, 10) ?? null,
       numGuests: booking.numGuests,
       totalPrice: booking.totalPrice.toNumber(),
+      priceDetails: {
+        stayPrice: booking.stayPrice?.toNumber() ?? booking.totalPrice.toNumber(),
+        extrasPrice: booking.extrasPrice?.toNumber() ?? 0,
+        serviceFee: booking.serviceFee?.toNumber() ?? 0,
+        vatAmount: booking.vatAmount?.toNumber() ?? 0,
+        discountAmount: booking.discountAmount?.toNumber() ?? 0,
+        selectedServices: booking.selectedServices,
+        pricingBreakdown: booking.pricingBreakdown,
+      },
       createdAt: booking.createdAt.toISOString(),
       item:
         booking.type === "PROPERTY" && booking.property
@@ -261,6 +289,10 @@ export const bookingService = {
     checkOut: Date;
     guests: number;
     notes?: string | null;
+    services?: {
+      breakfast?: boolean;
+      airportTransfer?: boolean;
+    };
   }) {
     return prisma.$transaction(async (tx) => {
       const property = await tx.property.findFirst({
@@ -276,6 +308,7 @@ export const bookingService = {
           maxGuests: true,
           bookingMethod: true,
           hostId: true,
+          breakfastIncluded: true,
         },
       });
 
@@ -313,11 +346,25 @@ export const bookingService = {
         return { kind: "PROPERTY_UNAVAILABLE" as const };
       }
 
+      const dailyRates = await tx.propertyDailyRate.findMany({
+        where: {
+          propertyId: input.propertyId,
+          date: { gte: input.checkIn, lt: input.checkOut },
+        },
+        select: { date: true, price: true },
+      });
+
       const pricing = pricingService.calculatePropertyTotal({
         pricePerNight: property.pricePerNight,
         cleaningFee: property.cleaningFee,
         checkIn: input.checkIn,
         checkOut: input.checkOut,
+        dailyRates,
+        guests: input.guests,
+        services: {
+          breakfast: property.breakfastIncluded ? false : input.services?.breakfast,
+          airportTransfer: input.services?.airportTransfer,
+        },
       });
 
       const booking = await tx.booking.create({
@@ -329,6 +376,13 @@ export const bookingService = {
           checkOut: input.checkOut,
           numGuests: input.guests,
           totalPrice: pricing.totalPrice,
+          stayPrice: pricing.stayPrice,
+          extrasPrice: pricing.extrasPrice,
+          serviceFee: pricing.serviceFee,
+          vatAmount: pricing.vatAmount,
+          discountAmount: pricing.discountAmount,
+          selectedServices: pricing.selectedServices,
+          pricingBreakdown: pricing,
           notes: input.notes?.trim() || null,
           status: property.bookingMethod === "INSTANT" ? "CONFIRMED" : "PENDING",
           ...(property.bookingMethod === "INSTANT" ? { confirmedAt: new Date() } : {}),

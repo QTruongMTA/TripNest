@@ -427,6 +427,7 @@ model Property {
   bookings     Booking[]
   settlements  Settlement[]
   availability PropertyAvailability[]
+  dailyRates   PropertyDailyRate[]
 
   @@index([city])
   @@index([hostId])
@@ -654,6 +655,13 @@ model Booking {
   tourDate      DateTime?
   numGuests     Int
   totalPrice    Decimal       @db.Decimal(10, 2)
+  stayPrice     Decimal?      @db.Decimal(10, 2)
+  extrasPrice   Decimal?      @db.Decimal(10, 2)
+  serviceFee    Decimal?      @db.Decimal(10, 2)
+  vatAmount     Decimal?      @db.Decimal(10, 2)
+  discountAmount Decimal?     @db.Decimal(10, 2)
+  selectedServices Json?
+  pricingBreakdown Json?
   status        BookingStatus @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)
   promotionId   String?
@@ -701,6 +709,22 @@ model Payment {
   booking Booking @relation(fields: [bookingId], references: [id])
 }
 
+model PropertyDailyRate {
+  id         String   @id @default(cuid())
+  propertyId String
+  date       DateTime @db.Date
+  price      Decimal  @db.Decimal(10, 2)
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+  @@index([date])
+}
+
 model Settlement {
   id            String           @id @default(cuid())
   bookingId     String           @unique
@@ -727,12 +751,18 @@ model Settlement {
 // ─── Review ───────────────────────────────────────────────────────────────────
 
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  bookingId String   @unique
-  rating    Int
-  comment   String
-  createdAt DateTime @default(now())
+  id                String    @id @default(cuid())
+  userId            String
+  bookingId         String    @unique
+  rating            Int
+  cleanlinessRating Int?
+  locationRating    Int?
+  serviceRating     Int?
+  valueRating       Int?
+  comment           String
+  hostResponse      String?
+  hostRespondedAt   DateTime?
+  createdAt         DateTime  @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
   booking Booking @relation(fields: [bookingId], references: [id])

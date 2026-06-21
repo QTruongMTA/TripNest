@@ -2,6 +2,7 @@
 import { PropertyFilters } from "@/components/search/PropertyFilters";
 import { SearchToolbar } from "@/components/search/SearchToolbar";
 import type { PropertyListItem } from "@/types/property";
+import { PropertyResultsClient } from "@/components/search/PropertyResultsClient";
 
 type PropertyListResponse = {
   data: PropertyListItem[];
@@ -14,6 +15,7 @@ type PropertiesSearchParams = {
   type?: string;
   minPrice?: string;
   maxPrice?: string;
+  minRating?: string;
   guests?: string;
   bedrooms?: string;
   bathrooms?: string;
@@ -64,13 +66,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
 
         <div>
           {nights ? <p className="mb-4 text-sm text-slate-600">Giá hiển thị cho <span className="font-semibold text-slate-950">{nights} đêm</span>.</p> : null}
-          <div className="grid gap-5 md:grid-cols-2">
-            {properties.data.length > 0 ? (
-              properties.data.map((property) => <PropertyCard key={property.id} property={property} nights={nights} />)
-            ) : (
-              <div className="rounded-3xl border border-dashed border-slate-300 p-8 text-slate-500 md:col-span-2">Không tìm thấy chỗ ở phù hợp với bộ lọc hiện tại.</div>
-            )}
-          </div>
+          <PropertyResultsClient properties={properties.data} nights={nights} />
         </div>
       </div>
     </section>

@@ -19,5 +19,8 @@ router.patch("/bookings/:id/check-out", hostController.checkOutBooking);
 router.post("/bookings/:id/payment", hostController.confirmPayment);
 router.get("/finance", hostController.finance);
 router.get("/reviews", hostController.reviews);
+router.patch("/reviews/:id/response", hostController.respondToReview);
+router.get("/calendar", hostController.calendar);
+router.put("/calendar/:propertyId/date", hostController.updateCalendarDate);
 
 export { router as hostRouter };

@@ -776,6 +776,150 @@ export const hostController = {
     return res.json({ data });
   },
 
+  async respondToReview(req: Request, res: Response) {
+    const reviewId = typeof req.params.id === "string" ? req.params.id : "";
+    const response = typeof req.body?.response === "string" ? req.body.response.trim() : "";
+    if (!reviewId || response.length < 2 || response.length > 2000) {
+      return res.status(400).json({
+        error: { code: "INVALID_REVIEW_RESPONSE", message: "Phản hồi phải có từ 2 đến 2000 ký tự." },
+      });
+    }
+
+    const data = await reviewService.respondAsHost({
+      hostId: req.user!.id,
+      reviewId,
+      response,
+    });
+    if (!data) {
+      return res.status(404).json({
+        error: { code: "REVIEW_NOT_FOUND", message: "Không tìm thấy đánh giá thuộc cơ sở của bạn." },
+      });
+    }
+    return res.json({ data });
+  },
+
+  async calendar(req: Request, res: Response) {
+    const propertyId = typeof req.query.propertyId === "string" ? req.query.propertyId : undefined;
+    const from = parseCalendarDate(req.query.from);
+    const to = parseCalendarDate(req.query.to);
+    if (!from || !to || from >= to) {
+      return res.status(400).json({
+        error: { code: "INVALID_DATE_RANGE", message: "Khoảng ngày lịch không hợp lệ." },
+      });
+    }
+
+    const properties = await prisma.property.findMany({
+      where: { hostId: req.user!.id, ...(propertyId ? { id: propertyId } : {}) },
+      orderBy: { title: "asc" },
+      select: {
+        id: true,
+        title: true,
+        pricePerNight: true,
+        availability: {
+          where: { date: { gte: from, lt: to } },
+          select: { date: true, status: true, reason: true },
+        },
+        dailyRates: {
+          where: { date: { gte: from, lt: to } },
+          select: { date: true, price: true, note: true },
+        },
+        bookings: {
+          where: {
+            status: { in: ["PENDING", "CONFIRMED", "CHECKED_IN"] },
+            checkIn: { lt: to },
+            checkOut: { gt: from },
+          },
+          select: { id: true, checkIn: true, checkOut: true, status: true },
+        },
+      },
+    });
+
+    return res.json({
+      data: properties.map((property) => ({
+        id: property.id,
+        title: property.title,
+        basePrice: property.pricePerNight.toNumber(),
+        blockedDates: property.availability.map((item) => ({
+          date: item.date.toISOString().slice(0, 10),
+          status: item.status,
+          reason: item.reason,
+        })),
+        dailyRates: property.dailyRates.map((item) => ({
+          date: item.date.toISOString().slice(0, 10),
+          price: item.price.toNumber(),
+          note: item.note,
+        })),
+        bookings: property.bookings.map((item) => ({
+          id: item.id,
+          checkIn: item.checkIn?.toISOString().slice(0, 10) ?? null,
+          checkOut: item.checkOut?.toISOString().slice(0, 10) ?? null,
+          status: item.status,
+        })),
+      })),
+    });
+  },
+
+  async updateCalendarDate(req: Request, res: Response) {
+    const propertyId = typeof req.params.propertyId === "string" ? req.params.propertyId : "";
+    const date = parseCalendarDate(req.body?.date);
+    const availability = req.body?.availability;
+    const price = req.body?.price;
+    const note = typeof req.body?.note === "string" ? req.body.note.trim() || null : null;
+
+    if (
+      !propertyId ||
+      !date ||
+      !["AVAILABLE", "BLOCKED", "MAINTENANCE"].includes(availability) ||
+      (price !== null && price !== undefined && price !== "" && (!Number.isFinite(Number(price)) || Number(price) <= 0))
+    ) {
+      return res.status(400).json({
+        error: { code: "INVALID_CALENDAR_UPDATE", message: "Dữ liệu cập nhật lịch không hợp lệ." },
+      });
+    }
+
+    const property = await prisma.property.findFirst({
+      where: { id: propertyId, hostId: req.user!.id },
+      select: { id: true },
+    });
+    if (!property) {
+      return res.status(404).json({
+        error: { code: "PROPERTY_NOT_FOUND", message: "Không tìm thấy cơ sở lưu trú." },
+      });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (availability === "AVAILABLE") {
+        await tx.propertyAvailability.deleteMany({ where: { propertyId, date } });
+      } else {
+        await tx.propertyAvailability.upsert({
+          where: { propertyId_date: { propertyId, date } },
+          create: { propertyId, date, status: availability, reason: note },
+          update: { status: availability, reason: note },
+        });
+      }
+
+      if (price === null || price === undefined || price === "") {
+        await tx.propertyDailyRate.deleteMany({ where: { propertyId, date } });
+      } else {
+        await tx.propertyDailyRate.upsert({
+          where: { propertyId_date: { propertyId, date } },
+          create: { propertyId, date, price: Number(price), note },
+          update: { price: Number(price), note },
+        });
+      }
+    });
+
+    return res.json({
+      data: {
+        propertyId,
+        date: date.toISOString().slice(0, 10),
+        availability,
+        price: price === null || price === undefined || price === "" ? null : Number(price),
+        note,
+      },
+    });
+  },
+
   async confirmBooking(req: Request, res: Response) {
     return handleUpdateStatus(req, res, "CONFIRMED");
   },
@@ -1053,4 +1197,10 @@ function toOptionalMoney(value: unknown) {
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric) || numeric < 0) return null;
   return numeric;
+}
+
+function parseCalendarDate(value: unknown) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
 }

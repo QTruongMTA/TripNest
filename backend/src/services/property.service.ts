@@ -15,6 +15,7 @@ export type PublicPropertyQuery = {
   type?: PropertyType;
   minPrice?: number;
   maxPrice?: number;
+  minRating?: number;
   guests?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -111,12 +112,14 @@ export const propertyService = {
         : {}),
     };
 
-    const [total, properties] = await prisma.$transaction([
-      prisma.property.count({ where }),
-      prisma.property.findMany({
+    const propertyQuery = {
         where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
+        ...(query.minRating === undefined
+          ? {
+              skip: (query.page - 1) * query.limit,
+              take: query.limit,
+            }
+          : {}),
         orderBy: { createdAt: "desc" },
         include: {
           images: {
@@ -135,11 +138,25 @@ export const propertyService = {
             select: { name: true },
           },
         },
-      }),
-    ]);
+      } as const;
+
+    const rawProperties = await prisma.property.findMany(propertyQuery);
+    const ratedProperties = rawProperties.map((property) => ({
+      property,
+      rating: buildRating(property.bookings),
+    }));
+    const filteredProperties = query.minRating === undefined
+      ? ratedProperties
+      : ratedProperties.filter(({ rating }) => (rating.average ?? 0) >= query.minRating!);
+    const paginatedProperties = query.minRating === undefined
+      ? filteredProperties
+      : filteredProperties.slice((query.page - 1) * query.limit, query.page * query.limit);
+    const total = query.minRating === undefined
+      ? await prisma.property.count({ where })
+      : filteredProperties.length;
 
     return {
-      data: properties.map((property) => ({
+      data: paginatedProperties.map(({ property, rating }) => ({
         id: property.id,
         title: property.title,
         city: property.city,
@@ -152,7 +169,7 @@ export const propertyService = {
         bathrooms: property.bathrooms,
         amenityNames: property.amenities.map((amenity) => amenity.name),
         thumbnailUrl: normalizePropertyImageUrl(property.images[0]?.url, property.type),
-        rating: buildRating(property.bookings),
+        rating,
       })),
       meta: {
         page: query.page,
@@ -196,6 +213,12 @@ export const propertyService = {
             status: true,
           },
         },
+        dailyRates: {
+          where: { date: { gte: new Date() } },
+          orderBy: { date: "asc" },
+          take: 540,
+          select: { date: true, price: true, note: true },
+        },
         bookings: {
           where: { review: { isNot: null } },
           select: {
@@ -203,7 +226,13 @@ export const propertyService = {
               select: {
                 id: true,
                 rating: true,
+                cleanlinessRating: true,
+                locationRating: true,
+                serviceRating: true,
+                valueRating: true,
                 comment: true,
+                hostResponse: true,
+                hostRespondedAt: true,
                 createdAt: true,
                 user: {
                   select: { name: true, displayName: true, avatar: true },
@@ -243,7 +272,15 @@ export const propertyService = {
         .map((review) => ({
           id: review.id,
           rating: review.rating,
+          criteria: {
+            cleanliness: review.cleanlinessRating,
+            location: review.locationRating,
+            service: review.serviceRating,
+            value: review.valueRating,
+          },
           comment: review.comment,
+          hostResponse: review.hostResponse,
+          hostRespondedAt: review.hostRespondedAt?.toISOString() ?? null,
           createdAt: review.createdAt.toISOString(),
           guest: {
             name: review.user.displayName ?? review.user.name ?? "Khách TripNest",
@@ -323,6 +360,11 @@ export const propertyService = {
         blockedDates: property.availability.map((slot) => ({
           date: slot.date.toISOString().slice(0, 10),
           status: slot.status,
+        })),
+        dailyRates: property.dailyRates.map((rate) => ({
+          date: rate.date.toISOString().slice(0, 10),
+          price: rate.price.toNumber(),
+          note: rate.note,
         })),
         window: property.availabilityWindow,
         longStayAllowed: property.longStayAllowed,

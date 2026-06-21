@@ -8,6 +8,7 @@ type SearchValues = {
   type?: string;
   minPrice?: string;
   maxPrice?: string;
+  minRating?: string;
   guests?: string;
   bedrooms?: string;
   bathrooms?: string;
@@ -68,6 +69,7 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
           "amenities",
           "minPrice",
           "maxPrice",
+          "minRating",
           "guests",
           "bedrooms",
           "bathrooms",
@@ -85,6 +87,21 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
         {propertyTypes.map((item) => (
           <label key={item.value} className="flex items-center gap-3 text-sm text-slate-700">
             <input type="radio" name="type" value={item.value} defaultChecked={values.type === item.value} /> {item.label}
+          </label>
+        ))}
+      </section>
+
+      <section className="space-y-3 border-t border-slate-100 pt-4">
+        <h3 className="font-semibold text-slate-900">Điểm đánh giá</h3>
+        {[
+          ["", "Tất cả"],
+          ["4.5", "Từ 4.5 điểm"],
+          ["4", "Từ 4 điểm"],
+          ["3", "Từ 3 điểm"],
+        ].map(([value, label]) => (
+          <label key={value || "all"} className="flex items-center gap-3 text-sm text-slate-700">
+            <input type="radio" name="minRating" value={value} defaultChecked={(values.minRating ?? "") === value} />
+            {label}
           </label>
         ))}
       </section>

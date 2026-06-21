@@ -6,7 +6,10 @@ export const reviewController = {
     const result = await reviewService.create({
       userId: req.user!.id,
       bookingId: req.body.bookingId,
-      rating: req.body.rating,
+      cleanlinessRating: req.body.cleanlinessRating,
+      locationRating: req.body.locationRating,
+      serviceRating: req.body.serviceRating,
+      valueRating: req.body.valueRating,
       comment: req.body.comment,
     });
 

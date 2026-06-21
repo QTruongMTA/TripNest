@@ -12,7 +12,10 @@ router.post(
   validateMiddleware(
     Joi.object({
       bookingId: Joi.string().required(),
-      rating: Joi.number().integer().min(1).max(5).required(),
+      cleanlinessRating: Joi.number().integer().min(1).max(5).required(),
+      locationRating: Joi.number().integer().min(1).max(5).required(),
+      serviceRating: Joi.number().integer().min(1).max(5).required(),
+      valueRating: Joi.number().integer().min(1).max(5).required(),
       comment: Joi.string().trim().min(10).max(2000).required(),
     })
   ),

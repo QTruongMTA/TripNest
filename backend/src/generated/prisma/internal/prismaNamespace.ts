@@ -407,6 +407,7 @@ export const ModelName = {
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
   Payment: 'Payment',
+  PropertyDailyRate: 'PropertyDailyRate',
   Settlement: 'Settlement',
   Review: 'Review',
   Promotion: 'Promotion',
@@ -429,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "settlement" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
+    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "propertyDailyRate" | "settlement" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2135,6 +2136,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PropertyDailyRate: {
+      payload: Prisma.$PropertyDailyRatePayload<ExtArgs>
+      fields: Prisma.PropertyDailyRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PropertyDailyRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PropertyDailyRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        findFirst: {
+          args: Prisma.PropertyDailyRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PropertyDailyRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        findMany: {
+          args: Prisma.PropertyDailyRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        create: {
+          args: Prisma.PropertyDailyRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        createMany: {
+          args: Prisma.PropertyDailyRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PropertyDailyRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        delete: {
+          args: Prisma.PropertyDailyRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        update: {
+          args: Prisma.PropertyDailyRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.PropertyDailyRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PropertyDailyRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PropertyDailyRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.PropertyDailyRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        aggregate: {
+          args: Prisma.PropertyDailyRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePropertyDailyRate>
+        }
+        groupBy: {
+          args: Prisma.PropertyDailyRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PropertyDailyRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PropertyDailyRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PropertyDailyRateCountAggregateOutputType> | number
+        }
+      }
+    }
     Settlement: {
       payload: Prisma.$SettlementPayload<ExtArgs>
       fields: Prisma.SettlementFieldRefs
@@ -3062,6 +3137,19 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const PropertyDailyRateScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  price: 'price',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyDailyRateScalarFieldEnum = (typeof PropertyDailyRateScalarFieldEnum)[keyof typeof PropertyDailyRateScalarFieldEnum]
+
+
 export const SettlementScalarFieldEnum = {
   id: 'id',
   bookingId: 'bookingId',
@@ -3086,7 +3174,13 @@ export const ReviewScalarFieldEnum = {
   userId: 'userId',
   bookingId: 'bookingId',
   rating: 'rating',
+  cleanlinessRating: 'cleanlinessRating',
+  locationRating: 'locationRating',
+  serviceRating: 'serviceRating',
+  valueRating: 'valueRating',
   comment: 'comment',
+  hostResponse: 'hostResponse',
+  hostRespondedAt: 'hostRespondedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -3774,6 +3868,7 @@ export type GlobalOmitConfig = {
   tourAvailability?: Prisma.TourAvailabilityOmit
   booking?: Prisma.BookingOmit
   payment?: Prisma.PaymentOmit
+  propertyDailyRate?: Prisma.PropertyDailyRateOmit
   settlement?: Prisma.SettlementOmit
   review?: Prisma.ReviewOmit
   promotion?: Prisma.PromotionOmit

@@ -15,6 +15,7 @@ export const bookingController = {
       checkOut: new Date(req.body.checkOut),
       guests: req.body.guests,
       notes: req.body.notes,
+      services: req.body.services,
     });
 
     if (result.kind === "PROPERTY_NOT_FOUND") {
