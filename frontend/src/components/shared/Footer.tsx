@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="border-t border-teal-950/10 bg-teal-950 text-white">
@@ -27,9 +29,15 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/50">Dành cho chủ nhà</p>
           <div className="mt-4 space-y-3 text-sm text-white/80">
-            <p>Đăng chỗ nghỉ</p>
-            <p>Quản lý đặt phòng</p>
-            <p>Mẹo tối ưu doanh thu</p>
+            <Link className="block transition hover:text-white hover:underline" href="/become-host">
+              Trở thành host
+            </Link>
+            <Link className="block transition hover:text-white hover:underline" href="/host/bookings">
+              Quản lý đặt phòng
+            </Link>
+            <Link className="block transition hover:text-white hover:underline" href="/host/revenue">
+              Doanh thu và đối soát
+            </Link>
           </div>
         </div>
       </div>

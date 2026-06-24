@@ -10,6 +10,7 @@ type BookingFormProps = {
   pricePerNight?: number;
   cleaningFee?: number | null;
   maxGuests?: number;
+  dailyRates?: Array<{ date: string; price: number }>;
 };
 
 export function BookingForm({
@@ -17,6 +18,7 @@ export function BookingForm({
   pricePerNight,
   cleaningFee,
   maxGuests,
+  dailyRates = [],
 }: BookingFormProps) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
@@ -38,10 +40,19 @@ export function BookingForm({
     );
   }, [checkIn, checkOut]);
 
-  const totalPreview =
-    pricePerNight && nights > 0
-      ? nights * pricePerNight + (cleaningFee ?? 0)
-      : null;
+  const stayPricePreview = useMemo(() => {
+    if (!pricePerNight || !checkIn || !checkOut || nights <= 0) return null;
+    const rateMap = new Map(dailyRates.map((rate) => [rate.date, rate.price]));
+    const cursor = new Date(`${checkIn}T00:00:00Z`);
+    const end = new Date(`${checkOut}T00:00:00Z`);
+    let total = 0;
+    while (cursor < end) {
+      total += rateMap.get(cursor.toISOString().slice(0, 10)) ?? pricePerNight;
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    return total;
+  }, [checkIn, checkOut, dailyRates, nights, pricePerNight]);
+  const totalPreview = stayPricePreview === null ? null : stayPricePreview + (cleaningFee ?? 0);
 
   async function handleCheckAvailability() {
     if (!checkIn || !checkOut) {
@@ -195,7 +206,7 @@ export function BookingForm({
             <span>
               {pricePerNight?.toLocaleString("vi-VN")} ₫ × {nights} đêm
             </span>
-            <span>{(nights * (pricePerNight ?? 0)).toLocaleString("vi-VN")} ₫</span>
+            <span>{(stayPricePreview ?? 0).toLocaleString("vi-VN")} ₫</span>
           </div>
           <div className="mt-2 flex justify-between text-slate-600">
             <span>Phí dọn dẹp</span>

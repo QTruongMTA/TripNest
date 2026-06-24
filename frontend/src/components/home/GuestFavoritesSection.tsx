@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { PropertyImage } from "@/components/property/PropertyImage";
 import { SectionHeading } from "./SectionHeading";
 
 type PropertyItem = {
@@ -10,8 +10,6 @@ type PropertyItem = {
   thumbnailUrl: string | null;
   rating: { average: number | null; count: number };
 };
-
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800";
 
 function formatVND(amount: number): string {
   return `${amount.toLocaleString("vi-VN")}đ`;
@@ -27,11 +25,9 @@ export function GuestFavoritesSection({ properties }: { properties: PropertyItem
           <Link key={property.id} href={`/properties/${property.id}`}>
             <article className="card-lift group overflow-hidden rounded-lg border border-slate-200 bg-white">
               <div className="relative h-48">
-                <Image
-                  src={property.thumbnailUrl ?? FALLBACK_IMAGE}
+                <PropertyImage
+                  src={property.thumbnailUrl}
                   alt={property.title}
-                  fill
-                  unoptimized
                   sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                   className="object-cover transition duration-500 group-hover:scale-105"
                 />

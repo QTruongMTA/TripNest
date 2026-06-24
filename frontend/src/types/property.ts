@@ -59,6 +59,10 @@ export type PropertyDetail = PropertyListItem & {
     partiesAllowed: boolean;
     petsPolicy: string;
   };
+  services: {
+    breakfastIncluded: boolean;
+    parkingType: string;
+  };
   images: Array<{
     id: string;
     url: string;
@@ -74,10 +78,33 @@ export type PropertyDetail = PropertyListItem & {
     name: string;
     avatar: string | null;
   };
+  reviews: Array<{
+    id: string;
+    rating: number;
+    criteria: {
+      cleanliness: number | null;
+      location: number | null;
+      service: number | null;
+      value: number | null;
+    };
+    comment: string;
+    hostResponse: string | null;
+    hostRespondedAt: string | null;
+    createdAt: string;
+    guest: {
+      name: string;
+      avatar: string | null;
+    };
+  }>;
   availability: {
     blockedDates: Array<{
       date: string;
       status: "BLOCKED" | "MAINTENANCE";
+    }>;
+    dailyRates: Array<{
+      date: string;
+      price: number;
+      note: string | null;
     }>;
   };
   createdAt: string;

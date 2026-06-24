@@ -16,7 +16,7 @@ export function SessionBootstrap() {
 
     setSession(storedUser, accessToken);
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/auth/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/auth/refresh`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then(async (response) => {
@@ -26,7 +26,7 @@ export function SessionBootstrap() {
         }
 
         const payload = await response.json();
-        setSession(payload.data, accessToken);
+        setSession(payload.data.user, payload.data.accessToken);
       })
       .catch(() => {
         // Giữ session cục bộ nếu backend tạm thời không phản hồi.

@@ -2,12 +2,36 @@
 import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { CURRENT_VIETNAM_PROVINCES } from "../src/constants/vietnam-provinces";
 import { tourImageUrls } from "./seed-images";
 
 const adapter = new PrismaPg({ connectionString: process.env["DATABASE_URL"]! });
 const prisma = new PrismaClient({ adapter });
 
+function assertSeedTargetIsSafe() {
+  const databaseUrl = process.env["DATABASE_URL"];
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const allowSharedDbSeed = process.env["ALLOW_SHARED_DB_SEED"] === "true";
+  const host = new URL(databaseUrl).hostname;
+  const isLocalDatabase = ["localhost", "127.0.0.1", "::1"].includes(host);
+
+  if (!isLocalDatabase && !allowSharedDbSeed) {
+    throw new Error(
+      [
+        `Refusing to run destructive seed against non-local database host "${host}".`,
+        "This seed deletes data before recreating sample data.",
+        "Set ALLOW_SHARED_DB_SEED=true only when the whole team agrees to reset the shared dev database.",
+      ].join(" ")
+    );
+  }
+}
+
 async function main() {
+  assertSeedTargetIsSafe();
+
   console.log("🌱 Bắt đầu seed dữ liệu...");
 
   // ── Dọn dữ liệu cũ ──────────────────────────────────────────────────────────
@@ -52,47 +76,77 @@ async function main() {
 
   console.log(`  ✓ Admin: admin@tripnest.vn`);
 
-  // ── 34 đơn vị hành chính cấp tỉnh (danh sách mới) ──────────────────────────
-  const provinces = await Promise.all([
-    // 6 Thành phố trực thuộc TW
-    prisma.province.create({ data: { name: "Hà Nội", code: "HN", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Hải Phòng", code: "HP", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Huế", code: "HUE", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Đà Nẵng", code: "DNA", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Cần Thơ", code: "CT", type: "THANH_PHO" } }),
-    prisma.province.create({ data: { name: "Thành phố Hồ Chí Minh", code: "HCM", type: "THANH_PHO" } }),
-    // 28 Tỉnh
-    prisma.province.create({ data: { name: "An Giang", code: "AG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Bắc Ninh", code: "BN", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Cao Bằng", code: "CB", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Cà Mau", code: "CM", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Điện Biên", code: "DB", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Đồng Nai", code: "DN", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Đồng Tháp", code: "DT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Gia Lai", code: "GL", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Hà Tĩnh", code: "HT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Hưng Yên", code: "HY", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Khánh Hòa", code: "KH", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Lai Châu", code: "LAI", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Lâm Đồng", code: "LD", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Lạng Sơn", code: "LS", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Lào Cai", code: "LC", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Long An", code: "LA", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Nghệ An", code: "NA", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Ninh Bình", code: "NB", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Ninh Thuận", code: "NT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Phú Thọ", code: "PT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Quảng Ngãi", code: "QNG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Quảng Ninh", code: "QN", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Quảng Trị", code: "QT", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Sơn La", code: "SL", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Tây Ninh", code: "TN", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Thái Nguyên", code: "TNG", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Thanh Hóa", code: "TH", type: "TINH" } }),
-    prisma.province.create({ data: { name: "Vĩnh Long", code: "VL", type: "TINH" } }),
-  ]);
+  // ── 34 đơn vị hành chính cấp tỉnh hiện hành ───────────────────────────────
+  const provinces = await Promise.all(
+    CURRENT_VIETNAM_PROVINCES.map((province) => prisma.province.create({ data: province }))
+  );
 
   console.log(`  ✓ ${provinces.length} tỉnh/thành phố`);
+
+  // ── Operator mẫu ────────────────────────────────────────────────────────────
+  const operatorPw = await bcrypt.hash("operator01", 12);
+  const operator02Pw = await bcrypt.hash("operator02", 12);
+  const operator03Pw = await bcrypt.hash("operator03", 12);
+  const operator04Pw = await bcrypt.hash("operator04", 12);
+
+  const operator01 = await prisma.user.create({
+    data: {
+      email: "operator01@tripnest.vn",
+      password: operatorPw,
+      name: "Operator Hà Nội",
+      phone: "0901000001",
+      role: "OPERATOR_PROVINCE",
+      emailVerified: true,
+      createdById: admin.id,
+    },
+  });
+
+  const operator02 = await prisma.user.create({
+    data: {
+      email: "operator02@tripnest.vn",
+      password: operator02Pw,
+      name: "Operator Miền Trung",
+      phone: "0901000002",
+      role: "OPERATOR_PROVINCE",
+      emailVerified: true,
+      createdById: admin.id,
+    },
+  });
+
+  const operator03 = await prisma.user.create({
+    data: {
+      email: "operator03@tripnest.vn",
+      password: operator03Pw,
+      name: "Inspector Miền Bắc",
+      phone: "0901000003",
+      role: "OPERATOR_SUB",
+      emailVerified: true,
+      createdById: operator01.id,
+    },
+  });
+
+  const operator04 = await prisma.user.create({
+    data: {
+      email: "operator04@tripnest.vn",
+      password: operator04Pw,
+      name: "Inspector Miền Trung",
+      phone: "0901000004",
+      role: "OPERATOR_SUB",
+      emailVerified: true,
+      createdById: operator02.id,
+    },
+  });
+
+  await prisma.operatorProvinceAssignment.createMany({
+    data: [
+      { operatorId: operator01.id, provinceId: provinces[0].id, assignedBy: admin.id },
+      { operatorId: operator01.id, provinceId: provinces[1].id, assignedBy: admin.id },
+      { operatorId: operator02.id, provinceId: provinces[2].id, assignedBy: admin.id },
+      { operatorId: operator02.id, provinceId: provinces[3].id, assignedBy: admin.id },
+    ],
+  });
+
+  console.log("  ✓ 4 operator mẫu");
 
   // ── Tiện nghi ────────────────────────────────────────────────────────────────
   const amenityNames = [
@@ -360,7 +414,7 @@ async function main() {
 
   console.log("\n✅ Seed hoàn tất!");
   console.log("   Admin: admin@tripnest.vn / tripnest");
-  console.log(`   ${provinces.length} tỉnh/thành phố | 0 properties | 7 tours`);
+  console.log(`   ${provinces.length} tỉnh/thành phố | 4 operators | 0 properties | 7 tours`);
 }
 
 main()

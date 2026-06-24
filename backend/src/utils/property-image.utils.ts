@@ -25,5 +25,22 @@ export function normalizePropertyImageUrl(
     return trimmed;
   }
 
+  if (trimmed) {
+    const publicApiUrl = (
+      process.env.PUBLIC_API_URL ??
+      process.env.BACKEND_PUBLIC_URL ??
+      `http://localhost:${process.env.PORT ?? 5000}`
+    ).replace(/\/+$/, "");
+    const uploadPath = trimmed.replace(/\\/g, "/");
+
+    if (uploadPath.startsWith("/uploads/")) {
+      return `${publicApiUrl}${uploadPath}`;
+    }
+
+    if (uploadPath.startsWith("uploads/")) {
+      return `${publicApiUrl}/${uploadPath}`;
+    }
+  }
+
   return getFallbackPropertyImage(type);
 }

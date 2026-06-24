@@ -47,6 +47,21 @@ export const authController = {
     return res.json({ data: user });
   },
 
+  async refresh(req: Request, res: Response) {
+    const session = await authService.refreshSession(req.user!.id);
+
+    if (!session) {
+      return res.status(404).json({
+        error: {
+          code: "USER_NOT_FOUND",
+          message: "User not found",
+        },
+      });
+    }
+
+    return res.json({ data: session });
+  },
+
   async updateAvatar(req: Request, res: Response) {
     const user = await authService.updateAvatar(req.user!.id, req.body.avatar ?? null);
     return res.json({ data: user });

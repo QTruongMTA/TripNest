@@ -127,6 +127,7 @@ function NotificationBell() {
 export function Header({ overlay = true }: { overlay?: boolean }) {
   const user = useAuthStore((state) => state.user);
   const isHost = user?.role === "HOST";
+  const hostHref = !user ? "/register?intent=host" : isHost ? "/host/properties" : "/become-host";
 
   return (
     <header className={`${overlay ? "absolute" : "relative"} inset-x-0 top-0 z-30`}>
@@ -151,10 +152,10 @@ export function Header({ overlay = true }: { overlay?: boolean }) {
 
         <div className="flex items-center gap-2">
           <a
-            href={isHost ? "/host/properties" : "/host/properties/new"}
+            href={hostHref}
             className="hidden px-3 py-2 text-sm font-medium text-white transition hover:text-white/80 sm:inline-flex"
           >
-            {isHost ? "Chỗ nghỉ của Quý vị" : "Đăng chỗ nghỉ"}
+            {isHost ? "Khu vực chủ nhà" : "Trở thành host"}
           </a>
           {user ? (
             <>

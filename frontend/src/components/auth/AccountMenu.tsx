@@ -57,6 +57,9 @@ export function AccountMenu() {
           <div className="border-b border-slate-100 px-5 py-4">
             <p className="font-semibold">{user.displayName || user.name}</p>
             <p className="mt-1 text-sm text-slate-500">{user.email}</p>
+            <p className="mt-2 text-xs font-medium text-emerald-700">
+              {user.role === "HOST" ? "Tài khoản chủ nhà" : "Tài khoản khách"}
+            </p>
           </div>
           <div className="p-2">
             {items.map((item) => (
@@ -70,6 +73,14 @@ export function AccountMenu() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href={user.role === "HOST" ? "/host/properties" : "/become-host"}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+            >
+              <MenuIcon name="user" />
+              {user.role === "HOST" ? "Khu vực chủ nhà" : "Trở thành host"}
+            </Link>
             <button
               type="button"
               onClick={() => {

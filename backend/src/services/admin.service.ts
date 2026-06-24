@@ -26,6 +26,7 @@ function mapBookingStatus(status: string): string {
   const map: Record<string, string> = {
     PENDING: "Chờ xử lý",
     CONFIRMED: "Đã xác nhận",
+    CHECKED_IN: "Đã nhận phòng",
     CANCELLED: "Đã huỷ",
     COMPLETED: "Hoàn tất",
   };
@@ -437,31 +438,55 @@ export const adminService = {
 
     const [
       totalUsers,
+      totalProperties,
+      totalTours,
       pendingProperties,
       pendingTours,
       pendingBookings,
       totalBookingsThisMonth,
-      revenueThisMonth,
       totalBookings,
       completedBookings,
+      totalRevenue,
+      revenueThisMonth,
+      grossPayments,
+      recentBookings,
+      coveredProvinces,
     ] = await prisma.$transaction([
       prisma.user.count(),
+      prisma.property.count(),
+      prisma.tour.count(),
       prisma.property.count({ where: { status: ListingStatus.PENDING } }),
       prisma.tour.count({ where: { status: ListingStatus.PENDING } }),
       prisma.booking.count({ where: { status: BookingStatus.PENDING } }),
       prisma.booking.count({ where: { createdAt: { gte: startOfMonth } } }),
-      prisma.payment.aggregate({
-        where: { status: PaymentStatus.PAID, paidAt: { gte: startOfMonth } },
-        _sum: { amount: true },
-      }),
       prisma.booking.count(),
       prisma.booking.count({ where: { status: BookingStatus.COMPLETED } }),
+      prisma.settlement.aggregate({
+        _sum: { platformFee: true },
+      }),
+      prisma.settlement.aggregate({
+        where: { recognizedAt: { gte: startOfMonth } },
+        _sum: { platformFee: true },
+      }),
+      prisma.payment.aggregate({
+        where: { status: PaymentStatus.PAID },
+        _sum: { amount: true },
+      }),
+      prisma.booking.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, status: true, totalPrice: true, createdAt: true },
+      }),
+      prisma.operatorProvinceAssignment.findMany({
+        distinct: ["provinceId"],
+        select: { provinceId: true },
+      }),
     ]);
 
-    const [payments6Months, bookings6Months] = await prisma.$transaction([
-      prisma.payment.findMany({
-        where: { status: PaymentStatus.PAID, paidAt: { gte: startOf6MonthsAgo } },
-        select: { amount: true, paidAt: true },
+    const [settlements6Months, bookings6Months] = await prisma.$transaction([
+      prisma.settlement.findMany({
+        where: { recognizedAt: { gte: startOf6MonthsAgo } },
+        select: { platformFee: true, recognizedAt: true },
       }),
       prisma.booking.findMany({
         where: { createdAt: { gte: startOf6MonthsAgo } },
@@ -478,9 +503,13 @@ export const adminService = {
     const revenueSeries = months.map(({ label, year, month }) => ({
       month: label,
       revenue: Math.round(
-        payments6Months
-          .filter((p) => p.paidAt && p.paidAt.getFullYear() === year && p.paidAt.getMonth() === month)
-          .reduce((sum, p) => sum + p.amount.toNumber(), 0) / 1_000_000
+        settlements6Months
+          .filter(
+            (item) =>
+              item.recognizedAt.getFullYear() === year &&
+              item.recognizedAt.getMonth() === month
+          )
+          .reduce((sum, item) => sum + item.platformFee.toNumber(), 0) / 1_000_000
       ),
       bookings: bookings6Months.filter(
         (b) => b.createdAt.getFullYear() === year && b.createdAt.getMonth() === month
@@ -516,8 +545,20 @@ export const adminService = {
       : 0;
 
     return {
+      totalUsers,
+      totalProperties,
+      totalTours,
+      totalBookings,
+      totalRevenue: totalRevenue._sum.platformFee?.toNumber() ?? 0,
+      grossPayments: grossPayments._sum.amount?.toNumber() ?? 0,
+      coveredProvinces: coveredProvinces.length,
+      recentBookings: recentBookings.map((booking) => ({
+        ...booking,
+        totalPrice: booking.totalPrice.toNumber(),
+        createdAt: booking.createdAt.toISOString(),
+      })),
       metrics: {
-        revenueThisMonth: revenueThisMonth._sum.amount?.toNumber() ?? 0,
+        revenueThisMonth: revenueThisMonth._sum.platformFee?.toNumber() ?? 0,
         newBookingsThisMonth: totalBookingsThisMonth,
         pendingListings: pendingProperties + pendingTours,
         completionRate,
@@ -570,7 +611,21 @@ export const adminService = {
     const payments = await prisma.payment.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        booking: { select: { id: true, user: { select: { email: true } } } },
+        booking: {
+          select: {
+            id: true,
+            status: true,
+            user: { select: { email: true } },
+            settlement: {
+              select: {
+                platformFee: true,
+                hostAmount: true,
+                recognizedAt: true,
+                status: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -583,7 +638,189 @@ export const adminService = {
       amount: formatVND(p.amount.toNumber()),
       status: mapPaymentStatus(p.status),
       paidAt: p.paidAt ? p.paidAt.toLocaleDateString("vi-VN") : "—",
+      confirmedBy:
+        p.confirmedByRole === "HOST"
+          ? "Host"
+          : p.confirmedByRole === "PAYMENT_GATEWAY"
+            ? "Cổng thanh toán TripNest"
+            : "Hệ thống",
+      bookingStatus: mapBookingStatus(p.booking.status),
+      platformFee: p.booking.settlement
+        ? formatVND(p.booking.settlement.platformFee.toNumber())
+        : "Chưa ghi nhận",
+      hostAmount: p.booking.settlement
+        ? formatVND(p.booking.settlement.hostAmount.toNumber())
+        : "Chưa quyết toán",
+      settlementStatus: p.booking.settlement?.status ?? null,
+      revenueRecognizedAt: p.booking.settlement
+        ? p.booking.settlement.recognizedAt.toLocaleString("vi-VN")
+        : null,
     }));
+  },
+
+  async getRevenueReport(input: { mode: "day" | "month"; value: string }) {
+    const start =
+      input.mode === "day"
+        ? new Date(`${input.value}T00:00:00+07:00`)
+        : new Date(`${input.value}-01T00:00:00+07:00`);
+    const end = new Date(start);
+    if (input.mode === "day") {
+      end.setDate(end.getDate() + 1);
+    } else {
+      end.setMonth(end.getMonth() + 1);
+    }
+
+    const [payments, settlements] = await prisma.$transaction([
+      prisma.payment.findMany({
+        where: {
+          status: PaymentStatus.PAID,
+          paidAt: { gte: start, lt: end },
+        },
+        orderBy: { paidAt: "desc" },
+        include: {
+          booking: {
+            select: {
+              id: true,
+              status: true,
+              user: { select: { email: true } },
+              property: {
+                select: {
+                  id: true,
+                  title: true,
+                  host: { select: { email: true } },
+                },
+              },
+              tour: {
+                select: {
+                  id: true,
+                  title: true,
+                  host: { select: { email: true } },
+                },
+              },
+              settlement: {
+                select: {
+                  id: true,
+                  platformFee: true,
+                  hostAmount: true,
+                  status: true,
+                  recognizedAt: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.settlement.findMany({
+        where: {
+          recognizedAt: { gte: start, lt: end },
+        },
+        select: {
+          platformFee: true,
+          hostAmount: true,
+          recognizedAt: true,
+        },
+      }),
+    ]);
+
+    const grossAmount = payments.reduce(
+      (total, item) => total + item.amount.toNumber(),
+      0
+    );
+    const platformRevenue = settlements.reduce(
+      (total, item) => total + item.platformFee.toNumber(),
+      0
+    );
+    const hostAmount = settlements.reduce(
+      (total, item) => total + item.hostAmount.toNumber(),
+      0
+    );
+
+    const breakdownMap = new Map<
+      string,
+      { label: string; grossAmount: number; platformRevenue: number; bookings: number }
+    >();
+
+    const getBreakdownKey = (date: Date) => {
+      const vietnamTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+      const key =
+        input.mode === "day"
+          ? `${String(vietnamTime.getUTCHours()).padStart(2, "0")}:00`
+          : String(vietnamTime.getUTCDate()).padStart(2, "0");
+      return {
+        key,
+        label: input.mode === "day" ? key : `Ngày ${Number(key)}`,
+      };
+    };
+
+    for (const item of payments) {
+      if (!item.paidAt) continue;
+      const { key, label } = getBreakdownKey(item.paidAt);
+      const current = breakdownMap.get(key) ?? {
+        label,
+        grossAmount: 0,
+        platformRevenue: 0,
+        bookings: 0,
+      };
+      current.grossAmount += item.amount.toNumber();
+      current.bookings += 1;
+      breakdownMap.set(key, current);
+    }
+
+    for (const item of settlements) {
+      const { key, label } = getBreakdownKey(item.recognizedAt);
+      const current = breakdownMap.get(key) ?? {
+        label,
+        grossAmount: 0,
+        platformRevenue: 0,
+        bookings: 0,
+      };
+      current.platformRevenue += item.platformFee.toNumber();
+      breakdownMap.set(key, current);
+    }
+
+    return {
+      mode: input.mode,
+      value: input.value,
+      from: start.toISOString(),
+      to: end.toISOString(),
+      summary: {
+        grossAmount,
+        platformRevenue,
+        hostAmount,
+        paidBookings: payments.length,
+        completedBookings: settlements.length,
+        pendingRecognition: payments.filter((item) => !item.booking.settlement).length,
+        averagePlatformRevenue: settlements.length
+          ? Math.round(platformRevenue / settlements.length)
+          : 0,
+      },
+      breakdown: Array.from(breakdownMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([, item]) => item),
+      transactions: payments.map((item) => {
+        const listing = item.booking.property ?? item.booking.tour;
+        return {
+          id: item.id,
+          bookingId: item.booking.id,
+          listing: listing?.title ?? "Booking",
+          guest: item.booking.user.email,
+          host: listing?.host.email ?? "—",
+          grossAmount: item.amount.toNumber(),
+          platformRevenue: item.booking.settlement?.platformFee.toNumber() ?? 0,
+          hostAmount: item.booking.settlement?.hostAmount.toNumber() ?? 0,
+          bookingStatus: item.booking.status,
+          settlementStatus: item.booking.settlement?.status ?? null,
+          confirmedBy:
+            item.confirmedByRole === "HOST"
+              ? "Host"
+              : item.confirmedByRole === "PAYMENT_GATEWAY"
+                ? "Cổng thanh toán TripNest"
+                : "Hệ thống",
+          paidAt: item.paidAt?.toISOString() ?? null,
+          recognizedAt: item.booking.settlement?.recognizedAt.toISOString() ?? null,
+        };
+      }),
+    };
   },
 
   async listAdminPromotions() {
@@ -637,11 +874,14 @@ export const adminService = {
 
     return reviews.map((r) => ({
       id: r.id,
-      guest: r.user.email,
-      item: r.booking.property?.title ?? r.booking.tour?.title ?? "—",
-      rating: r.rating.toFixed(1),
-      excerpt: r.comment.length > 80 ? r.comment.slice(0, 80) + "…" : r.comment,
-      status: "Hiển thị",
+      rating: r.rating,
+      comment: r.comment,
+      createdAt: r.createdAt.toISOString(),
+      user: { email: r.user.email },
+      booking: {
+        property: r.booking.property,
+        tour: r.booking.tour,
+      },
     }));
   },
 
@@ -657,6 +897,9 @@ export const adminService = {
       actor: log.user?.email ?? "system",
       action: log.action,
       entity: log.entity,
+      entityId: log.entityId,
+      oldValue: log.oldValue,
+      newValue: log.newValue,
       time: log.createdAt.toLocaleString("vi-VN"),
     }));
   },

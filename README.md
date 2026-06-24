@@ -237,6 +237,7 @@ DATABASE_URL="postgresql://username:password@localhost:5432/tripnest_db"
 JWT_SECRET="your-development-secret"
 PORT=5000
 NODE_ENV=development
+CORS_ORIGINS="http://localhost:3000,http://localhost:3001"
 ```
 
 Tao file `frontend/.env.local`:
@@ -261,6 +262,12 @@ Chay trong thu muc `backend`:
 npx prisma migrate dev
 ```
 
+Neu dung database dev chung cua nhom, khong chay `migrate dev` truc tiep tren database chung. Sau khi pull code moi, dung:
+
+```bash
+npm run migrate:deploy
+```
+
 Neu can tao Prisma client:
 
 ```bash
@@ -273,6 +280,18 @@ Chay trong thu muc `backend`:
 
 ```bash
 npm run seed
+```
+
+Luu y: seed hien tai se xoa du lieu cu truoc khi tao lai du lieu mau. Len database dev chung, lenh seed bi chan mac dinh neu `DATABASE_URL` khong tro ve `localhost`/`127.0.0.1`. Chi reset database chung khi ca nhom da thong nhat:
+
+```bash
+ALLOW_SHARED_DB_SEED=true npm run seed
+```
+
+Tren PowerShell:
+
+```powershell
+$env:ALLOW_SHARED_DB_SEED="true"; npm run seed
 ```
 
 Tai khoan admin mac dinh sau khi seed:

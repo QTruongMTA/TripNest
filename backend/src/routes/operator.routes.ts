@@ -13,6 +13,8 @@ router.get("/dashboard", operatorController.dashboard);
 router.get("/provinces", operatorController.provinces);
 router.get("/listings", operatorController.listings);
 router.patch("/listings/:id/status", requireRole(...provinceOnly), operatorController.updateListingStatus);
+router.post("/listings/:id/request-revision", requireRole(...provinceOnly), operatorController.requestListingRevision);
+router.post("/listings/:id/field-inspection", requireRole(...provinceOnly), operatorController.requestFieldInspection);
 router.get("/payments", operatorController.payments);
 router.get("/bookings", operatorController.bookings);
 router.patch("/bookings/:id/status", requireRole(...provinceOnly), operatorController.updateBookingStatus);

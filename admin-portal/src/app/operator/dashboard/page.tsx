@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AlertCircle, Building2, CheckSquare, ClipboardList, MapPin } from "lucide-react";
 import { PortalShell } from "@/components/layout/PortalShell";
 import { useAuthStore } from "@/store/authStore";
@@ -19,15 +20,27 @@ interface DashboardData {
   };
 }
 
-function StatCard({ title, value, icon, tone }: { title: string; value: number; icon: React.ReactNode; tone: "teal" | "amber" | "slate" }) {
+function StatCard({
+  title,
+  value,
+  icon,
+  tone,
+  href,
+}: {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  tone: "teal" | "amber" | "slate";
+  href?: string;
+}) {
   const colors = {
     teal: "bg-teal-800 text-white",
     amber: "bg-amber-400 text-teal-950",
     slate: "bg-slate-100 text-teal-900",
   };
 
-  return (
-    <div className="portal-card p-5 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-teal-950/10">
+  const card = (
+    <div className={`portal-card p-5 transition ${href ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:shadow-teal-950/10" : ""}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -36,6 +49,13 @@ function StatCard({ title, value, icon, tone }: { title: string; value: number; 
         <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-md ${colors[tone]}`}>{icon}</div>
       </div>
     </div>
+  );
+
+  if (!href) return card;
+  return (
+    <Link href={href} className="block">
+      {card}
+    </Link>
   );
 }
 
@@ -87,11 +107,23 @@ export default function OperatorDashboard() {
                 <StatCard title="Đặt phòng chờ duyệt" value={stats.pendingBookings ?? 0} icon={<ClipboardList size={20} />} tone="slate" />
                 <StatCard title="Hồ sơ host chờ duyệt" value={stats.pendingApprovals ?? 0} icon={<CheckSquare size={20} />} tone="slate" />
                 <StatCard title="Tranh chấp đang xử lý" value={stats.openDisputes ?? 0} icon={<AlertCircle size={20} />} tone="amber" />
-                <StatCard title="Nhiệm vụ đang chạy" value={stats.activeTasks ?? 0} icon={<ClipboardList size={20} />} tone="teal" />
+                <StatCard
+                  title="Nhiệm vụ đang chạy"
+                  value={stats.activeTasks ?? 0}
+                  icon={<ClipboardList size={20} />}
+                  tone="teal"
+                  href="/operator/tasks"
+                />
               </>
             ) : (
               <>
-                <StatCard title="Nhiệm vụ đang chạy" value={stats.activeTasks ?? 0} icon={<ClipboardList size={20} />} tone="teal" />
+                <StatCard
+                  title="Nhiệm vụ đang chạy"
+                  value={stats.activeTasks ?? 0}
+                  icon={<ClipboardList size={20} />}
+                  tone="teal"
+                  href="/operator/tasks"
+                />
                 <StatCard title="Hoàn thành tháng này" value={stats.completedThisMonth ?? 0} icon={<CheckSquare size={20} />} tone="amber" />
                 <StatCard title="Tổng hoàn thành" value={stats.totalCompleted ?? 0} icon={<CheckSquare size={20} />} tone="slate" />
               </>

@@ -1,6 +1,6 @@
-﻿import { Card } from "@/components/ui/Card";
+import { PropertyImage } from "@/components/property/PropertyImage";
+import { Card } from "@/components/ui/Card";
 import type { PropertyListItem } from "@/types/property";
-import Image from "next/image";
 import Link from "next/link";
 
 export function PropertyCard({ property, nights }: { property: PropertyListItem; nights?: number | null }) {
@@ -9,18 +9,16 @@ export function PropertyCard({ property, nights }: { property: PropertyListItem;
   return (
     <Link href={`/properties/${property.id}`} className="block">
       <Card>
-        {property.thumbnailUrl ? (
-          <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-2xl">
-            <Image
-              src={property.thumbnailUrl}
-              alt={property.title}
-              fill
-              unoptimized
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        ) : null}
+        <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100">
+          <PropertyImage
+            src={property.thumbnailUrl}
+            alt={property.title}
+            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+          />
+          <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
+            Đã duyệt
+          </span>
+        </div>
         <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
           <p>{property.city}</p>
           <p>{property.rating.average ? `★ ${property.rating.average} (${property.rating.count})` : "Chưa có đánh giá"}</p>

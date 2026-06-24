@@ -167,6 +167,33 @@ export const authService = {
     return user ? toPublicUser(user) : null;
   },
 
+  async refreshSession(id: string) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        displayName: true,
+        phone: true,
+        avatar: true,
+        birthDate: true,
+        nationality: true,
+        gender: true,
+        address: true,
+        role: true,
+        emailVerified: true,
+      },
+    });
+
+    if (!user) return null;
+
+    return {
+      user: toPublicUser(user),
+      accessToken: signAccessToken({ sub: user.id, role: user.role, email: user.email }),
+    };
+  },
+
   async updateAvatar(id: string, avatar: string | null) {
     const user = await prisma.user.update({
       where: { id },

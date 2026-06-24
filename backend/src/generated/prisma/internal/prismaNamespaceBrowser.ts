@@ -74,6 +74,8 @@ export const ModelName = {
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
   Payment: 'Payment',
+  PropertyDailyRate: 'PropertyDailyRate',
+  Settlement: 'Settlement',
   Review: 'Review',
   Promotion: 'Promotion',
   PromotionRedemption: 'PromotionRedemption',
@@ -439,6 +441,10 @@ export const BookingScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   promotionId: 'promotionId',
   notes: 'notes',
+  confirmedAt: 'confirmedAt',
+  checkedInAt: 'checkedInAt',
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -454,6 +460,8 @@ export const PaymentScalarFieldEnum = {
   method: 'method',
   status: 'status',
   transactionId: 'transactionId',
+  confirmedById: 'confirmedById',
+  confirmedByRole: 'confirmedByRole',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -462,12 +470,50 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const PropertyDailyRateScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  price: 'price',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyDailyRateScalarFieldEnum = (typeof PropertyDailyRateScalarFieldEnum)[keyof typeof PropertyDailyRateScalarFieldEnum]
+
+
+export const SettlementScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  propertyId: 'propertyId',
+  grossAmount: 'grossAmount',
+  platformFee: 'platformFee',
+  hostAmount: 'hostAmount',
+  currency: 'currency',
+  status: 'status',
+  availableAt: 'availableAt',
+  recognizedAt: 'recognizedAt',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementScalarFieldEnum = (typeof SettlementScalarFieldEnum)[keyof typeof SettlementScalarFieldEnum]
+
+
 export const ReviewScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   bookingId: 'bookingId',
   rating: 'rating',
+  cleanlinessRating: 'cleanlinessRating',
+  locationRating: 'locationRating',
+  serviceRating: 'serviceRating',
+  valueRating: 'valueRating',
   comment: 'comment',
+  hostResponse: 'hostResponse',
+  hostRespondedAt: 'hostRespondedAt',
   createdAt: 'createdAt'
 } as const
 

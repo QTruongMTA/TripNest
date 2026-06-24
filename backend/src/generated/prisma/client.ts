@@ -157,6 +157,16 @@ export type Booking = Prisma.BookingModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model PropertyDailyRate
+ * 
+ */
+export type PropertyDailyRate = Prisma.PropertyDailyRateModel
+/**
+ * Model Settlement
+ * 
+ */
+export type Settlement = Prisma.SettlementModel
+/**
  * Model Review
  * 
  */

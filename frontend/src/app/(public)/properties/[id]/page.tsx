@@ -86,6 +86,10 @@ export default async function PropertyDetailPage({
   const [heroImage, ...galleryImages] = property.images;
   const addressText = formatAddress(property);
   const totalBeds = getTotalBeds(property);
+  const mapEmbedUrl =
+    property.location.latitude !== null && property.location.longitude !== null
+      ? `https://www.openstreetmap.org/export/embed.html?bbox=${property.location.longitude - 0.01}%2C${property.location.latitude - 0.01}%2C${property.location.longitude + 0.01}%2C${property.location.latitude + 0.01}&layer=mapnik&marker=${property.location.latitude}%2C${property.location.longitude}`
+      : null;
   const highlights = [
     `${property.capacity.maxGuests} khách`,
     `${property.capacity.bedroomCount} phòng ngủ`,
@@ -243,6 +247,74 @@ export default async function PropertyDetailPage({
             </p>
           </div>
 
+          {mapEmbedUrl ? (
+            <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white">
+              <div className="p-6 pb-4">
+                <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Bản đồ</p>
+                <h2 className="mt-2 text-2xl font-semibold">Vị trí cơ sở lưu trú</h2>
+                <p className="mt-2 text-sm text-slate-600">{addressText}</p>
+              </div>
+              <iframe
+                title={`Bản đồ ${property.title}`}
+                src={mapEmbedUrl}
+                className="h-80 w-full border-0"
+                loading="lazy"
+              />
+            </div>
+          ) : null}
+
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm uppercase tracking-[0.18em] text-slate-400">
+                  Khách đã lưu trú
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold">Đánh giá thực tế</h2>
+              </div>
+              <p className="text-sm font-medium text-amber-600">
+                {property.rating.average
+                  ? `${property.rating.average}/5 · ${property.rating.count} đánh giá`
+                  : "Chưa có đánh giá"}
+              </p>
+            </div>
+            {property.reviews.length ? (
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {property.reviews.map((review) => (
+                  <article key={review.id} className="rounded-3xl bg-slate-50 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-semibold text-slate-900">{review.guest.name}</p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+                      <span className="font-semibold text-amber-500">
+                        {"★".repeat(review.rating)}
+                      </span>
+                    </div>
+                    <p className="mt-3 leading-7 text-slate-600">{review.comment}</p>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-500">
+                      <span>Vệ sinh: {review.criteria.cleanliness ?? review.rating}/5</span>
+                      <span>Vị trí: {review.criteria.location ?? review.rating}/5</span>
+                      <span>Phục vụ: {review.criteria.service ?? review.rating}/5</span>
+                      <span>Giá trị: {review.criteria.value ?? review.rating}/5</span>
+                    </div>
+                    {review.hostResponse ? (
+                      <div className="mt-4 rounded-2xl bg-teal-50 p-3 text-sm text-slate-700">
+                        <strong className="text-teal-800">Phản hồi từ cơ sở:</strong>
+                        <p className="mt-1 leading-6">{review.hostResponse}</p>
+                      </div>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-slate-500">
+                Chỗ ở này chưa có đánh giá từ booking đã hoàn tất.
+              </p>
+            )}
+          </div>
+
           <div className="rounded-[28px] border border-slate-200 bg-white p-6">
             <div className="flex items-end justify-between gap-4">
               <div>
@@ -302,6 +374,7 @@ export default async function PropertyDetailPage({
             pricePerNight={property.pricePerNight}
             cleaningFee={property.cleaningFee}
             maxGuests={property.capacity.maxGuests}
+            dailyRates={property.availability.dailyRates}
           />
         </div>
       </div>

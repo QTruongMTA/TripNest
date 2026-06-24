@@ -407,6 +407,8 @@ export const ModelName = {
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
   Payment: 'Payment',
+  PropertyDailyRate: 'PropertyDailyRate',
+  Settlement: 'Settlement',
   Review: 'Review',
   Promotion: 'Promotion',
   PromotionRedemption: 'PromotionRedemption',
@@ -428,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
+    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "propertyDailyRate" | "settlement" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2134,6 +2136,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PropertyDailyRate: {
+      payload: Prisma.$PropertyDailyRatePayload<ExtArgs>
+      fields: Prisma.PropertyDailyRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PropertyDailyRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PropertyDailyRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        findFirst: {
+          args: Prisma.PropertyDailyRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PropertyDailyRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        findMany: {
+          args: Prisma.PropertyDailyRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        create: {
+          args: Prisma.PropertyDailyRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        createMany: {
+          args: Prisma.PropertyDailyRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PropertyDailyRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        delete: {
+          args: Prisma.PropertyDailyRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        update: {
+          args: Prisma.PropertyDailyRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.PropertyDailyRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PropertyDailyRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PropertyDailyRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.PropertyDailyRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PropertyDailyRatePayload>
+        }
+        aggregate: {
+          args: Prisma.PropertyDailyRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePropertyDailyRate>
+        }
+        groupBy: {
+          args: Prisma.PropertyDailyRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PropertyDailyRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PropertyDailyRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PropertyDailyRateCountAggregateOutputType> | number
+        }
+      }
+    }
+    Settlement: {
+      payload: Prisma.$SettlementPayload<ExtArgs>
+      fields: Prisma.SettlementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SettlementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SettlementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        findFirst: {
+          args: Prisma.SettlementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SettlementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        findMany: {
+          args: Prisma.SettlementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        create: {
+          args: Prisma.SettlementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        createMany: {
+          args: Prisma.SettlementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SettlementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        delete: {
+          args: Prisma.SettlementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        update: {
+          args: Prisma.SettlementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        deleteMany: {
+          args: Prisma.SettlementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SettlementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SettlementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>[]
+        }
+        upsert: {
+          args: Prisma.SettlementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettlementPayload>
+        }
+        aggregate: {
+          args: Prisma.SettlementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSettlement>
+        }
+        groupBy: {
+          args: Prisma.SettlementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettlementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SettlementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettlementCountAggregateOutputType> | number
+        }
+      }
+    }
     Review: {
       payload: Prisma.$ReviewPayload<ExtArgs>
       fields: Prisma.ReviewFieldRefs
@@ -2958,6 +3108,10 @@ export const BookingScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   promotionId: 'promotionId',
   notes: 'notes',
+  confirmedAt: 'confirmedAt',
+  checkedInAt: 'checkedInAt',
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2973,6 +3127,8 @@ export const PaymentScalarFieldEnum = {
   method: 'method',
   status: 'status',
   transactionId: 'transactionId',
+  confirmedById: 'confirmedById',
+  confirmedByRole: 'confirmedByRole',
   paidAt: 'paidAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2981,12 +3137,50 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const PropertyDailyRateScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  price: 'price',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyDailyRateScalarFieldEnum = (typeof PropertyDailyRateScalarFieldEnum)[keyof typeof PropertyDailyRateScalarFieldEnum]
+
+
+export const SettlementScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  propertyId: 'propertyId',
+  grossAmount: 'grossAmount',
+  platformFee: 'platformFee',
+  hostAmount: 'hostAmount',
+  currency: 'currency',
+  status: 'status',
+  availableAt: 'availableAt',
+  recognizedAt: 'recognizedAt',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementScalarFieldEnum = (typeof SettlementScalarFieldEnum)[keyof typeof SettlementScalarFieldEnum]
+
+
 export const ReviewScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   bookingId: 'bookingId',
   rating: 'rating',
+  cleanlinessRating: 'cleanlinessRating',
+  locationRating: 'locationRating',
+  serviceRating: 'serviceRating',
+  valueRating: 'valueRating',
   comment: 'comment',
+  hostResponse: 'hostResponse',
+  hostRespondedAt: 'hostRespondedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -3501,6 +3695,20 @@ export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'SettlementStatus'
+ */
+export type EnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SettlementStatus[]'
+ */
+export type ListEnumSettlementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettlementStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'DiscountType'
  */
 export type EnumDiscountTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscountType'>
@@ -3660,6 +3868,8 @@ export type GlobalOmitConfig = {
   tourAvailability?: Prisma.TourAvailabilityOmit
   booking?: Prisma.BookingOmit
   payment?: Prisma.PaymentOmit
+  propertyDailyRate?: Prisma.PropertyDailyRateOmit
+  settlement?: Prisma.SettlementOmit
   review?: Prisma.ReviewOmit
   promotion?: Prisma.PromotionOmit
   promotionRedemption?: Prisma.PromotionRedemptionOmit

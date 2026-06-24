@@ -52,7 +52,8 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Tài khoản nhân viên", href: "/admin/operators", icon: <UserCog size={18} /> },
   { label: "Chỗ ở & Tour", href: "/admin/listings", icon: <Building2 size={18} /> },
   { label: "Đặt chỗ", href: "/admin/bookings", icon: <BookOpen size={18} /> },
-  { label: "Doanh thu", href: "/admin/payments", icon: <CreditCard size={18} /> },
+  { label: "Giao dịch", href: "/admin/payments", icon: <CreditCard size={18} /> },
+  { label: "Doanh thu", href: "/admin/revenue", icon: <BarChart2 size={18} /> },
   { label: "Khuyến mãi", href: "/admin/promotions", icon: <Tag size={18} /> },
   { label: "Hoa hồng", href: "/admin/commission", icon: <BarChart2 size={18} /> },
   { label: "Đánh giá", href: "/admin/reviews", icon: <ClipboardList size={18} /> },
@@ -64,6 +65,7 @@ type OperatorStats = {
   pendingApprovals?: number;
   openDisputes?: number;
   pendingBookings?: number;
+  activeTasks?: number;
 };
 
 function Badge({ value }: { value?: number }) {
@@ -134,6 +136,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ],
     },
     {
+      label: "Nhiệm vụ",
+      href: "/operator/tasks",
+      icon: <ClipboardList size={18} />,
+      badge: stats.activeTasks,
+    },
+    {
       label: "Quản lý cơ sở",
       icon: <Building2 size={18} />,
       items: [
@@ -164,7 +172,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       href: "/operator/profile",
       icon: <User size={18} />,
     },
-  ], [stats.openDisputes, stats.pendingApprovals, stats.pendingBookings, stats.pendingListings]);
+  ], [stats.activeTasks, stats.openDisputes, stats.pendingApprovals, stats.pendingBookings, stats.pendingListings]);
 
   const roleLabel =
     user?.role === "ADMIN"

@@ -5,11 +5,28 @@ export type TravelerBooking = {
   type: "PROPERTY" | "TOUR";
   status: string;
   paymentStatus: string;
+  paymentMethod: string | null;
+  paidAt: string | null;
+  paymentConfirmedBy: string | null;
   checkIn: string | null;
   checkOut: string | null;
   tourDate: string | null;
   numGuests: number;
   totalPrice: number;
+  settlement: {
+    status: string;
+    platformFee: number;
+    hostAmount: number;
+    availableAt: string;
+    paidAt: string | null;
+  } | null;
+  review: {
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+  } | null;
+  canReview: boolean;
   createdAt: string;
   item: {
     id: string;
@@ -23,8 +40,15 @@ export type TravelerBooking = {
 const statusLabel: Record<string, string> = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
+  CHECKED_IN: "Đã nhận phòng",
   CANCELLED: "Đã hủy",
   COMPLETED: "Hoàn thành",
+};
+
+const paymentLabel: Record<string, string> = {
+  UNPAID: "Chưa thanh toán",
+  PAID: "Đã thanh toán",
+  REFUNDED: "Đã hoàn tiền",
 };
 
 export function BookingCard({ booking }: { booking: TravelerBooking }) {
@@ -64,6 +88,27 @@ export function BookingCard({ booking }: { booking: TravelerBooking }) {
             </span>
           </div>
 
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+              Thanh toán: {paymentLabel[booking.paymentStatus] ?? booking.paymentStatus}
+            </span>
+            {booking.paymentMethod ? (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                Phương thức: {booking.paymentMethod}
+              </span>
+            ) : null}
+            {booking.paymentConfirmedBy ? (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                Xác nhận bởi: {booking.paymentConfirmedBy === "HOST" ? "Host" : "TripNest"}
+              </span>
+            ) : null}
+            {booking.settlement ? (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                Quyết toán: {booking.settlement.status}
+              </span>
+            ) : null}
+          </div>
+
           <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-4">
             <div>
               <p className="text-slate-400">Nhận phòng</p>
@@ -90,6 +135,14 @@ export function BookingCard({ booking }: { booking: TravelerBooking }) {
               </p>
             </div>
           </div>
+          {booking.review ? (
+            <div className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-slate-700">
+              <p className="font-semibold text-amber-700">
+                Đánh giá của bạn: {"★".repeat(booking.review.rating)}
+              </p>
+              <p className="mt-1">{booking.review.comment}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </article>

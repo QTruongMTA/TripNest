@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, Building2, CreditCard, MapPin, UserCog, Users } from "lucide-react";
 import { PortalShell } from "@/components/layout/PortalShell";
 import api from "@/lib/api";
+import Link from "next/link";
 
 interface DashboardData {
   totalUsers?: number;
@@ -10,6 +11,14 @@ interface DashboardData {
   totalTours?: number;
   totalBookings?: number;
   totalRevenue?: number;
+  grossPayments?: number;
+  coveredProvinces?: number;
+  metrics?: {
+    revenueThisMonth?: number;
+    newBookingsThisMonth?: number;
+    pendingListings?: number;
+    completionRate?: number;
+  };
   totalOperators?: number;
   recentBookings?: { id: string; status: string; totalPrice: number; createdAt: string }[];
 }
@@ -19,6 +28,7 @@ interface StatCardProps {
   value: string | number;
   icon: React.ReactNode;
   tone: "teal" | "amber" | "slate";
+  href: string;
 }
 
 const toneClass = {
@@ -27,9 +37,12 @@ const toneClass = {
   slate: "bg-slate-100 text-teal-900",
 };
 
-function StatCard({ title, value, icon, tone }: StatCardProps) {
+function StatCard({ title, value, icon, tone, href }: StatCardProps) {
   return (
-    <div className="portal-card p-5 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-teal-950/10">
+    <Link
+      href={href}
+      className="portal-card block p-5 transition hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md hover:shadow-teal-950/10"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -39,7 +52,8 @@ function StatCard({ title, value, icon, tone }: StatCardProps) {
           {icon}
         </div>
       </div>
-    </div>
+      <p className="mt-4 text-xs font-semibold text-teal-700">Xem chi tiết →</p>
+    </Link>
   );
 }
 
@@ -88,12 +102,19 @@ export default function AdminDashboard() {
         </section>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <StatCard title="Người dùng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
-          <StatCard title="Chỗ ở & Tour" value={(data.totalProperties ?? 0) + (data.totalTours ?? 0)} icon={<Building2 size={20} />} tone="slate" />
-          <StatCard title="Đặt chỗ" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
-          <StatCard title="Doanh thu (VNĐ)" value={(data.totalRevenue ?? 0).toLocaleString("vi-VN")} icon={<CreditCard size={20} />} tone="amber" />
-          <StatCard title="Operators" value={operators} icon={<UserCog size={20} />} tone="teal" />
-          <StatCard title="Tỉnh đã phủ" value={operators} icon={<MapPin size={20} />} tone="amber" />
+          <StatCard href="/admin/users" title="Người dùng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
+          <StatCard href="/admin/listings" title="Chỗ ở & Tour" value={(data.totalProperties ?? 0) + (data.totalTours ?? 0)} icon={<Building2 size={20} />} tone="slate" />
+          <StatCard href="/admin/bookings" title="Đặt chỗ" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
+          <StatCard href="/admin/revenue" title="Doanh thu nền tảng" value={`${(data.totalRevenue ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="amber" />
+          <StatCard href="/admin/revenue" title="Doanh thu tháng này" value={`${(data.metrics?.revenueThisMonth ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="teal" />
+          <StatCard href="/admin/payments" title="Tiền khách đã thanh toán" value={`${(data.grossPayments ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="slate" />
+          <StatCard href="/admin/operators" title="Operators" value={operators} icon={<UserCog size={20} />} tone="teal" />
+          <StatCard href="/admin/provinces" title="Tỉnh đã phủ" value={data.coveredProvinces ?? 0} icon={<MapPin size={20} />} tone="amber" />
+        </div>
+
+        <div className="portal-card border-l-4 border-l-amber-400 p-5 text-sm leading-6 text-slate-600">
+          Doanh thu nền tảng chỉ được ghi nhận khi host hoàn tất check-out. Trước thời điểm đó,
+          khoản khách đã trả vẫn là tiền giao dịch đang chờ thực hiện dịch vụ, chưa tính là doanh thu.
         </div>
 
         {(data.recentBookings?.length ?? 0) > 0 ? (
