@@ -1,4 +1,4 @@
-import { BookingType, ListingStatus } from "../generated/prisma/enums";
+import { BookingMethod, BookingStatus, BookingType, ListingStatus, PaymentMethod } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
 import { pricingService } from "./pricing.service";
 
@@ -74,6 +74,7 @@ export const bookingService = {
         select: {
           id: true,
           status: true,
+          totalPrice: true,
           userId: true,
           property: { select: { title: true } },
         },
@@ -96,6 +97,18 @@ export const bookingService = {
           updatedAt: true,
         },
       });
+
+      if (input.status === "CONFIRMED") {
+        await tx.payment.create({
+          data: {
+            bookingId: input.bookingId,
+            amount: booking.totalPrice,
+            currency: "VND",
+            method: PaymentMethod.BANK_TRANSFER,
+            status: "UNPAID",
+          },
+        });
+      }
 
       await tx.notification.create({
         data: {
@@ -210,6 +223,8 @@ export const bookingService = {
           pricePerNight: true,
           cleaningFee: true,
           maxGuests: true,
+          bookingMethod: true,
+          hostId: true,
         },
       });
 
@@ -263,6 +278,9 @@ export const bookingService = {
           checkOut: input.checkOut,
           numGuests: input.guests,
           totalPrice: pricing.totalPrice,
+          status: property.bookingMethod === BookingMethod.INSTANT
+            ? BookingStatus.CONFIRMED
+            : BookingStatus.PENDING,
           notes: input.notes?.trim() || null,
         },
         select: {
@@ -279,26 +297,52 @@ export const bookingService = {
         },
       });
 
-      const admins = await tx.user.findMany({
-        where: { role: "ADMIN", isActive: true },
-        select: { id: true },
-      });
+      const isInstant = booking.status === BookingStatus.CONFIRMED;
 
-      if (admins.length > 0) {
-        await tx.notification.createMany({
-          data: admins.map((admin) => ({
-            userId: admin.id,
+      // CONFIRMED means the slot is reserved; UNPAID reflects that payment has not yet been collected.
+      // Create the Payment record now so the payment flow has a row to update later.
+      if (isInstant) {
+        await tx.payment.create({
+          data: {
+            bookingId: booking.id,
+            amount: booking.totalPrice,
+            currency: "VND",
+            method: PaymentMethod.BANK_TRANSFER,
+            status: "UNPAID",
+          },
+        });
+      }
+
+      await tx.notification.createMany({
+        data: [
+          {
+            userId: property.hostId,
             type: "SYSTEM",
-            title: "Có đơn đặt phòng mới",
-            message: `Khách vừa đặt ${property.title}. Vui lòng kiểm tra và duyệt đơn.`,
+            title: isInstant ? "Có booking được xác nhận tự động" : "Có yêu cầu đặt phòng mới",
+            message: isInstant
+              ? `Khách vừa đặt ${property.title} và đơn đã được xác nhận tự động.`
+              : `Khách vừa gửi yêu cầu đặt ${property.title}. Vui lòng kiểm tra và xác nhận.`,
             metadata: {
               bookingId: booking.id,
               propertyId: input.propertyId,
-              action: "BOOKING_CREATED",
+              action: isInstant ? "BOOKING_AUTO_CONFIRMED" : "BOOKING_APPROVAL_REQUESTED",
             },
-          })),
-        });
-      }
+          },
+          {
+            userId: input.userId,
+            type: isInstant ? "BOOKING_CONFIRMED" : "SYSTEM",
+            title: isInstant ? "Đặt phòng thành công" : "Đã gửi yêu cầu đặt phòng",
+            message: isInstant
+              ? `Đơn đặt ${property.title} của bạn đã được xác nhận thành công.`
+              : `Yêu cầu đặt ${property.title} đã được gửi tới Host để xác nhận.`,
+            metadata: {
+              bookingId: booking.id,
+              propertyId: input.propertyId,
+              action: isInstant ? "BOOKING_CONFIRMED" : "BOOKING_PENDING_HOST",
+            },
+          },
+        ],
+      });
 
       return {
         kind: "SUCCESS" as const,
@@ -324,6 +368,7 @@ export const bookingService = {
         select: {
           id: true,
           status: true,
+          totalPrice: true,
           userId: true,
           type: true,
           property: { select: { title: true } },
@@ -348,6 +393,18 @@ export const bookingService = {
           updatedAt: true,
         },
       });
+
+      if (input.status === "CONFIRMED") {
+        await tx.payment.create({
+          data: {
+            bookingId: input.bookingId,
+            amount: booking.totalPrice,
+            currency: "VND",
+            method: PaymentMethod.BANK_TRANSFER,
+            status: "UNPAID",
+          },
+        });
+      }
 
       const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";
       await tx.notification.create({
