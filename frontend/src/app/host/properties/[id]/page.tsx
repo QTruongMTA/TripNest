@@ -3,7 +3,7 @@
 import { AvailabilityCalendar } from "@/components/host/AvailabilityCalendar";
 import { getAccessToken, getStoredUser } from "@/lib/auth";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
@@ -97,13 +97,18 @@ const PET_POLICIES = [
 export default function ManagePropertyPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const propertyId = params.id as string;
+
+  const initialTab = (TABS as readonly string[]).includes(searchParams.get("tab") ?? "")
+    ? (searchParams.get("tab") as Tab)
+    : "info";
 
   const [token, setToken] = useState<string | null>(null);
   const [property, setProperty] = useState<HostProperty | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("info");
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
