@@ -22,6 +22,9 @@ export type PropertyListItem = {
 export type PropertyDetail = PropertyListItem & {
   description: string;
   livingRoomSofaBeds: number;
+  childrenAllowed: boolean;
+  cribsAvailable: boolean;
+  sizeM2: number | null;
   address: {
     line1: string;
     line2: string | null;
@@ -59,6 +62,29 @@ export type PropertyDetail = PropertyListItem & {
     partiesAllowed: boolean;
     petsPolicy: string;
   };
+  services: {
+    breakfastIncluded: boolean;
+    parkingType: "FREE" | "PAID" | "NOT_AVAILABLE";
+  };
+  pricing: {
+    launchDiscountEnabled: boolean;
+    groupPricingEnabled: boolean;
+    oneGuestDiscountPct: number;
+  };
+  languages: string[];
+  ratePlans: Array<{
+    type: "NON_REFUNDABLE" | "WEEKLY";
+    enabled: boolean;
+    discountPct: number;
+  }>;
+  childPricing: {
+    enabled: boolean;
+    infantFree: boolean;
+    infantPrice: number | null;
+    childMaxAge: number;
+    childFree: boolean;
+    childPrice: number | null;
+  } | null;
   images: Array<{
     id: string;
     url: string;
@@ -71,7 +97,7 @@ export type PropertyDetail = PropertyListItem & {
   }>;
   host: {
     id: string;
-    name: string;
+    name: string | null;
     avatar: string | null;
   };
   availability: {
@@ -79,6 +105,9 @@ export type PropertyDetail = PropertyListItem & {
       date: string;
       status: "BLOCKED" | "MAINTENANCE";
     }>;
+    window: number;
+    longStayAllowed: boolean;
+    maxStayNights: number | null;
   };
   createdAt: string;
   updatedAt: string;

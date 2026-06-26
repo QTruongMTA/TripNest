@@ -48,6 +48,8 @@ export const propertyController = {
     const bathrooms = parsePositiveInteger(req.query.bathrooms, 0);
     const checkIn = parseIsoDate(req.query.checkIn);
     const checkOut = parseIsoDate(req.query.checkOut);
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const amenities = parseStringList(req.query.amenities);
     const type =
       typeof req.query.type === "string" &&
@@ -76,11 +78,12 @@ export const propertyController = {
       bathrooms === null ||
       checkIn === null ||
       checkOut === null ||
+      (checkIn === undefined) !== (checkOut === undefined) ||
       type === null ||
       cancellationPolicy === null ||
       (checkIn !== undefined &&
         checkOut !== undefined &&
-        checkIn >= checkOut) ||
+        (checkIn >= checkOut || checkIn < today)) ||
       (minPrice !== undefined &&
         maxPrice !== undefined &&
         minPrice > maxPrice)

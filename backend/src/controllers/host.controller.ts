@@ -1,11 +1,48 @@
 import type { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { bookingService } from "../services/booking.service";
 import { prisma } from "../lib/prisma";
-import { CancellationPolicy, PropertyType } from "../generated/prisma/enums";
+import {
+  BookingMethod,
+  CancellationPolicy,
+  LegalEntityType,
+  ParkingType,
+  PetPolicy,
+  PropertyType,
+  RatePlanType,
+} from "../generated/prisma/enums";
 import { normalizePropertyImageUrl } from "../utils/property-image.utils";
+import { PROPERTY_UPLOAD_DIR } from "../utils/upload-path.utils";
+
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function boundedInt(value: unknown, fallback: number, min: number, max: number): number {
+  const parsed = finiteNumber(value);
+  return parsed === undefined ? fallback : Math.min(max, Math.max(min, Math.round(parsed)));
+}
+
+function cleanStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean))];
+}
+
+function blockedDatesBefore(value: unknown): Date[] {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return [];
+  const firstBookableDate = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(firstBookableDate.getTime())) return [];
+
+  const today = new Date();
+  const cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const dates: Date[] = [];
+  while (cursor < firstBookableDate && dates.length < 730) {
+    dates.push(new Date(cursor));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return dates;
+}
 
 export const hostController = {
   async uploadPropertyImage(req: Request, res: Response) {
@@ -52,10 +89,9 @@ export const hostController = {
       });
     }
 
-    const uploadDir = path.join(process.cwd(), "uploads", "properties");
-    await mkdir(uploadDir, { recursive: true });
+    await mkdir(PROPERTY_UPLOAD_DIR, { recursive: true });
     const filename = `${randomUUID()}.${extension}`;
-    await writeFile(path.join(uploadDir, filename), buffer);
+    await writeFile(`${PROPERTY_UPLOAD_DIR}/${filename}`, buffer);
 
     const publicUrl = `${req.protocol}://${req.get("host")}/uploads/properties/${filename}`;
     return res.status(201).json({ data: { url: publicUrl } });
@@ -81,7 +117,85 @@ export const hostController = {
       });
     }
 
-    const thumbnailUrl = normalizePropertyImageUrl(body.thumbnailUrl, body.type);
+    const submittedImages: Array<{ url: string; isPrimary: boolean }> = [];
+    if (Array.isArray(body.images)) {
+      for (const image of body.images) {
+        if (!image || typeof image !== "object") continue;
+        const url = normalizePropertyImageUrl(
+          typeof image.url === "string" ? image.url : null,
+          body.type
+        );
+        if (url) submittedImages.push({ url, isPrimary: image.isPrimary === true });
+      }
+    }
+
+    const legacyThumbnailUrl = normalizePropertyImageUrl(body.thumbnailUrl, body.type);
+    const requestedImages = submittedImages.length
+      ? submittedImages
+      : legacyThumbnailUrl
+        ? [{ url: legacyThumbnailUrl, isPrimary: true }]
+        : [];
+    const requestedPrimaryIndex = requestedImages.findIndex((image) => image.isPrimary);
+    const primaryIndex = requestedPrimaryIndex >= 0 ? requestedPrimaryIndex : 0;
+    const propertyImages = requestedImages.map((image, index) => ({
+      url: image.url,
+      isPrimary: index === primaryIndex,
+    }));
+    const amenityNames = cleanStringList(body.amenities);
+    const languageNames = cleanStringList(body.languages);
+    const bedrooms = Array.isArray(body.bedrooms)
+      ? body.bedrooms.slice(0, 50).map((bedroom: unknown, index: number) => {
+          const item = bedroom && typeof bedroom === "object" ? bedroom as Record<string, unknown> : {};
+          return {
+            roomNumber: index + 1,
+            singleBeds: boundedInt(item.singleBeds, 0, 0, 20),
+            doubleBeds: boundedInt(item.doubleBeds, 0, 0, 20),
+            kingBeds: boundedInt(item.kingBeds, 0, 0, 20),
+            superKingBeds: boundedInt(item.superKingBeds, 0, 0, 20),
+            bunkBeds: boundedInt(item.bunkBeds, 0, 0, 20),
+            sofaBeds: boundedInt(item.sofaBeds, 0, 0, 20),
+            futonBeds: boundedInt(item.futonBeds, 0, 0, 20),
+          };
+        })
+      : [];
+    const ratePlans = Array.isArray(body.ratePlans)
+      ? body.ratePlans.flatMap((ratePlan: unknown) => {
+          if (!ratePlan || typeof ratePlan !== "object") return [];
+          const item = ratePlan as Record<string, unknown>;
+          if (!Object.values(RatePlanType).includes(item.type as RatePlanType)) return [];
+          return [{
+            type: item.type as RatePlanType,
+            enabled: item.enabled !== false,
+            discountPct: boundedInt(item.discountPct, 0, 0, 99),
+          }];
+        })
+      : [];
+    const childPricing = body.childPricing && typeof body.childPricing === "object"
+      ? {
+          enabled: body.childPricing.enabled !== false,
+          infantFree: body.childPricing.infantFree !== false,
+          infantPrice: body.childPricing.infantFree === false ? finiteNumber(body.childPricing.infantPrice) ?? 0 : null,
+          childMaxAge: boundedInt(body.childPricing.childMaxAge, 17, 3, 17),
+          childFree: body.childPricing.childFree !== false,
+          childPrice: body.childPricing.childFree === false ? finiteNumber(body.childPricing.childPrice) ?? 0 : null,
+        }
+      : null;
+    const owners = Array.isArray(body.owners)
+      ? body.owners.slice(0, 4).flatMap((owner: unknown, index: number) => {
+          if (!owner || typeof owner !== "object") return [];
+          const item = owner as Record<string, unknown>;
+          const firstName = typeof item.firstName === "string" ? item.firstName.trim() : "";
+          const lastName = typeof item.lastName === "string" ? item.lastName.trim() : "";
+          const birthDateText = typeof item.birthDate === "string" ? item.birthDate : "";
+          const birthDate = new Date(`${birthDateText}T00:00:00.000Z`);
+          if (!firstName || !lastName || Number.isNaN(birthDate.getTime())) return [];
+          return [{ firstName, lastName, birthDate, sortOrder: index }];
+        })
+      : [];
+    const initiallyBlockedDates = blockedDatesBefore(body.firstBookableDate);
+    const latitude = finiteNumber(body.latitude);
+    const longitude = finiteNumber(body.longitude);
+    const sizeM2 = finiteNumber(body.sizeM2);
 
     const property = await prisma.$transaction(async (tx) => {
       const created = await tx.property.create({
@@ -95,18 +209,73 @@ export const hostController = {
           country: typeof body.country === "string" ? body.country.trim() : "Việt Nam",
           pricePerNight: body.pricePerNight,
           ...(typeof body.cleaningFee === "number" ? { cleaningFee: body.cleaningFee } : {}),
-          maxGuests: body.maxGuests,
-          bedroomCount: typeof body.bedroomCount === "number" ? body.bedroomCount : 0,
-          bathrooms: body.bathrooms,
+          ...(latitude !== undefined ? { latitude } : {}),
+          ...(longitude !== undefined ? { longitude } : {}),
+          maxGuests: boundedInt(body.maxGuests, 2, 1, 100),
+          bedroomCount: bedrooms.length || boundedInt(body.bedroomCount, 0, 0, 50),
+          bathrooms: boundedInt(body.bathrooms, 1, 1, 50),
+          livingRoomSofaBeds: boundedInt(body.livingRoomSofaBeds, 0, 0, 20),
+          childrenAllowed: body.childrenAllowed !== false,
+          cribsAvailable: body.cribsAvailable === true,
+          ...(sizeM2 !== undefined ? { sizeM2 } : {}),
           type: body.type,
+          bookingMethod: Object.values(BookingMethod).includes(body.bookingMethod) ? body.bookingMethod : BookingMethod.INSTANT,
+          launchDiscountEnabled: body.launchDiscountEnabled === true,
+          cancellationFreeDays: boundedInt(body.cancellationFreeDays, 1, 0, 365),
+          mistakeProtection: body.mistakeProtection !== false,
+          breakfastIncluded: body.breakfastIncluded === true,
+          parkingType: Object.values(ParkingType).includes(body.parkingType) ? body.parkingType : ParkingType.NOT_AVAILABLE,
+          smokingAllowed: body.smokingAllowed === true,
+          partiesAllowed: body.partiesAllowed === true,
+          petsPolicy: Object.values(PetPolicy).includes(body.petsPolicy) ? body.petsPolicy : PetPolicy.NOT_ALLOWED,
+          checkInFrom: typeof body.checkInFrom === "string" ? body.checkInFrom : null,
+          checkInTo: typeof body.checkInTo === "string" ? body.checkInTo : null,
+          checkOutFrom: typeof body.checkOutFrom === "string" ? body.checkOutFrom : null,
+          checkOutTo: typeof body.checkOutTo === "string" ? body.checkOutTo : null,
+          groupPricingEnabled: body.groupPricingEnabled === true,
+          oneGuestDiscountPct: boundedInt(body.oneGuestDiscountPct, 0, 0, 99),
+          availabilityWindow: boundedInt(body.availabilityWindow, 365, 1, 730),
+          longStayAllowed: body.longStayAllowed === true,
+          maxStayNights: body.longStayAllowed === true ? boundedInt(body.maxStayNights, 30, 30, 365) : null,
+          legalEntityType: Object.values(LegalEntityType).includes(body.legalEntityType) ? body.legalEntityType : LegalEntityType.INDIVIDUAL,
+          ownerAlias: typeof body.ownerAlias === "string" && body.ownerAlias.trim() ? body.ownerAlias.trim() : null,
           hostId: req.user!.id,
           status: "PENDING",
-          images: {
-            create: {
-              url: thumbnailUrl,
-              isPrimary: true,
-            },
-          },
+          ...(propertyImages.length
+            ? {
+                images: {
+                  create: propertyImages,
+                },
+              }
+            : {}),
+          ...(bedrooms.length ? { bedrooms: { create: bedrooms } } : {}),
+          ...(amenityNames.length
+            ? {
+                amenities: {
+                  connectOrCreate: amenityNames.map((name) => ({
+                    where: { name },
+                    create: { name },
+                  })),
+                },
+              }
+            : {}),
+          ...(languageNames.length
+            ? { languages: { create: languageNames.map((language) => ({ language })) } }
+            : {}),
+          ...(ratePlans.length ? { ratePlans: { create: ratePlans } } : {}),
+          ...(childPricing ? { childPricing: { create: childPricing } } : {}),
+          ...(owners.length ? { owners: { create: owners } } : {}),
+          ...(initiallyBlockedDates.length
+            ? {
+                availability: {
+                  create: initiallyBlockedDates.map((date) => ({
+                    date,
+                    status: "BLOCKED" as const,
+                    reason: "Chưa đến ngày bắt đầu nhận khách",
+                  })),
+                },
+              }
+            : {}),
         },
       });
 

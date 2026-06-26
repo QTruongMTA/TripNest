@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev:frontend": "npm --prefix frontend run dev",
+    "dev:frontend:clean": "npm --prefix frontend run dev:clean",
     "dev:backend": "npm --prefix backend run dev",
     "dev:admin": "npm --prefix admin-portal run dev",
     "dev:admin:clean": "npm --prefix admin-portal run dev:clean",

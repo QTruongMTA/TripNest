@@ -14,6 +14,28 @@ const cancellationLabels: Record<string, string> = {
   NON_REFUNDABLE: "Không hoàn tiền",
 };
 
+const propertyTypeLabels: Record<string, string> = {
+  HOTEL: "Khách sạn",
+  APARTMENT: "Căn hộ",
+  RESORT: "Resort",
+  VILLA: "Biệt thự",
+  HOUSE: "Nhà",
+  HOMESTAY: "Homestay",
+  UNIQUE: "Chỗ nghỉ độc đáo",
+};
+
+const parkingLabels: Record<string, string> = {
+  FREE: "Chỗ đậu xe miễn phí",
+  PAID: "Chỗ đậu xe có tính phí",
+  NOT_AVAILABLE: "Không có chỗ đậu xe",
+};
+
+const petLabels: Record<string, string> = {
+  ALLOWED: "Cho phép thú cưng",
+  ON_REQUEST: "Thú cưng theo yêu cầu",
+  NOT_ALLOWED: "Không cho phép thú cưng",
+};
+
 async function getProperty(id: string) {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/properties/${id}`,
@@ -62,20 +84,24 @@ function getTotalBeds(property: PropertyDetail) {
 
 function formatHouseRules(property: PropertyDetail) {
   const rules = [
-    property.policies.smokingAllowed ? "Cho phep hut thuoc" : "Khong hut thuoc",
-    property.policies.partiesAllowed ? "Cho phep tiec/su kien" : "Khong tiec/su kien",
-    property.policies.petsPolicy === "NOT_ALLOWED"
-      ? "Khong thu cung"
-      : `Chinh sach thu cung: ${property.policies.petsPolicy}`,
+    property.policies.smokingAllowed ? "Cho phép hút thuốc" : "Không hút thuốc",
+    property.policies.partiesAllowed ? "Cho phép tiệc/sự kiện" : "Không tổ chức tiệc/sự kiện",
+    petLabels[property.policies.petsPolicy] ?? property.policies.petsPolicy,
   ];
 
   return rules.join(". ");
 }
 
+function formatVnd(amount: number | null) {
+  return amount === null ? "—" : `${amount.toLocaleString("vi-VN")}đ`;
+}
+
 export default async function PropertyDetailPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { checkIn?: string; checkOut?: string; guests?: string };
 }) {
   const property = await getProperty(params.id);
 
@@ -91,6 +117,7 @@ export default async function PropertyDetailPage({
     `${property.capacity.bedroomCount} phòng ngủ`,
     `${totalBeds || "—"} giường`,
     `${property.capacity.bathrooms} phòng tắm`,
+    ...(property.sizeM2 ? [`${Math.round(property.sizeM2)} m²`] : []),
   ];
 
   return (
@@ -98,7 +125,7 @@ export default async function PropertyDetailPage({
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-emerald-700">
-            {property.type} · {property.city}
+            {propertyTypeLabels[property.type] ?? property.type} · {property.city}
           </p>
           <h1 className="mt-2 max-w-4xl text-4xl font-semibold text-balance">
             {property.title}
@@ -137,11 +164,13 @@ export default async function PropertyDetailPage({
             />
           </div>
         ) : (
-          <div className="min-h-[320px] bg-slate-100" />
+          <div className="grid min-h-[320px] place-items-center bg-gradient-to-br from-teal-50 via-white to-amber-50 text-sm font-medium text-slate-400">
+            Chỗ nghỉ chưa có ảnh
+          </div>
         )}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-          {galleryImages.slice(0, 2).map((image) => (
-            <div key={image.id} className="relative min-h-[154px]">
+        <div className="grid min-h-[320px] grid-cols-2 gap-3 lg:min-h-[430px]">
+          {galleryImages.slice(0, 4).map((image, index) => (
+            <div key={image.id} className="relative min-h-[154px] overflow-hidden">
               <Image
                 src={image.url}
                 alt=""
@@ -150,10 +179,17 @@ export default async function PropertyDetailPage({
                 sizes="(min-width: 1024px) 38vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover"
               />
+              {index === 3 && galleryImages.length > 4 ? (
+                <span className="absolute inset-0 grid place-items-center bg-slate-950/55 text-lg font-semibold text-white">
+                  +{galleryImages.length - 4} ảnh
+                </span>
+              ) : null}
             </div>
           ))}
           {galleryImages.length === 0 ? (
-            <div className="min-h-[154px] bg-slate-100" />
+            <div className="col-span-2 grid min-h-[154px] place-items-center bg-slate-100 text-sm text-slate-400">
+              Ảnh bổ sung sẽ hiển thị tại đây
+            </div>
           ) : null}
         </div>
       </div>
@@ -194,12 +230,19 @@ export default async function PropertyDetailPage({
                 <p className="mt-1 font-medium text-slate-800">
                   {cancellationLabels[property.policies.cancellationPolicy] ??
                     property.policies.cancellationPolicy}
+                  {` · miễn phí trước ${property.policies.cancellationFreeDays} ngày`}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400">Phương thức đặt</p>
+                <p className="mt-1 font-medium text-slate-800">
+                  {property.policies.bookingMethod === "INSTANT" ? "Đặt ngay" : "Gửi yêu cầu cho Host"}
                 </p>
               </div>
               <div>
                 <p className="text-slate-400">Host</p>
                 <p className="mt-1 font-medium text-slate-800">
-                  {property.host.name}
+                  {property.host.name ?? "Chủ chỗ nghỉ"}
                 </p>
               </div>
             </div>
@@ -263,8 +306,63 @@ export default async function PropertyDetailPage({
                   {amenity.name}
                 </div>
               ))}
+              {property.services.breakfastIncluded ? (
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-slate-700">
+                  Có phục vụ bữa sáng
+                </div>
+              ) : null}
+              {property.services.parkingType !== "NOT_AVAILABLE" ? (
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-slate-700">
+                  {parkingLabels[property.services.parkingType]}
+                </div>
+              ) : null}
+              {property.amenities.length === 0 && !property.services.breakfastIncluded && property.services.parkingType === "NOT_AVAILABLE" ? (
+                <p className="text-sm text-slate-500 sm:col-span-2">Host chưa khai báo tiện nghi.</p>
+              ) : null}
             </div>
           </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+              <h2 className="text-2xl font-semibold">Phù hợp cho gia đình</h2>
+              <div className="mt-4 grid gap-2 text-sm leading-6 text-slate-600">
+                <p>{property.childrenAllowed ? "Có tiếp đón trẻ em" : "Không tiếp đón trẻ em"}</p>
+                <p>{property.cribsAvailable ? "Có thể cung cấp nôi/cũi" : "Không cung cấp nôi/cũi"}</p>
+                {property.childPricing?.enabled ? (
+                  <p>
+                    Trẻ sơ sinh: {property.childPricing.infantFree ? "miễn phí" : formatVnd(property.childPricing.infantPrice)}; trẻ em đến {property.childPricing.childMaxAge} tuổi: {property.childPricing.childFree ? "miễn phí" : formatVnd(property.childPricing.childPrice)}.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+              <h2 className="text-2xl font-semibold">Ngôn ngữ & lưu trú</h2>
+              <p className="mt-4 leading-7 text-slate-600">
+                {property.languages.length > 0 ? property.languages.join(", ") : "Host chưa khai báo ngôn ngữ."}
+              </p>
+              <p className="mt-3 text-sm text-slate-600">
+                Mở lịch trước {property.availability.window} ngày. {property.availability.longStayAllowed
+                  ? `Cho phép lưu trú dài ngày, tối đa ${property.availability.maxStayNights ?? "—"} đêm.`
+                  : "Không nhận kỳ lưu trú trên 30 đêm."}
+              </p>
+            </div>
+          </div>
+
+          {(property.ratePlans.some((plan) => plan.enabled) || property.pricing.launchDiscountEnabled || property.pricing.groupPricingEnabled) ? (
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+              <h2 className="text-2xl font-semibold">Ưu đãi và loại giá</h2>
+              <div className="mt-4 flex flex-wrap gap-2 text-sm text-teal-800">
+                {property.pricing.launchDiscountEnabled ? <span className="rounded-full bg-teal-50 px-3 py-2">Giảm 20% cho khách đầu tiên</span> : null}
+                {property.pricing.groupPricingEnabled ? <span className="rounded-full bg-teal-50 px-3 py-2">1 khách giảm {property.pricing.oneGuestDiscountPct}%</span> : null}
+                {property.ratePlans.filter((plan) => plan.enabled).map((plan) => (
+                  <span key={plan.type} className="rounded-full bg-teal-50 px-3 py-2">
+                    {plan.type === "NON_REFUNDABLE" ? "Không hoàn tiền" : "Lưu trú theo tuần"}: giảm {plan.discountPct}%
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6">
@@ -278,7 +376,7 @@ export default async function PropertyDetailPage({
               <h2 className="text-2xl font-semibold">Lịch bị chặn</h2>
               {property.availability.blockedDates.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {property.availability.blockedDates.map((slot) => (
+                  {property.availability.blockedDates.slice(0, 12).map((slot) => (
                     <span
                       key={slot.date}
                       className="rounded-full bg-rose-50 px-3 py-1 text-sm text-rose-700"
@@ -286,6 +384,11 @@ export default async function PropertyDetailPage({
                       {slot.date} · {slot.status}
                     </span>
                   ))}
+                  {property.availability.blockedDates.length > 12 ? (
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">
+                      +{property.availability.blockedDates.length - 12} ngày khác
+                    </span>
+                  ) : null}
                 </div>
               ) : (
                 <p className="mt-4 text-slate-600">
@@ -302,6 +405,10 @@ export default async function PropertyDetailPage({
             pricePerNight={property.pricePerNight}
             cleaningFee={property.cleaningFee}
             maxGuests={property.capacity.maxGuests}
+            bookingMethod={property.policies.bookingMethod as "INSTANT" | "REQUEST"}
+            initialCheckIn={searchParams.checkIn}
+            initialCheckOut={searchParams.checkOut}
+            initialGuests={Math.max(1, Number(searchParams.guests) || 1)}
           />
         </div>
       </div>

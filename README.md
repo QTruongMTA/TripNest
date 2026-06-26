@@ -313,6 +313,21 @@ Frontend mac dinh chay tai:
 http://localhost:3000
 ```
 
+### Cache khi phat trien frontend
+
+- Frontend development su dung thu muc cache `.next-dev`.
+- Production build su dung thu muc `.next`.
+- Hai che do da duoc tach rieng, vi vay co the chay `npm run build:frontend` trong khi dev server dang mo ma khong lam hong chunk cua dev server.
+- Khi chi sua code thong thuong, khong can tat server; Next.js se tu dong cap nhat bang hot reload.
+- Can khoi dong lai server sau khi thay doi `.env.local`, `next.config.mjs` hoac dependencies.
+- Neu dev server gap loi cache bat thuong, dung server hien tai bang `Ctrl+C`, sau do chay:
+
+```bash
+npm run dev:frontend:clean
+```
+
+Khong xoa `.next` de sua loi cua dev server, vi cache development nam trong `.next-dev`.
+
 Chay admin portal:
 
 ```bash

@@ -271,6 +271,11 @@ export const propertyService = {
         breakfastIncluded: property.breakfastIncluded,
         parkingType: property.parkingType,
       },
+      pricing: {
+        launchDiscountEnabled: property.launchDiscountEnabled,
+        groupPricingEnabled: property.groupPricingEnabled,
+        oneGuestDiscountPct: property.oneGuestDiscountPct,
+      },
       languages: property.languages.map((l) => l.language),
       ratePlans: property.ratePlans.map((rp) => ({
         type: rp.type,
@@ -287,11 +292,10 @@ export const propertyService = {
             childPrice: toNumber(property.childPricing.childPrice),
           }
         : null,
-      images: property.images.map((image) => ({
-        id: image.id,
-        url: normalizePropertyImageUrl(image.url, property.type),
-        isPrimary: image.isPrimary,
-      })),
+      images: property.images.flatMap((image) => {
+        const url = normalizePropertyImageUrl(image.url, property.type);
+        return url ? [{ id: image.id, url, isPrimary: image.isPrimary }] : [];
+      }),
       amenities: property.amenities.map((amenity) => ({
         id: amenity.id,
         name: amenity.name,

@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
 
-type PropertyType = "APARTMENT" | "HOUSE" | "HOTEL" | "UNIQUE";
+type PropertyType = "HOTEL" | "APARTMENT" | "RESORT" | "VILLA";
 type Step =
   | "type"
   | "name"
@@ -197,10 +197,10 @@ type MapLibreRuntime = {
 type NominatimResult = { lat: string; lon: string; display_name: string };
 
 const propertyTypes: Array<{ value: PropertyType; title: string; description: string; marker: string }> = [
-  { value: "APARTMENT", title: "Căn hộ", description: "Chỗ nghỉ tự nấu nướng, đầy đủ nội thất mà khách thuê nguyên căn.", marker: "A" },
-  { value: "HOUSE", title: "Nhà", description: "Nhà nguyên căn, biệt thự, nhà nghỉ dưỡng hoặc homestay riêng tư.", marker: "N" },
-  { value: "HOTEL", title: "Khách sạn, B&B", description: "Khách sạn, nhà nghỉ B&B, nhà khách hoặc chỗ nghỉ tương tự.", marker: "K" },
-  { value: "UNIQUE", title: "Chỗ nghỉ khác", description: "Khu cắm trại, bungalow, thuyền nghỉ dưỡng hoặc mô hình đặc biệt.", marker: "C" },
+  { value: "HOTEL", title: "Khách sạn", description: "Khách sạn và các cơ sở lưu trú có dịch vụ, tiện nghi tương tự.", marker: "K" },
+  { value: "APARTMENT", title: "Căn hộ", description: "Căn hộ đầy đủ nội thất, có không gian sinh hoạt và khu vực nấu nướng riêng.", marker: "A" },
+  { value: "RESORT", title: "Resort", description: "Khu nghỉ dưỡng có không gian thư giãn cùng nhiều dịch vụ và tiện ích tại chỗ.", marker: "R" },
+  { value: "VILLA", title: "Biệt thự", description: "Biệt thự nguyên căn, riêng tư, phù hợp cho gia đình hoặc nhóm khách.", marker: "B" },
 ];
 
 const steps: Step[] = ["type", "name", "address", "setup-details", "amenities", "services", "languages", "rules", "photos", "booking-method", "nightly-price", "rate-plans", "availability", "legal", "review"];
@@ -422,8 +422,15 @@ export default function Page() {
     setPublishSuccess(false);
 
     try {
-      const mainPhoto = photos.find((photo) => photo.isMain) ?? photos[0];
-      const thumbnailUrl = mainPhoto ? await uploadPropertyImage(mainPhoto.file, token) : undefined;
+      const uploadedImages = await Promise.all(
+        photos.map(async (photo) => ({
+          url: await uploadPropertyImage(photo.file, token),
+          isPrimary: photo.isMain,
+        }))
+      );
+      const sizeM2 = details.sizeUnit === "ft2"
+        ? Number(details.size) * 0.092903
+        : Number(details.size);
 
       await api.post(
         "/host/properties",
@@ -435,14 +442,73 @@ export default function Page() {
           city: address.city.trim(),
           postalCode: address.postalCode.trim() || undefined,
           country: address.country.trim() || "Việt Nam",
+          latitude: address.latitude,
+          longitude: address.longitude,
           pricePerNight: Number(nightlyPrice),
           maxGuests: details.guests,
           bedroomCount: details.bedrooms.length,
           bathrooms: details.bathrooms,
+          livingRoomSofaBeds: details.livingBeds,
+          childrenAllowed: details.children,
+          cribsAvailable: details.cribs,
+          sizeM2,
           type: propertyType,
-          thumbnailUrl,
+          images: uploadedImages,
+          bedrooms: details.bedrooms.map((bedroom, index) => ({
+            roomNumber: index + 1,
+            singleBeds: bedroom.beds.single,
+            doubleBeds: bedroom.beds.double,
+            kingBeds: bedroom.beds.king,
+            superKingBeds: bedroom.beds.superKing,
+            bunkBeds: bedroom.beds.bunk,
+            sofaBeds: bedroom.beds.sofa,
+            futonBeds: bedroom.beds.futon,
+          })),
+          amenities,
+          languages,
+          breakfastIncluded: services.breakfast === "yes",
+          parkingType: services.parking === "free" ? "FREE" : services.parking === "paid" ? "PAID" : "NOT_AVAILABLE",
+          smokingAllowed: rules.smoking,
+          partiesAllowed: rules.parties,
+          petsPolicy: rules.pets === "yes" ? "ALLOWED" : rules.pets === "request" ? "ON_REQUEST" : "NOT_ALLOWED",
+          checkInFrom: rules.checkInFrom,
+          checkInTo: rules.checkInTo,
+          checkOutFrom: rules.checkOutFrom,
+          checkOutTo: rules.checkOutTo,
+          bookingMethod: bookingMethod === "request" ? "REQUEST" : "INSTANT",
+          launchDiscountEnabled: launchDiscount,
+          cancellationFreeDays: cancellationDays,
+          mistakeProtection,
+          groupPricingEnabled: groupPricing.enabled,
+          oneGuestDiscountPct: groupPricing.oneGuestDiscount,
+          childPricing: {
+            enabled: childPricing.enabled,
+            infantFree: childPricing.infantMode === "free",
+            infantPrice: childPricing.infantMode === "fixed" ? Number(childPricing.infantPrice) || 0 : undefined,
+            childMaxAge: childPricing.childToAge,
+            childFree: childPricing.childMode === "free",
+            childPrice: childPricing.childMode === "fixed" ? Number(childPricing.childPrice) || 0 : undefined,
+          },
+          ratePlans: [
+            { type: "NON_REFUNDABLE", enabled: nonRefundableRate.enabled, discountPct: nonRefundableRate.discount },
+            { type: "WEEKLY", enabled: weeklyRate.enabled, discountPct: weeklyRate.discount },
+          ],
+          availabilityWindow: availability.first18MonthsOnly ? 540 : availability.openWindow,
+          firstBookableDate: availability.firstBookableDate === "specific" ? availability.specificDate : undefined,
+          longStayAllowed: availability.longStayAllowed,
+          maxStayNights: availability.longStayAllowed ? availability.maxStayNights : undefined,
           legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
           ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
+          owners: legalType === "business"
+            ? owners
+                .filter((owner) => owner.firstName.trim() && owner.lastName.trim() && owner.birthDate)
+                .map((owner, index) => ({
+                  firstName: owner.firstName.trim(),
+                  lastName: owner.lastName.trim(),
+                  birthDate: owner.birthDate,
+                  sortOrder: index,
+                }))
+            : [],
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

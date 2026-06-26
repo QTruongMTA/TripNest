@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "clean:build": "node -e \"const fs=require('fs');fs.rmSync('.next',{recursive:true,force:true})\"",
+    "clean:dev": "node -e \"const fs=require('fs');fs.rmSync('.next-dev',{recursive:true,force:true})\"",
+    "dev": "set NEXT_DIST_DIR=.next-dev&& next dev -p 3000",
+    "dev:clean": "npm run clean:dev && set NEXT_DIST_DIR=.next-dev&& next dev -p 3000",
+    "build": "npm run clean:build && next build",
     "start": "next start",
     "lint": "next lint"
   },

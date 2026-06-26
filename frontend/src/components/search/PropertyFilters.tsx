@@ -18,25 +18,23 @@ type SearchValues = {
 };
 
 const propertyTypes = [
-  { value: "HOUSE", label: "Nhà" },
-  { value: "APARTMENT", label: "Căn hộ" },
-  { value: "VILLA", label: "Villa" },
-  { value: "HOMESTAY", label: "Homestay" },
   { value: "HOTEL", label: "Khách sạn" },
+  { value: "APARTMENT", label: "Căn hộ" },
   { value: "RESORT", label: "Resort" },
+  { value: "VILLA", label: "Biệt thự" },
 ];
 
 const amenities = [
   "WiFi miễn phí",
   "Hồ bơi",
   "Điều hòa nhiệt độ",
-  "Bãi đỗ xe",
-  "Bếp đầy đủ tiện nghi",
+  "Hệ thống sưởi",
+  "Bếp",
+  "Bếp nhỏ",
   "Máy giặt",
-  "Smart TV",
-  "Ban công view đẹp",
-  "Phòng tập gym",
-  "Lò sưởi",
+  "TV màn hình phẳng",
+  "Ban công",
+  "Sân thượng / hiên",
 ];
 
 const cancellationPolicies = [
@@ -56,7 +54,7 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
       ref={formRef}
       action="/properties"
       onChange={submitOnChange}
-      className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-950/5"
+      className="space-y-5 self-start rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-950/5 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Bộ lọc</p>

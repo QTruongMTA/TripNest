@@ -10,21 +10,42 @@ type BookingFormProps = {
   pricePerNight?: number;
   cleaningFee?: number | null;
   maxGuests?: number;
+  bookingMethod?: "INSTANT" | "REQUEST";
+  initialCheckIn?: string;
+  initialCheckOut?: string;
+  initialGuests?: number;
 };
+
+function toLocalIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function nextDate(value: string) {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00`);
+  date.setDate(date.getDate() + 1);
+  return toLocalIsoDate(date);
+}
 
 export function BookingForm({
   propertyId,
   pricePerNight,
   cleaningFee,
   maxGuests,
+  bookingMethod = "INSTANT",
+  initialCheckIn,
+  initialCheckOut,
+  initialGuests,
 }: BookingFormProps) {
   const router = useRouter();
-  const today = new Date().toISOString().split("T")[0];
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(1);
+  const today = toLocalIsoDate(new Date());
+  const [checkIn, setCheckIn] = useState(initialCheckIn ?? "");
+  const [checkOut, setCheckOut] = useState(initialCheckOut ?? "");
+  const [guests, setGuests] = useState(Math.min(maxGuests ?? 100, Math.max(1, initialGuests ?? 1)));
   const [message, setMessage] = useState<string | null>(null);
-  const [availabilityOk, setAvailabilityOk] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
 
@@ -46,13 +67,11 @@ export function BookingForm({
   async function handleCheckAvailability() {
     if (!checkIn || !checkOut) {
       setMessage("Vui lòng chọn ngày nhận và trả phòng.");
-      setAvailabilityOk(false);
       return;
     }
 
     setLoading(true);
     setMessage(null);
-    setAvailabilityOk(false);
 
     try {
       const response = await fetch(
@@ -65,7 +84,6 @@ export function BookingForm({
         return;
       }
 
-      setAvailabilityOk(payload.data.available);
       setMessage(
         payload.data.available
           ? "Phòng còn trống cho khoảng thời gian này."
@@ -82,7 +100,7 @@ export function BookingForm({
     const accessToken = getAccessToken();
 
     if (!accessToken) {
-      const next = window.location.pathname;
+      const next = `${window.location.pathname}${window.location.search}`;
       router.push(`/login?next=${encodeURIComponent(next)}`);
       return;
     }
@@ -96,6 +114,21 @@ export function BookingForm({
     setMessage(null);
 
     try {
+      const availabilityResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/availability/properties/${propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
+      );
+      const availabilityPayload = await availabilityResponse.json();
+
+      if (!availabilityResponse.ok) {
+        setMessage(availabilityPayload.error?.message ?? "Không thể kiểm tra phòng trống.");
+        return;
+      }
+
+      if (!availabilityPayload.data.available) {
+        setMessage("Chỗ nghỉ không còn trống trong khoảng ngày đã chọn. Vui lòng chọn ngày khác.");
+        return;
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/bookings/property`,
         {
@@ -119,10 +152,12 @@ export function BookingForm({
         return;
       }
 
+      const bookingCode = payload.data.id.slice(-6).toUpperCase();
       setMessage(
-        `Đặt phòng thành công. Mã booking: ${payload.data.id.slice(-6).toUpperCase()}`
+        payload.data.status === "CONFIRMED"
+          ? `Đặt phòng thành công. Đơn đã được xác nhận ngay. Mã booking: ${bookingCode}`
+          : `Đã gửi yêu cầu đặt phòng tới Host. Mã booking: ${bookingCode}`
       );
-      setAvailabilityOk(false);
     } catch {
       setMessage("Không thể kết nối để tạo booking.");
     } finally {
@@ -158,7 +193,6 @@ export function BookingForm({
               const val = event.target.value;
               setCheckIn(val);
               if (checkOut && checkOut <= val) setCheckOut("");
-              setAvailabilityOk(false);
             }}
             className="rounded-2xl border border-slate-200 px-4 py-3"
           />
@@ -168,10 +202,9 @@ export function BookingForm({
           <input
             type="date"
             value={checkOut}
-            min={checkIn || today}
+            min={checkIn ? nextDate(checkIn) : today}
             onChange={(event) => {
               setCheckOut(event.target.value);
-              setAvailabilityOk(false);
             }}
             className="rounded-2xl border border-slate-200 px-4 py-3"
           />
@@ -220,9 +253,13 @@ export function BookingForm({
         type="button"
         onClick={handleCreateBooking}
         className="mt-3 w-full py-3"
-        disabled={!availabilityOk || bookingLoading}
+        disabled={!checkIn || !checkOut || guests < 1 || bookingLoading}
       >
-        {bookingLoading ? "Đang tạo booking..." : "Đặt phòng"}
+        {bookingLoading
+          ? "Đang xử lý đặt phòng..."
+          : bookingMethod === "INSTANT"
+            ? "Đặt phòng ngay"
+            : "Gửi yêu cầu cho Host"}
       </Button>
 
       {message ? (

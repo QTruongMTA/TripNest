@@ -1,7 +1,6 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-import path from "path";
 import { prisma } from "./lib/prisma";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { rateLimitMiddleware } from "./middlewares/rateLimit.middleware";
@@ -17,6 +16,7 @@ import { promotionRouter } from "./routes/promotion.routes";
 import { provinceRouter } from "./routes/province.routes";
 import { reviewRouter } from "./routes/review.routes";
 import { tourRouter } from "./routes/tour.routes";
+import { UPLOAD_ROOT } from "./utils/upload-path.utils";
 
 const app = express();
 
@@ -55,7 +55,7 @@ app.use(
   express.json({ limit: "5mb" }),
   rateLimitMiddleware
 );
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads", express.static(UPLOAD_ROOT));
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/availability", availabilityRouter);
