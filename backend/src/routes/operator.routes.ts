@@ -17,7 +17,6 @@ router.post("/listings/:id/request-revision", requireRole(...provinceOnly), oper
 router.post("/listings/:id/field-inspection", requireRole(...provinceOnly), operatorController.requestFieldInspection);
 router.get("/payments", operatorController.payments);
 router.get("/bookings", operatorController.bookings);
-router.patch("/bookings/:id/status", requireRole(...provinceOnly), operatorController.updateBookingStatus);
 
 router.get("/host-approvals", operatorController.hostApprovals);
 router.post("/host-approvals/:id/approve", requireRole(...provinceOnly), operatorController.approveHost);

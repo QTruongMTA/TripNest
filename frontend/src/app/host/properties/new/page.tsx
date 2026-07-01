@@ -173,7 +173,7 @@ type ProvinceOption = {
   type: "TINH" | "THANH_PHO";
 };
 
-const currentVietnamProvinceOptions: ProvinceOption[] = [
+const legacyVietnamProvinceOptions: ProvinceOption[] = [
   { id: "HN", name: "Hà Nội", code: "HN", type: "THANH_PHO" },
   { id: "HP", name: "Hải Phòng", code: "HP", type: "THANH_PHO" },
   { id: "HUE", name: "Huế", code: "HUE", type: "THANH_PHO" },
@@ -181,42 +181,71 @@ const currentVietnamProvinceOptions: ProvinceOption[] = [
   { id: "CT", name: "Cần Thơ", code: "CT", type: "THANH_PHO" },
   { id: "HCM", name: "Thành phố Hồ Chí Minh", code: "HCM", type: "THANH_PHO" },
   { id: "AG", name: "An Giang", code: "AG", type: "TINH" },
+  { id: "BRVT", name: "Bà Rịa - Vũng Tàu", code: "BRVT", type: "TINH" },
+  { id: "BG", name: "Bắc Giang", code: "BG", type: "TINH" },
+  { id: "BK", name: "Bắc Kạn", code: "BK", type: "TINH" },
+  { id: "BL", name: "Bạc Liêu", code: "BL", type: "TINH" },
   { id: "BN", name: "Bắc Ninh", code: "BN", type: "TINH" },
+  { id: "BTR", name: "Bến Tre", code: "BTR", type: "TINH" },
+  { id: "BDH", name: "Bình Định", code: "BDH", type: "TINH" },
+  { id: "BDU", name: "Bình Dương", code: "BDU", type: "TINH" },
+  { id: "BP", name: "Bình Phước", code: "BP", type: "TINH" },
+  { id: "BT", name: "Bình Thuận", code: "BT", type: "TINH" },
   { id: "CM", name: "Cà Mau", code: "CM", type: "TINH" },
   { id: "CB", name: "Cao Bằng", code: "CB", type: "TINH" },
   { id: "DL", name: "Đắk Lắk", code: "DL", type: "TINH" },
+  { id: "DNO", name: "Đắk Nông", code: "DNO", type: "TINH" },
   { id: "DB", name: "Điện Biên", code: "DB", type: "TINH" },
   { id: "DN", name: "Đồng Nai", code: "DN", type: "TINH" },
   { id: "DT", name: "Đồng Tháp", code: "DT", type: "TINH" },
   { id: "GL", name: "Gia Lai", code: "GL", type: "TINH" },
+  { id: "HG", name: "Hà Giang", code: "HG", type: "TINH" },
+  { id: "HNA", name: "Hà Nam", code: "HNA", type: "TINH" },
   { id: "HT", name: "Hà Tĩnh", code: "HT", type: "TINH" },
+  { id: "HD", name: "Hải Dương", code: "HD", type: "TINH" },
+  { id: "HGI", name: "Hậu Giang", code: "HGI", type: "TINH" },
+  { id: "HB", name: "Hòa Bình", code: "HB", type: "TINH" },
   { id: "HY", name: "Hưng Yên", code: "HY", type: "TINH" },
   { id: "KH", name: "Khánh Hòa", code: "KH", type: "TINH" },
+  { id: "KG", name: "Kiên Giang", code: "KG", type: "TINH" },
+  { id: "KT", name: "Kon Tum", code: "KT", type: "TINH" },
   { id: "LAI", name: "Lai Châu", code: "LAI", type: "TINH" },
   { id: "LD", name: "Lâm Đồng", code: "LD", type: "TINH" },
   { id: "LS", name: "Lạng Sơn", code: "LS", type: "TINH" },
   { id: "LC", name: "Lào Cai", code: "LC", type: "TINH" },
+  { id: "LA", name: "Long An", code: "LA", type: "TINH" },
+  { id: "ND", name: "Nam Định", code: "ND", type: "TINH" },
   { id: "NA", name: "Nghệ An", code: "NA", type: "TINH" },
   { id: "NB", name: "Ninh Bình", code: "NB", type: "TINH" },
+  { id: "NT", name: "Ninh Thuận", code: "NT", type: "TINH" },
   { id: "PT", name: "Phú Thọ", code: "PT", type: "TINH" },
+  { id: "PY", name: "Phú Yên", code: "PY", type: "TINH" },
+  { id: "QB", name: "Quảng Bình", code: "QB", type: "TINH" },
+  { id: "QNA", name: "Quảng Nam", code: "QNA", type: "TINH" },
   { id: "QNG", name: "Quảng Ngãi", code: "QNG", type: "TINH" },
   { id: "QN", name: "Quảng Ninh", code: "QN", type: "TINH" },
   { id: "QT", name: "Quảng Trị", code: "QT", type: "TINH" },
+  { id: "ST", name: "Sóc Trăng", code: "ST", type: "TINH" },
   { id: "SL", name: "Sơn La", code: "SL", type: "TINH" },
   { id: "TN", name: "Tây Ninh", code: "TN", type: "TINH" },
+  { id: "TB", name: "Thái Bình", code: "TB", type: "TINH" },
   { id: "TNG", name: "Thái Nguyên", code: "TNG", type: "TINH" },
   { id: "TH", name: "Thanh Hóa", code: "TH", type: "TINH" },
+  { id: "TG", name: "Tiền Giang", code: "TG", type: "TINH" },
+  { id: "TV", name: "Trà Vinh", code: "TV", type: "TINH" },
   { id: "TQ", name: "Tuyên Quang", code: "TQ", type: "TINH" },
   { id: "VL", name: "Vĩnh Long", code: "VL", type: "TINH" },
+  { id: "VP", name: "Vĩnh Phúc", code: "VP", type: "TINH" },
+  { id: "YB", name: "Yên Bái", code: "YB", type: "TINH" },
 ];
 
-function mergeCurrentProvinceOptions(provinces: ProvinceOption[]) {
+function mergeLegacyProvinceOptions(provinces: ProvinceOption[]) {
   const byName = new Map<string, ProvinceOption>();
-  currentVietnamProvinceOptions.forEach((province) => byName.set(province.name, province));
+  legacyVietnamProvinceOptions.forEach((province) => byName.set(province.name, province));
   provinces.forEach((province) => {
     if (byName.has(province.name)) byName.set(province.name, province);
   });
-  return currentVietnamProvinceOptions.map((province) => byName.get(province.name) ?? province);
+  return legacyVietnamProvinceOptions.map((province) => byName.get(province.name) ?? province);
 }
 
 type MapLibreLngLat = { lat: number; lng: number };
@@ -296,33 +325,62 @@ const vietnamProvinceCenters: Record<string, { lat: number; lng: number }> = {
   "Cần Thơ": { lat: 10.045162, lng: 105.746857 },
   "Thành phố Hồ Chí Minh": { lat: 10.776889, lng: 106.700806 },
   "An Giang": { lat: 10.38639, lng: 105.43518 },
+  "Bà Rịa - Vũng Tàu": { lat: 10.411379, lng: 107.136224 },
+  "Bắc Giang": { lat: 21.281993, lng: 106.197476 },
+  "Bắc Kạn": { lat: 22.147014, lng: 105.83481 },
+  "Bạc Liêu": { lat: 9.29414, lng: 105.72776 },
   "Bắc Ninh": { lat: 21.18608, lng: 106.07631 },
+  "Bến Tre": { lat: 10.243355, lng: 106.375552 },
+  "Bình Định": { lat: 13.782967, lng: 109.219663 },
+  "Bình Dương": { lat: 10.9804, lng: 106.6519 },
+  "Bình Phước": { lat: 11.534407, lng: 106.890491 },
+  "Bình Thuận": { lat: 10.92889, lng: 108.10208 },
   "Cà Mau": { lat: 9.17682, lng: 105.15242 },
   "Cao Bằng": { lat: 22.66667, lng: 106.25 },
   "Đắk Lắk": { lat: 12.710012, lng: 108.237751 },
+  "Đắk Nông": { lat: 12.004712, lng: 107.690735 },
   "Điện Biên": { lat: 21.38602, lng: 103.02301 },
   "Đồng Nai": { lat: 10.957413, lng: 106.842687 },
   "Đồng Tháp": { lat: 10.46017, lng: 105.63294 },
   "Gia Lai": { lat: 13.971835, lng: 108.015079 },
+  "Hà Giang": { lat: 22.823326, lng: 104.983568 },
+  "Hà Nam": { lat: 20.541111, lng: 105.913889 },
   "Hà Tĩnh": { lat: 18.355953, lng: 105.887749 },
+  "Hải Dương": { lat: 20.937341, lng: 106.314554 },
+  "Hậu Giang": { lat: 9.78451, lng: 105.47012 },
+  "Hòa Bình": { lat: 20.81333, lng: 105.33833 },
   "Hưng Yên": { lat: 20.64637, lng: 106.05112 },
   "Khánh Hòa": { lat: 12.238791, lng: 109.196749 },
+  "Kiên Giang": { lat: 10.01245, lng: 105.08091 },
+  "Kon Tum": { lat: 14.34974, lng: 108.00046 },
   "Lai Châu": { lat: 22.39643, lng: 103.45824 },
   "Lâm Đồng": { lat: 11.940419, lng: 108.458313 },
   "Lạng Sơn": { lat: 21.853708, lng: 106.761519 },
   "Lào Cai": { lat: 22.480943, lng: 103.975495 },
+  "Long An": { lat: 10.53589, lng: 106.41366 },
+  "Nam Định": { lat: 20.43882, lng: 106.162105 },
   "Nghệ An": { lat: 18.679585, lng: 105.681335 },
   "Ninh Bình": { lat: 20.250614, lng: 105.974453 },
+  "Ninh Thuận": { lat: 11.58257, lng: 108.99119 },
   "Phú Thọ": { lat: 21.32274, lng: 105.40199 },
+  "Phú Yên": { lat: 13.09546, lng: 109.32094 },
+  "Quảng Bình": { lat: 17.46885, lng: 106.62226 },
+  "Quảng Nam": { lat: 15.57364, lng: 108.47403 },
   "Quảng Ngãi": { lat: 15.121387, lng: 108.804414 },
   "Quảng Ninh": { lat: 20.971198, lng: 107.044806 },
   "Quảng Trị": { lat: 16.818916, lng: 107.100304 },
+  "Sóc Trăng": { lat: 9.602521, lng: 105.973904 },
   "Sơn La": { lat: 21.327034, lng: 103.914128 },
   "Tây Ninh": { lat: 11.335155, lng: 106.109885 },
+  "Thái Bình": { lat: 20.446347, lng: 106.336582 },
   "Thái Nguyên": { lat: 21.59422, lng: 105.84817 },
   "Thanh Hóa": { lat: 19.806692, lng: 105.785181 },
+  "Tiền Giang": { lat: 10.36, lng: 106.3597 },
+  "Trà Vinh": { lat: 9.93472, lng: 106.34528 },
   "Tuyên Quang": { lat: 21.776724, lng: 105.22802 },
   "Vĩnh Long": { lat: 10.25369, lng: 105.9722 },
+  "Vĩnh Phúc": { lat: 21.30891, lng: 105.60489 },
+  "Yên Bái": { lat: 21.7168, lng: 104.89859 },
 };
 const mapTilerApiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
 const mapStyleUrl = mapTilerApiKey ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${mapTilerApiKey}` : "https://tiles.openfreemap.org/styles/positron";
@@ -415,11 +473,11 @@ export default function Page() {
               ))
               .map((item) => ({ id: item.id, name: item.name, code: item.code, type: item.type }))
           : [];
-        if (!cancelled) setProvinceOptions(mergeCurrentProvinceOptions(provinces));
+        if (!cancelled) setProvinceOptions(mergeLegacyProvinceOptions(provinces));
       })
       .catch(() => {
         if (!cancelled) {
-          setProvinceOptions(currentVietnamProvinceOptions);
+          setProvinceOptions(legacyVietnamProvinceOptions);
           setProvincesError("");
         }
       })
@@ -491,7 +549,7 @@ export default function Page() {
     services: true,
     languages: languages.length > 0,
     rules: true,
-    photos: photos.length >= 5,
+    photos: photos.length >= 1,
     "booking-method": true,
     "nightly-price": Number(nightlyPrice) > 0,
     "rate-plans": true,
@@ -646,8 +704,14 @@ export default function Page() {
       );
       setPublishSuccess(true);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      setPublishError(message ?? "Không thể gửi yêu cầu duyệt cơ sở lưu trú. Vui lòng thử lại.");
+      const response = (err as { response?: { status?: number; data?: { error?: { code?: string; message?: string } } } })?.response;
+      if (response?.status === 401) {
+        setPublishError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại rồi gửi hồ sơ; thông tin đang nhập vẫn được giữ trên trang.");
+      } else if (response?.status === 413 || response?.data?.error?.code === "IMAGE_TOO_LARGE") {
+        setPublishError("Có ảnh vượt quá dung lượng cho phép. Vui lòng chọn ảnh nhỏ hơn 4 MB rồi thử lại.");
+      } else {
+        setPublishError(response?.data?.error?.message ?? "Không thể gửi yêu cầu duyệt cơ sở lưu trú. Vui lòng kiểm tra kết nối và thử lại.");
+      }
     } finally {
       setPublishing(false);
     }
@@ -954,7 +1018,7 @@ function AddressStep({
             <Field label="Địa chỉ"><input value={address.line1} onChange={(event) => setAddress({ ...address, line1: event.target.value })} className={inputClass} placeholder="Tên đường và số nhà/căn hộ" /></Field>
             <Field label="Địa chỉ dòng 2"><input value={address.line2} onChange={(event) => setAddress({ ...address, line2: event.target.value })} className={inputClass} placeholder="Số căn hộ, tầng, tòa nhà" /></Field>
             <div className="grid gap-5 md:grid-cols-2">
-              <Field label="Thị trấn/thành phố">
+              <Field label="Tỉnh/thành phố">
                 <select value={address.city} onChange={(event) => updateCity(event.target.value)} className={inputClass} disabled={citiesLoading || cityOptions.length === 0}>
                   <option value="" disabled>{citiesLoading ? "Đang tải tỉnh/thành" : "Chọn tỉnh/thành"}</option>
                   {cityOptions.map((city) => <option key={city}>{city}</option>)}
@@ -1465,7 +1529,7 @@ function RulesStep({ rules, setRules, onBack, onSubmit }: { rules: { smoking: bo
 }
 
 function PhotosStep({ photos, setPhotos, onBack, onSubmit, canContinue }: { photos: PhotoItem[]; setPhotos: (photos: PhotoItem[]) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
-  const remainingPhotos = Math.max(0, 5 - photos.length);
+  const remainingPhotos = Math.max(0, 1 - photos.length);
 
   function addPhotos(files: FileList | null) {
     if (!files?.length) return;
@@ -1507,7 +1571,7 @@ function PhotosStep({ photos, setPhotos, onBack, onSubmit, canContinue }: { phot
       <div>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Chỗ nghỉ của Quý vị trông như thế nào?</h1>
         <Panel className="mt-7">
-          <p className="text-sm font-semibold text-slate-950">Đăng tải ít nhất 5 ảnh của chỗ nghỉ.</p>
+          <p className="text-sm font-semibold text-slate-950">Đăng tải ít nhất 1 ảnh của chỗ nghỉ (khuyến nghị từ 5 ảnh để hồ sơ dễ được duyệt).</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">Càng đăng nhiều, Quý vị càng có cơ hội nhận đặt phòng. Quý vị có thể thêm ảnh sau.</p>
           <label className="mt-5 grid min-h-[118px] cursor-pointer place-items-center rounded-md border border-dashed border-slate-500 bg-white px-4 py-6 text-center transition hover:border-teal-600 hover:bg-teal-50">
             <span className="text-sm font-semibold text-slate-950">Kéo và thả hoặc</span>

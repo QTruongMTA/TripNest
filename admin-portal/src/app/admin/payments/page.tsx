@@ -38,7 +38,7 @@ export default function PaymentsPage() {
         <div>
           <p className="text-sm text-slate-500">{payments.length} giao dịch</p>
           <p className="mt-1 text-xs text-slate-400">
-            Đây là tiền khách đã thanh toán cho TripNest, không phải doanh thu thực nhận của từng host.
+            Đây là tiền khách đã thanh toán cho TripNest. Doanh thu lưu trú thuộc host; admin theo dõi hoa hồng nền tảng và đối soát chi trả.
           </p>
         </div>
 
@@ -115,10 +115,10 @@ export default function PaymentsPage() {
               <Detail label="Người xác nhận thu tiền" value={selected.confirmedBy ?? "Hệ thống"} />
               <Detail label="Số tiền khách trả" value={selected.amount} prominent />
               <Detail label="Trạng thái booking" value={selected.bookingStatus ?? "-"} />
-              <Detail label="Doanh thu TripNest" value={selected.platformFee ?? "Chưa ghi nhận"} />
+              <Detail label="Hoa hồng TripNest" value={selected.platformFee ?? "Chưa ghi nhận"} />
               <Detail label="Host thực nhận" value={selected.hostAmount ?? "Chưa quyết toán"} />
               <Detail
-                label="Ngày ghi nhận doanh thu"
+                label="Ngày ghi nhận hoa hồng"
                 value={selected.revenueRecognizedAt ?? "Sau khi khách trả phòng"}
               />
             </dl>

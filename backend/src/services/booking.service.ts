@@ -33,6 +33,7 @@ export const bookingService = {
             title: true,
             city: true,
             country: true,
+            bookingMethod: true,
             images: {
               where: { isPrimary: true },
               take: 1,
@@ -102,7 +103,7 @@ export const bookingService = {
           status: true,
           userId: true,
           paymentStatus: true,
-          property: { select: { title: true } },
+          property: { select: { title: true, bookingMethod: true } },
         },
       });
 
@@ -112,6 +113,10 @@ export const bookingService = {
 
       if (booking.status !== "PENDING") {
         return { kind: "BOOKING_NOT_PENDING" as const };
+      }
+
+      if (booking.property?.bookingMethod !== "REQUEST") {
+        return { kind: "BOOKING_NOT_HOST_APPROVAL" as const };
       }
 
       const now = new Date();
@@ -151,6 +156,17 @@ export const bookingService = {
             bookingId: booking.id,
             action: input.status === "CONFIRMED" ? "BOOKING_APPROVED" : "BOOKING_CANCELLED",
           },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.hostId,
+          action: input.status === "CONFIRMED" ? "BOOKING_CONFIRMED_BY_HOST" : "BOOKING_CANCELLED_BY_HOST",
+          entity: "Booking",
+          entityId: booking.id,
+          oldValue: { status: booking.status },
+          newValue: { status: input.status, propertyTitle: booking.property?.title ?? null },
         },
       });
 
@@ -362,8 +378,8 @@ export const bookingService = {
         dailyRates,
         guests: input.guests,
         services: {
-          breakfast: property.breakfastIncluded ? false : input.services?.breakfast,
-          airportTransfer: input.services?.airportTransfer,
+          breakfast: property.breakfastIncluded ? false : input.services?.breakfast === true,
+          airportTransfer: input.services?.airportTransfer === true,
         },
       });
 
@@ -427,84 +443,6 @@ export const bookingService = {
           checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
           createdAt: booking.createdAt.toISOString(),
           pricing,
-        },
-      };
-    });
-  },
-
-  async updateAdminBookingStatus(input: {
-    bookingId: string;
-    status: "CONFIRMED" | "CANCELLED";
-  }) {
-    return prisma.$transaction(async (tx) => {
-      const booking = await tx.booking.findUnique({
-        where: { id: input.bookingId },
-        select: {
-          id: true,
-          status: true,
-          userId: true,
-          paymentStatus: true,
-          type: true,
-          property: { select: { title: true } },
-          tour: { select: { title: true } },
-        },
-      });
-
-      if (!booking) {
-        return { kind: "BOOKING_NOT_FOUND" as const };
-      }
-
-      if (booking.status !== "PENDING") {
-        return { kind: "BOOKING_NOT_PENDING" as const };
-      }
-
-      const now = new Date();
-      const updated = await tx.booking.update({
-        where: { id: input.bookingId },
-        data: {
-          status: input.status,
-          ...(input.status === "CONFIRMED" ? { confirmedAt: now } : { cancelledAt: now }),
-          ...(input.status === "CANCELLED" && booking.paymentStatus === "PAID"
-            ? { paymentStatus: "REFUNDED" }
-            : {}),
-        },
-        select: {
-          id: true,
-          status: true,
-          updatedAt: true,
-        },
-      });
-
-      if (input.status === "CANCELLED" && booking.paymentStatus === "PAID") {
-        await tx.payment.updateMany({
-          where: { bookingId: booking.id, status: "PAID" },
-          data: { status: "REFUNDED" },
-        });
-      }
-
-      const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";
-      await tx.notification.create({
-        data: {
-          userId: booking.userId,
-          type: input.status === "CONFIRMED" ? "BOOKING_CONFIRMED" : "BOOKING_CANCELLED",
-          title: input.status === "CONFIRMED" ? "Đặt phòng thành công" : "Đặt phòng đã bị hủy",
-          message:
-            input.status === "CONFIRMED"
-              ? `Đơn đặt ${itemTitle} của bạn đã được admin duyệt thành công.`
-              : `Đơn đặt ${itemTitle} của bạn đã bị admin hủy.`,
-          metadata: {
-            bookingId: booking.id,
-            action: input.status === "CONFIRMED" ? "BOOKING_APPROVED" : "BOOKING_CANCELLED",
-          },
-        },
-      });
-
-      return {
-        kind: "SUCCESS" as const,
-        data: {
-          id: updated.id,
-          status: updated.status,
-          updatedAt: updated.updatedAt.toISOString(),
         },
       };
     });

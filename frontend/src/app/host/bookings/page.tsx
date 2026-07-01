@@ -37,6 +37,7 @@ type HostBooking = {
     title: string;
     city: string;
     country: string;
+    bookingMethod: "INSTANT" | "REQUEST";
     thumbnailUrl: string | null;
   } | null;
 };
@@ -233,10 +234,9 @@ export default function HostBookingsPage() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold">Đơn đặt của khách</h1>
         <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
-          Khách thanh toán online trực tiếp trên TripNest. Nếu khách trả tiền mặt hoặc
-          chuyển khoản tại cơ sở, host là người chịu trách nhiệm xác nhận đã nhận đủ tiền.
-          Host có thể check-in trước và thu tiền khi trả phòng, nhưng không thể hoàn tất
-          check-out nếu booking vẫn chưa được xác nhận thanh toán.
+          Một tài khoản host có thể quản lý nhiều cơ sở. Trang này chỉ hiển thị booking thuộc
+          các cơ sở có hostId là tài khoản của bạn. Cơ sở đặt tức thì được hệ thống tự xác nhận;
+          cơ sở đặt theo yêu cầu phải do chính host xác nhận hoặc từ chối. Admin và operator không duyệt thay.
         </div>
       </div>
 
@@ -286,6 +286,11 @@ export default function HostBookingsPage() {
                     </h2>
                     <p className="mt-1 text-slate-500">
                       Khách: {booking.guest.name} · {booking.guest.email}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-teal-700">
+                      {booking.property?.bookingMethod === "INSTANT"
+                        ? "Đặt tức thì · Hệ thống tự xác nhận"
+                        : "Đặt theo yêu cầu · Host xác nhận"}
                     </p>
                   </div>
                   <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700">
@@ -346,7 +351,7 @@ export default function HostBookingsPage() {
                   </div>
                 ) : null}
 
-                {booking.status === "PENDING" ? (
+                {booking.status === "PENDING" && booking.property?.bookingMethod === "REQUEST" ? (
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
                       type="button"

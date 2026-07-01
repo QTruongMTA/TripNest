@@ -6,6 +6,7 @@ import { ApprovedPropertiesSection } from "@/components/home/ApprovedPropertiesS
 import { PopularVietnamSection } from "@/components/home/PopularVietnamSection";
 import { PromoBannerSection } from "@/components/home/PromoBannerSection";
 import { QuickPlanSection } from "@/components/home/QuickPlanSection";
+import { RubyTravelTipsSection } from "@/components/home/RubyTravelTipsSection";
 import { StayTypeSection } from "@/components/home/StayTypeSection";
 import { UniqueStaysSection } from "@/components/home/UniqueStaysSection";
 import { WeekendDealsSection } from "@/components/home/WeekendDealsSection";
@@ -45,6 +46,7 @@ export default async function HomePage() {
         <WeekendDealsSection properties={weekendDeals} />
         <UniqueStaysSection properties={uniqueStays} />
         <GuestFavoritesSection properties={guestFavorites} />
+        <RubyTravelTipsSection />
         <QuickPlanSection />
         <PopularVietnamSection />
       </main>

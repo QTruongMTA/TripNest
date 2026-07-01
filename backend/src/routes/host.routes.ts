@@ -10,7 +10,7 @@ router.post("/properties", authMiddleware, hostController.createProperty);
 router.get("/properties", authMiddleware, hostController.listProperties);
 router.get("/profile-request", authMiddleware, hostController.getProfileRequest);
 router.post("/profile-request", authMiddleware, hostController.submitProfileRequest);
-router.use(authMiddleware, requireRole("HOST", "ADMIN"));
+router.use(authMiddleware, requireRole("HOST"));
 router.get("/bookings", hostController.listBookings);
 router.patch("/bookings/:id/confirm", hostController.confirmBooking);
 router.patch("/bookings/:id/cancel", hostController.cancelBooking);

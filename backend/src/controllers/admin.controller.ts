@@ -6,7 +6,6 @@ import {
   TourCategory,
 } from "../generated/prisma/enums";
 import { adminService } from "../services/admin.service";
-import { bookingService } from "../services/booking.service";
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -204,49 +203,6 @@ export const adminController = {
   async bookings(_req: Request, res: Response) {
     const data = await adminService.listAdminBookings();
     return res.json({ data });
-  },
-
-  async updateBookingStatus(req: Request, res: Response) {
-    const { id } = req.params;
-    const { status } = req.body ?? {};
-
-    if (
-      typeof id !== "string" ||
-      !id ||
-      (status !== "CONFIRMED" && status !== "CANCELLED")
-    ) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_BOOKING_STATUS_PAYLOAD",
-          message: "Invalid booking status payload",
-        },
-      });
-    }
-
-    const result = await bookingService.updateAdminBookingStatus({
-      bookingId: id,
-      status,
-    });
-
-    if (result.kind === "BOOKING_NOT_FOUND") {
-      return res.status(404).json({
-        error: {
-          code: "BOOKING_NOT_FOUND",
-          message: "Booking not found",
-        },
-      });
-    }
-
-    if (result.kind === "BOOKING_NOT_PENDING") {
-      return res.status(409).json({
-        error: {
-          code: "BOOKING_NOT_PENDING",
-          message: "Only pending bookings can be updated",
-        },
-      });
-    }
-
-    return res.json({ data: result.data });
   },
 
   async payments(_req: Request, res: Response) {

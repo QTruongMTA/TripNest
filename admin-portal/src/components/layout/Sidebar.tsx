@@ -53,7 +53,6 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Chỗ ở & Tour", href: "/admin/listings", icon: <Building2 size={18} /> },
   { label: "Đặt chỗ", href: "/admin/bookings", icon: <BookOpen size={18} /> },
   { label: "Giao dịch", href: "/admin/payments", icon: <CreditCard size={18} /> },
-  { label: "Doanh thu", href: "/admin/revenue", icon: <BarChart2 size={18} /> },
   { label: "Khuyến mãi", href: "/admin/promotions", icon: <Tag size={18} /> },
   { label: "Hoa hồng", href: "/admin/commission", icon: <BarChart2 size={18} /> },
   { label: "Đánh giá", href: "/admin/reviews", icon: <ClipboardList size={18} /> },

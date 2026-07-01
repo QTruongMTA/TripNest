@@ -592,66 +592,6 @@ export const operatorService = {
     });
   },
 
-  async updateProvinceBookingStatus(input: {
-    cities: string[];
-    bookingId: string;
-    status: "CONFIRMED" | "CANCELLED";
-  }) {
-    return prisma.$transaction(async (tx) => {
-      const booking = await tx.booking.findFirst({
-        where: {
-          id: input.bookingId,
-          OR: [
-            { property: { city: { in: input.cities } } },
-            { tour: { city: { in: input.cities } } },
-          ],
-        },
-        select: {
-          id: true,
-          status: true,
-          userId: true,
-          property: { select: { title: true } },
-          tour: { select: { title: true } },
-        },
-      });
-
-      if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
-      if (booking.status !== "PENDING") return { kind: "BOOKING_NOT_PENDING" as const };
-
-      const updated = await tx.booking.update({
-        where: { id: input.bookingId },
-        data: { status: input.status },
-        select: { id: true, status: true, updatedAt: true },
-      });
-
-      const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";
-      await tx.notification.create({
-        data: {
-          userId: booking.userId,
-          type: input.status === "CONFIRMED" ? "BOOKING_CONFIRMED" : "BOOKING_CANCELLED",
-          title: input.status === "CONFIRMED" ? "Đặt phòng thành công" : "Đặt phòng đã bị hủy",
-          message:
-            input.status === "CONFIRMED"
-              ? `Đơn đặt ${itemTitle} của bạn đã được xác nhận.`
-              : `Đơn đặt ${itemTitle} của bạn đã bị hủy.`,
-          metadata: {
-            bookingId: booking.id,
-            action: input.status === "CONFIRMED" ? "BOOKING_APPROVED" : "BOOKING_CANCELLED",
-          },
-        },
-      });
-
-      return {
-        kind: "SUCCESS" as const,
-        data: {
-          id: updated.id,
-          status: updated.status,
-          updatedAt: updated.updatedAt.toISOString(),
-        },
-      };
-    });
-  },
-
   // ── Host approval ────────────────────────────────────────────────────────────
 
   async updateProvinceListingStatus(input: {

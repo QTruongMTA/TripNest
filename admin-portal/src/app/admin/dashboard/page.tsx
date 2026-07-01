@@ -92,7 +92,7 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-3xl font-semibold">Điều phối TripNest hôm nay</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-                Theo dõi người dùng, booking, doanh thu và độ phủ operator trên toàn hệ thống.
+                Theo dõi người dùng, booking, hoa hồng và độ phủ operator trên toàn hệ thống.
               </p>
             </div>
             <span className="w-fit rounded-md bg-amber-400 px-4 py-2 text-sm font-semibold text-teal-950">
@@ -105,16 +105,16 @@ export default function AdminDashboard() {
           <StatCard href="/admin/users" title="Người dùng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
           <StatCard href="/admin/listings" title="Chỗ ở & Tour" value={(data.totalProperties ?? 0) + (data.totalTours ?? 0)} icon={<Building2 size={20} />} tone="slate" />
           <StatCard href="/admin/bookings" title="Đặt chỗ" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
-          <StatCard href="/admin/revenue" title="Doanh thu nền tảng" value={`${(data.totalRevenue ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="amber" />
-          <StatCard href="/admin/revenue" title="Doanh thu tháng này" value={`${(data.metrics?.revenueThisMonth ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="teal" />
+          <StatCard href="/admin/commission" title="Hoa hồng nền tảng" value={`${(data.totalRevenue ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="amber" />
+          <StatCard href="/admin/commission" title="Hoa hồng tháng này" value={`${(data.metrics?.revenueThisMonth ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="teal" />
           <StatCard href="/admin/payments" title="Tiền khách đã thanh toán" value={`${(data.grossPayments ?? 0).toLocaleString("vi-VN")} ₫`} icon={<CreditCard size={20} />} tone="slate" />
           <StatCard href="/admin/operators" title="Operators" value={operators} icon={<UserCog size={20} />} tone="teal" />
           <StatCard href="/admin/provinces" title="Tỉnh đã phủ" value={data.coveredProvinces ?? 0} icon={<MapPin size={20} />} tone="amber" />
         </div>
 
         <div className="portal-card border-l-4 border-l-amber-400 p-5 text-sm leading-6 text-slate-600">
-          Doanh thu nền tảng chỉ được ghi nhận khi host hoàn tất check-out. Trước thời điểm đó,
-          khoản khách đã trả vẫn là tiền giao dịch đang chờ thực hiện dịch vụ, chưa tính là doanh thu.
+          Doanh thu cơ sở lưu trú thuộc về host. Admin chỉ ghi nhận phần hoa hồng nền tảng sau khi host hoàn tất check-out;
+          trước thời điểm đó, khoản khách đã trả vẫn là tiền giao dịch đang chờ thực hiện dịch vụ.
         </div>
 
         {(data.recentBookings?.length ?? 0) > 0 ? (

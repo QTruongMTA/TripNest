@@ -1078,6 +1078,15 @@ async function handleUpdateStatus(
     });
   }
 
+  if (result.kind === "BOOKING_NOT_HOST_APPROVAL") {
+    return res.status(409).json({
+      error: {
+        code: "BOOKING_NOT_HOST_APPROVAL",
+        message: "Booking đặt tức thì do hệ thống tự xác nhận, host không cần duyệt lại.",
+      },
+    });
+  }
+
   return res.json({ data: result.data });
 }
 

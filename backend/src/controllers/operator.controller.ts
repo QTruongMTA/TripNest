@@ -111,47 +111,6 @@ export const operatorController = {
     return res.json({ data });
   },
 
-  async updateBookingStatus(req: Request, res: Response) {
-    const { id } = req.params;
-    const { status } = req.body ?? {};
-
-    if (typeof id !== "string" || !id || (status !== "CONFIRMED" && status !== "CANCELLED")) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_BOOKING_STATUS_PAYLOAD",
-          message: "Invalid booking status payload",
-        },
-      });
-    }
-
-    const provinces = await operatorService.getOperatorProvinces(req.user!.id);
-    const result = await operatorService.updateProvinceBookingStatus({
-      cities: provinces.map((p) => p.name),
-      bookingId: id,
-      status,
-    });
-
-    if (result.kind === "BOOKING_NOT_FOUND") {
-      return res.status(404).json({
-        error: {
-          code: "BOOKING_NOT_FOUND",
-          message: "Booking not found in assigned provinces",
-        },
-      });
-    }
-
-    if (result.kind === "BOOKING_NOT_PENDING") {
-      return res.status(409).json({
-        error: {
-          code: "BOOKING_NOT_PENDING",
-          message: "Only pending bookings can be updated",
-        },
-      });
-    }
-
-    return res.json({ data: result.data });
-  },
-
   async updateListingStatus(req: Request, res: Response) {
     const { id } = req.params;
     const { status, notes, checklist } = req.body ?? {};

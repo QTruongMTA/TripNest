@@ -29,11 +29,21 @@ export type AggregateBooking = {
 export type BookingAvgAggregateOutputType = {
   numGuests: number | null
   totalPrice: runtime.Decimal | null
+  stayPrice: runtime.Decimal | null
+  extrasPrice: runtime.Decimal | null
+  serviceFee: runtime.Decimal | null
+  vatAmount: runtime.Decimal | null
+  discountAmount: runtime.Decimal | null
 }
 
 export type BookingSumAggregateOutputType = {
   numGuests: number | null
   totalPrice: runtime.Decimal | null
+  stayPrice: runtime.Decimal | null
+  extrasPrice: runtime.Decimal | null
+  serviceFee: runtime.Decimal | null
+  vatAmount: runtime.Decimal | null
+  discountAmount: runtime.Decimal | null
 }
 
 export type BookingMinAggregateOutputType = {
@@ -47,6 +57,11 @@ export type BookingMinAggregateOutputType = {
   tourDate: Date | null
   numGuests: number | null
   totalPrice: runtime.Decimal | null
+  stayPrice: runtime.Decimal | null
+  extrasPrice: runtime.Decimal | null
+  serviceFee: runtime.Decimal | null
+  vatAmount: runtime.Decimal | null
+  discountAmount: runtime.Decimal | null
   status: $Enums.BookingStatus | null
   paymentStatus: $Enums.PaymentStatus | null
   promotionId: string | null
@@ -70,6 +85,11 @@ export type BookingMaxAggregateOutputType = {
   tourDate: Date | null
   numGuests: number | null
   totalPrice: runtime.Decimal | null
+  stayPrice: runtime.Decimal | null
+  extrasPrice: runtime.Decimal | null
+  serviceFee: runtime.Decimal | null
+  vatAmount: runtime.Decimal | null
+  discountAmount: runtime.Decimal | null
   status: $Enums.BookingStatus | null
   paymentStatus: $Enums.PaymentStatus | null
   promotionId: string | null
@@ -93,6 +113,13 @@ export type BookingCountAggregateOutputType = {
   tourDate: number
   numGuests: number
   totalPrice: number
+  stayPrice: number
+  extrasPrice: number
+  serviceFee: number
+  vatAmount: number
+  discountAmount: number
+  selectedServices: number
+  pricingBreakdown: number
   status: number
   paymentStatus: number
   promotionId: number
@@ -110,11 +137,21 @@ export type BookingCountAggregateOutputType = {
 export type BookingAvgAggregateInputType = {
   numGuests?: true
   totalPrice?: true
+  stayPrice?: true
+  extrasPrice?: true
+  serviceFee?: true
+  vatAmount?: true
+  discountAmount?: true
 }
 
 export type BookingSumAggregateInputType = {
   numGuests?: true
   totalPrice?: true
+  stayPrice?: true
+  extrasPrice?: true
+  serviceFee?: true
+  vatAmount?: true
+  discountAmount?: true
 }
 
 export type BookingMinAggregateInputType = {
@@ -128,6 +165,11 @@ export type BookingMinAggregateInputType = {
   tourDate?: true
   numGuests?: true
   totalPrice?: true
+  stayPrice?: true
+  extrasPrice?: true
+  serviceFee?: true
+  vatAmount?: true
+  discountAmount?: true
   status?: true
   paymentStatus?: true
   promotionId?: true
@@ -151,6 +193,11 @@ export type BookingMaxAggregateInputType = {
   tourDate?: true
   numGuests?: true
   totalPrice?: true
+  stayPrice?: true
+  extrasPrice?: true
+  serviceFee?: true
+  vatAmount?: true
+  discountAmount?: true
   status?: true
   paymentStatus?: true
   promotionId?: true
@@ -174,6 +221,13 @@ export type BookingCountAggregateInputType = {
   tourDate?: true
   numGuests?: true
   totalPrice?: true
+  stayPrice?: true
+  extrasPrice?: true
+  serviceFee?: true
+  vatAmount?: true
+  discountAmount?: true
+  selectedServices?: true
+  pricingBreakdown?: true
   status?: true
   paymentStatus?: true
   promotionId?: true
@@ -284,6 +338,13 @@ export type BookingGroupByOutputType = {
   tourDate: Date | null
   numGuests: number
   totalPrice: runtime.Decimal
+  stayPrice: runtime.Decimal | null
+  extrasPrice: runtime.Decimal | null
+  serviceFee: runtime.Decimal | null
+  vatAmount: runtime.Decimal | null
+  discountAmount: runtime.Decimal | null
+  selectedServices: runtime.JsonValue | null
+  pricingBreakdown: runtime.JsonValue | null
   status: $Enums.BookingStatus
   paymentStatus: $Enums.PaymentStatus
   promotionId: string | null
@@ -330,6 +391,13 @@ export type BookingWhereInput = {
   tourDate?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   numGuests?: Prisma.IntFilter<"Booking"> | number
   totalPrice?: Prisma.DecimalFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.JsonNullableFilter<"Booking">
+  pricingBreakdown?: Prisma.JsonNullableFilter<"Booking">
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   promotionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -361,6 +429,13 @@ export type BookingOrderByWithRelationInput = {
   tourDate?: Prisma.SortOrderInput | Prisma.SortOrder
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceFee?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  discountAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  selectedServices?: Prisma.SortOrderInput | Prisma.SortOrder
+  pricingBreakdown?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   promotionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -395,6 +470,13 @@ export type BookingWhereUniqueInput = Prisma.AtLeast<{
   tourDate?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   numGuests?: Prisma.IntFilter<"Booking"> | number
   totalPrice?: Prisma.DecimalFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.JsonNullableFilter<"Booking">
+  pricingBreakdown?: Prisma.JsonNullableFilter<"Booking">
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   promotionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -426,6 +508,13 @@ export type BookingOrderByWithAggregationInput = {
   tourDate?: Prisma.SortOrderInput | Prisma.SortOrder
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrderInput | Prisma.SortOrder
+  serviceFee?: Prisma.SortOrderInput | Prisma.SortOrder
+  vatAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  discountAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  selectedServices?: Prisma.SortOrderInput | Prisma.SortOrder
+  pricingBreakdown?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   promotionId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -457,6 +546,13 @@ export type BookingScalarWhereWithAggregatesInput = {
   tourDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
   numGuests?: Prisma.IntWithAggregatesFilter<"Booking"> | number
   totalPrice?: Prisma.DecimalWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.DecimalNullableWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.DecimalNullableWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.DecimalNullableWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.DecimalNullableWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.DecimalNullableWithAggregatesFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.JsonNullableWithAggregatesFilter<"Booking">
+  pricingBreakdown?: Prisma.JsonNullableWithAggregatesFilter<"Booking">
   status?: Prisma.EnumBookingStatusWithAggregatesFilter<"Booking"> | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"Booking"> | $Enums.PaymentStatus
   promotionId?: Prisma.StringNullableWithAggregatesFilter<"Booking"> | string | null
@@ -477,6 +573,13 @@ export type BookingCreateInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -507,6 +610,13 @@ export type BookingUncheckedCreateInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -531,6 +641,13 @@ export type BookingUpdateInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -561,6 +678,13 @@ export type BookingUncheckedUpdateInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -588,6 +712,13 @@ export type BookingCreateManyInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -608,6 +739,13 @@ export type BookingUpdateManyMutationInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -630,6 +768,13 @@ export type BookingUncheckedUpdateManyInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -663,6 +808,13 @@ export type BookingCountOrderByAggregateInput = {
   tourDate?: Prisma.SortOrder
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrder
+  serviceFee?: Prisma.SortOrder
+  vatAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
+  selectedServices?: Prisma.SortOrder
+  pricingBreakdown?: Prisma.SortOrder
   status?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   promotionId?: Prisma.SortOrder
@@ -678,6 +830,11 @@ export type BookingCountOrderByAggregateInput = {
 export type BookingAvgOrderByAggregateInput = {
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrder
+  serviceFee?: Prisma.SortOrder
+  vatAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
 }
 
 export type BookingMaxOrderByAggregateInput = {
@@ -691,6 +848,11 @@ export type BookingMaxOrderByAggregateInput = {
   tourDate?: Prisma.SortOrder
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrder
+  serviceFee?: Prisma.SortOrder
+  vatAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   promotionId?: Prisma.SortOrder
@@ -714,6 +876,11 @@ export type BookingMinOrderByAggregateInput = {
   tourDate?: Prisma.SortOrder
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrder
+  serviceFee?: Prisma.SortOrder
+  vatAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   promotionId?: Prisma.SortOrder
@@ -729,6 +896,11 @@ export type BookingMinOrderByAggregateInput = {
 export type BookingSumOrderByAggregateInput = {
   numGuests?: Prisma.SortOrder
   totalPrice?: Prisma.SortOrder
+  stayPrice?: Prisma.SortOrder
+  extrasPrice?: Prisma.SortOrder
+  serviceFee?: Prisma.SortOrder
+  vatAmount?: Prisma.SortOrder
+  discountAmount?: Prisma.SortOrder
 }
 
 export type BookingScalarRelationFilter = {
@@ -980,6 +1152,13 @@ export type BookingCreateWithoutUserInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1008,6 +1187,13 @@ export type BookingUncheckedCreateWithoutUserInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1064,6 +1250,13 @@ export type BookingScalarWhereInput = {
   tourDate?: Prisma.DateTimeNullableFilter<"Booking"> | Date | string | null
   numGuests?: Prisma.IntFilter<"Booking"> | number
   totalPrice?: Prisma.DecimalFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.DecimalNullableFilter<"Booking"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.JsonNullableFilter<"Booking">
+  pricingBreakdown?: Prisma.JsonNullableFilter<"Booking">
   status?: Prisma.EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Booking"> | $Enums.PaymentStatus
   promotionId?: Prisma.StringNullableFilter<"Booking"> | string | null
@@ -1084,6 +1277,13 @@ export type BookingCreateWithoutPropertyInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1112,6 +1312,13 @@ export type BookingUncheckedCreateWithoutPropertyInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1162,6 +1369,13 @@ export type BookingCreateWithoutTourInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1190,6 +1404,13 @@ export type BookingUncheckedCreateWithoutTourInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1240,6 +1461,13 @@ export type BookingCreateWithoutPaymentInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1269,6 +1497,13 @@ export type BookingUncheckedCreateWithoutPaymentInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1308,6 +1543,13 @@ export type BookingUpdateWithoutPaymentInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1337,6 +1579,13 @@ export type BookingUncheckedUpdateWithoutPaymentInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1360,6 +1609,13 @@ export type BookingCreateWithoutSettlementInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1389,6 +1645,13 @@ export type BookingUncheckedCreateWithoutSettlementInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1428,6 +1691,13 @@ export type BookingUpdateWithoutSettlementInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1457,6 +1727,13 @@ export type BookingUncheckedUpdateWithoutSettlementInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1480,6 +1757,13 @@ export type BookingCreateWithoutReviewInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1509,6 +1793,13 @@ export type BookingUncheckedCreateWithoutReviewInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1548,6 +1839,13 @@ export type BookingUpdateWithoutReviewInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1577,6 +1875,13 @@ export type BookingUncheckedUpdateWithoutReviewInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1600,6 +1905,13 @@ export type BookingCreateWithoutPromotionInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1629,6 +1941,13 @@ export type BookingUncheckedCreateWithoutPromotionInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1678,6 +1997,13 @@ export type BookingCreateWithoutPromotionRedemptionInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -1707,6 +2033,13 @@ export type BookingUncheckedCreateWithoutPromotionRedemptionInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1746,6 +2079,13 @@ export type BookingUpdateWithoutPromotionRedemptionInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1775,6 +2115,13 @@ export type BookingUncheckedUpdateWithoutPromotionRedemptionInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1800,6 +2147,13 @@ export type BookingCreateManyUserInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1820,6 +2174,13 @@ export type BookingUpdateWithoutUserInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1848,6 +2209,13 @@ export type BookingUncheckedUpdateWithoutUserInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1874,6 +2242,13 @@ export type BookingUncheckedUpdateManyWithoutUserInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1896,6 +2271,13 @@ export type BookingCreateManyPropertyInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -1916,6 +2298,13 @@ export type BookingUpdateWithoutPropertyInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1944,6 +2333,13 @@ export type BookingUncheckedUpdateWithoutPropertyInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1970,6 +2366,13 @@ export type BookingUncheckedUpdateManyWithoutPropertyInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1992,6 +2395,13 @@ export type BookingCreateManyTourInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   promotionId?: string | null
@@ -2012,6 +2422,13 @@ export type BookingUpdateWithoutTourInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2040,6 +2457,13 @@ export type BookingUncheckedUpdateWithoutTourInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2066,6 +2490,13 @@ export type BookingUncheckedUpdateManyWithoutTourInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   promotionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2089,6 +2520,13 @@ export type BookingCreateManyPromotionInput = {
   tourDate?: Date | string | null
   numGuests: number
   totalPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.BookingStatus
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
@@ -2108,6 +2546,13 @@ export type BookingUpdateWithoutPromotionInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2137,6 +2582,13 @@ export type BookingUncheckedUpdateWithoutPromotionInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2163,6 +2615,13 @@ export type BookingUncheckedUpdateManyWithoutPromotionInput = {
   tourDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   numGuests?: Prisma.IntFieldUpdateOperationsInput | number
   totalPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stayPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  extrasPrice?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  serviceFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  vatAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  discountAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  selectedServices?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pricingBreakdown?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2187,6 +2646,13 @@ export type BookingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   tourDate?: boolean
   numGuests?: boolean
   totalPrice?: boolean
+  stayPrice?: boolean
+  extrasPrice?: boolean
+  serviceFee?: boolean
+  vatAmount?: boolean
+  discountAmount?: boolean
+  selectedServices?: boolean
+  pricingBreakdown?: boolean
   status?: boolean
   paymentStatus?: boolean
   promotionId?: boolean
@@ -2218,6 +2684,13 @@ export type BookingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   tourDate?: boolean
   numGuests?: boolean
   totalPrice?: boolean
+  stayPrice?: boolean
+  extrasPrice?: boolean
+  serviceFee?: boolean
+  vatAmount?: boolean
+  discountAmount?: boolean
+  selectedServices?: boolean
+  pricingBreakdown?: boolean
   status?: boolean
   paymentStatus?: boolean
   promotionId?: boolean
@@ -2245,6 +2718,13 @@ export type BookingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   tourDate?: boolean
   numGuests?: boolean
   totalPrice?: boolean
+  stayPrice?: boolean
+  extrasPrice?: boolean
+  serviceFee?: boolean
+  vatAmount?: boolean
+  discountAmount?: boolean
+  selectedServices?: boolean
+  pricingBreakdown?: boolean
   status?: boolean
   paymentStatus?: boolean
   promotionId?: boolean
@@ -2272,6 +2752,13 @@ export type BookingSelectScalar = {
   tourDate?: boolean
   numGuests?: boolean
   totalPrice?: boolean
+  stayPrice?: boolean
+  extrasPrice?: boolean
+  serviceFee?: boolean
+  vatAmount?: boolean
+  discountAmount?: boolean
+  selectedServices?: boolean
+  pricingBreakdown?: boolean
   status?: boolean
   paymentStatus?: boolean
   promotionId?: boolean
@@ -2284,7 +2771,7 @@ export type BookingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "userId" | "propertyId" | "tourId" | "checkIn" | "checkOut" | "tourDate" | "numGuests" | "totalPrice" | "status" | "paymentStatus" | "promotionId" | "notes" | "confirmedAt" | "checkedInAt" | "completedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
+export type BookingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "userId" | "propertyId" | "tourId" | "checkIn" | "checkOut" | "tourDate" | "numGuests" | "totalPrice" | "stayPrice" | "extrasPrice" | "serviceFee" | "vatAmount" | "discountAmount" | "selectedServices" | "pricingBreakdown" | "status" | "paymentStatus" | "promotionId" | "notes" | "confirmedAt" | "checkedInAt" | "completedAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["booking"]>
 export type BookingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   property?: boolean | Prisma.Booking$propertyArgs<ExtArgs>
@@ -2331,6 +2818,13 @@ export type $BookingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     tourDate: Date | null
     numGuests: number
     totalPrice: runtime.Decimal
+    stayPrice: runtime.Decimal | null
+    extrasPrice: runtime.Decimal | null
+    serviceFee: runtime.Decimal | null
+    vatAmount: runtime.Decimal | null
+    discountAmount: runtime.Decimal | null
+    selectedServices: runtime.JsonValue | null
+    pricingBreakdown: runtime.JsonValue | null
     status: $Enums.BookingStatus
     paymentStatus: $Enums.PaymentStatus
     promotionId: string | null
@@ -2782,6 +3276,13 @@ export interface BookingFieldRefs {
   readonly tourDate: Prisma.FieldRef<"Booking", 'DateTime'>
   readonly numGuests: Prisma.FieldRef<"Booking", 'Int'>
   readonly totalPrice: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly stayPrice: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly extrasPrice: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly serviceFee: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly vatAmount: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly discountAmount: Prisma.FieldRef<"Booking", 'Decimal'>
+  readonly selectedServices: Prisma.FieldRef<"Booking", 'Json'>
+  readonly pricingBreakdown: Prisma.FieldRef<"Booking", 'Json'>
   readonly status: Prisma.FieldRef<"Booking", 'BookingStatus'>
   readonly paymentStatus: Prisma.FieldRef<"Booking", 'PaymentStatus'>
   readonly promotionId: Prisma.FieldRef<"Booking", 'String'>
