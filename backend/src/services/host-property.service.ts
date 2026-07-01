@@ -224,7 +224,7 @@ export const hostPropertyService = {
     const rangeStart = new Date(Date.UTC(year, month - 1, 1));
     const rangeEnd = new Date(Date.UTC(year, month, 1)); // exclusive
 
-    const [blocked, bookings] = await Promise.all([
+    const [blocked, bookings, dailyRates] = await Promise.all([
       prisma.propertyAvailability.findMany({
         where: { propertyId, date: { gte: rangeStart, lt: rangeEnd } },
         select: { date: true, status: true, reason: true },
@@ -238,7 +238,13 @@ export const hostPropertyService = {
         },
         select: { id: true, checkIn: true, checkOut: true, status: true },
       }),
+      prisma.propertyDailyRate.findMany({
+        where: { propertyId, date: { gte: rangeStart, lt: rangeEnd } },
+        select: { date: true, price: true, minStay: true, maxStay: true, closedToArrival: true, closedToDeparture: true, note: true },
+      }),
     ]);
+
+    const rateMap = new Map(dailyRates.map((r) => [r.date.toISOString().slice(0, 10), r]));
 
     // Build day map: date string → state
     const dayMap = new Map<string, { state: string; bookingId?: string; bookingStatus?: string; reason?: string }>();
@@ -270,11 +276,29 @@ export const hostPropertyService = {
     }
 
     // Build the result array for every day in the month
-    const days: Array<{ date: string; state: string; bookingId?: string; bookingStatus?: string; reason?: string }> = [];
+    type DayEntry = {
+      date: string; state: string;
+      bookingId?: string; bookingStatus?: string; reason?: string;
+      price?: number | null; minStay?: number | null; maxStay?: number | null;
+      closedToArrival?: boolean; closedToDeparture?: boolean; note?: string | null;
+    };
+    const days: DayEntry[] = [];
     const cursor = new Date(rangeStart);
     while (cursor < rangeEnd) {
       const key = cursor.toISOString().slice(0, 10);
-      days.push({ date: key, ...(dayMap.get(key) ?? { state: "available" }) });
+      const rate = rateMap.get(key);
+      days.push({
+        date: key,
+        ...(dayMap.get(key) ?? { state: "available" }),
+        ...(rate ? {
+          price: rate.price != null ? Number(rate.price) : null,
+          minStay: rate.minStay,
+          maxStay: rate.maxStay,
+          closedToArrival: rate.closedToArrival,
+          closedToDeparture: rate.closedToDeparture,
+          note: rate.note,
+        } : {}),
+      });
       cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
 
@@ -363,6 +387,178 @@ export const hostPropertyService = {
     });
 
     return { deleted: result.count };
+  },
+
+  // ── Daily rate management ─────────────────────────────────────────────────
+
+  async setDailyRates(
+    hostId: string,
+    propertyId: string,
+    items: Array<{
+      date: string;
+      price?: number | null;
+      minStay?: number | null;
+      maxStay?: number | null;
+      closedToArrival?: boolean;
+      closedToDeparture?: boolean;
+      note?: string | null;
+      _delete?: boolean;
+    }>,
+  ) {
+    const exists = await prisma.property.findFirst({
+      where: { id: propertyId, hostId },
+      select: { id: true },
+    });
+    if (!exists) return null;
+
+    const validItems = items.filter((i) => /^\d{4}-\d{2}-\d{2}$/.test(i.date));
+
+    // Items flagged _delete OR all fields at their defaults → remove row (keep DB clean)
+    function isAllDefault(i: (typeof validItems)[0]) {
+      return (
+        i.price == null &&
+        !i.minStay &&
+        !i.maxStay &&
+        !i.closedToArrival &&
+        !i.closedToDeparture &&
+        !i.note
+      );
+    }
+
+    const toDelete = validItems
+      .filter((i) => i._delete || isAllDefault(i))
+      .map((i) => new Date(`${i.date}T00:00:00.000Z`));
+
+    const toUpsert = validItems.filter((i) => !i._delete && !isAllDefault(i));
+
+    await prisma.$transaction([
+      ...(toDelete.length > 0
+        ? [prisma.propertyDailyRate.deleteMany({ where: { propertyId, date: { in: toDelete } } })]
+        : []),
+      ...toUpsert.map((item) => {
+        const date = new Date(`${item.date}T00:00:00.000Z`);
+        const payload = {
+          price: item.price ?? null,
+          minStay: item.minStay ?? null,
+          maxStay: item.maxStay ?? null,
+          closedToArrival: item.closedToArrival ?? false,
+          closedToDeparture: item.closedToDeparture ?? false,
+          note: item.note ?? null,
+        };
+        return prisma.propertyDailyRate.upsert({
+          where: { propertyId_date: { propertyId, date } },
+          create: { propertyId, date, ...payload },
+          update: payload,
+        });
+      }),
+    ]);
+
+    return { upserted: toUpsert.length, deleted: toDelete.length };
+  },
+
+  // ── Rate plan management ──────────────────────────────────────────────────
+
+  async listRatePlans(hostId: string, propertyId: string) {
+    const exists = await prisma.property.findFirst({ where: { id: propertyId, hostId }, select: { id: true } });
+    if (!exists) return null;
+    return prisma.propertyRatePlan.findMany({
+      where: { propertyId },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+  },
+
+  async createRatePlan(
+    hostId: string,
+    propertyId: string,
+    input: {
+      name: string;
+      type?: string;
+      priceAdjustmentType?: string;
+      priceAdjustmentValue?: number;
+      cancellationPolicy?: string | null;
+      cancellationFreeDays?: number | null;
+      minStay?: number | null;
+      maxStay?: number | null;
+      breakfastIncluded?: boolean;
+      sortOrder?: number;
+    },
+  ) {
+    const exists = await prisma.property.findFirst({ where: { id: propertyId, hostId }, select: { id: true } });
+    if (!exists) return null;
+    return prisma.propertyRatePlan.create({
+      data: {
+        propertyId,
+        name: input.name.trim(),
+        type: (input.type ?? "STANDARD") as never,
+        isActive: true,
+        priceAdjustmentType: (input.priceAdjustmentType ?? "NONE") as never,
+        priceAdjustmentValue: input.priceAdjustmentValue ?? 0,
+        cancellationPolicy: (input.cancellationPolicy ?? null) as never,
+        cancellationFreeDays: input.cancellationFreeDays ?? null,
+        minStay: input.minStay ?? null,
+        maxStay: input.maxStay ?? null,
+        breakfastIncluded: input.breakfastIncluded ?? false,
+        sortOrder: input.sortOrder ?? 0,
+      },
+    });
+  },
+
+  async updateRatePlan(
+    hostId: string,
+    propertyId: string,
+    ratePlanId: string,
+    input: {
+      name?: string;
+      type?: string;
+      priceAdjustmentType?: string;
+      priceAdjustmentValue?: number;
+      cancellationPolicy?: string | null;
+      cancellationFreeDays?: number | null;
+      minStay?: number | null;
+      maxStay?: number | null;
+      breakfastIncluded?: boolean;
+      sortOrder?: number;
+    },
+  ) {
+    const plan = await prisma.propertyRatePlan.findFirst({
+      where: { id: ratePlanId, propertyId, property: { hostId } },
+      select: { id: true },
+    });
+    if (!plan) return null;
+    return prisma.propertyRatePlan.update({
+      where: { id: ratePlanId },
+      data: {
+        ...(input.name !== undefined && { name: input.name.trim() }),
+        ...(input.type !== undefined && { type: input.type as never }),
+        ...(input.priceAdjustmentType !== undefined && { priceAdjustmentType: input.priceAdjustmentType as never }),
+        ...(input.priceAdjustmentValue !== undefined && { priceAdjustmentValue: input.priceAdjustmentValue }),
+        ...(input.cancellationPolicy !== undefined && { cancellationPolicy: (input.cancellationPolicy ?? null) as never }),
+        ...(input.cancellationFreeDays !== undefined && { cancellationFreeDays: input.cancellationFreeDays }),
+        ...(input.minStay !== undefined && { minStay: input.minStay }),
+        ...(input.maxStay !== undefined && { maxStay: input.maxStay }),
+        ...(input.breakfastIncluded !== undefined && { breakfastIncluded: input.breakfastIncluded }),
+        ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
+      },
+    });
+  },
+
+  async toggleRatePlan(hostId: string, propertyId: string, ratePlanId: string, isActive: boolean) {
+    const plan = await prisma.propertyRatePlan.findFirst({
+      where: { id: ratePlanId, propertyId, property: { hostId } },
+      select: { id: true },
+    });
+    if (!plan) return null;
+    return prisma.propertyRatePlan.update({ where: { id: ratePlanId }, data: { isActive } });
+  },
+
+  async deleteRatePlan(hostId: string, propertyId: string, ratePlanId: string) {
+    const plan = await prisma.propertyRatePlan.findFirst({
+      where: { id: ratePlanId, propertyId, property: { hostId } },
+      select: { id: true },
+    });
+    if (!plan) return null;
+    await prisma.propertyRatePlan.delete({ where: { id: ratePlanId } });
+    return true;
   },
 
   // ── Image management ─────────────────────────────────────────────────────

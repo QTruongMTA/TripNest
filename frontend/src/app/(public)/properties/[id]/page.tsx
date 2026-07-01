@@ -72,6 +72,19 @@ function formatHouseRules(property: PropertyDetail) {
   return rules.join(". ");
 }
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+const reviewBreakdownLabels: Array<[keyof NonNullable<PropertyDetail["rating"]["breakdown"]>, string]> = [
+  ["cleanliness", "Sạch sẽ"],
+  ["comfort", "Thoải mái"],
+  ["location", "Vị trí"],
+  ["facilities", "Tiện nghi"],
+  ["staff", "Chủ nhà"],
+  ["valueForMoney", "Đáng tiền"],
+];
+
 export default async function PropertyDetailPage({
   params,
 }: {
@@ -266,6 +279,71 @@ export default async function PropertyDetailPage({
             </div>
           </div>
 
+          <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.18em] text-slate-400">Đánh giá của khách</p>
+                <h2 className="mt-2 text-2xl font-semibold">
+                  {property.rating.average ? `${property.rating.average}/5` : "Chưa có đánh giá"}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {property.rating.count ? `${property.rating.count} đánh giá đã xác thực sau lưu trú` : "Khách sẽ có thể đánh giá sau khi hoàn tất booking."}
+                </p>
+              </div>
+            </div>
+
+            {property.rating.breakdown && (
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {reviewBreakdownLabels.map(([key, label]) => (
+                  <div key={key} className="rounded-2xl bg-slate-50 px-4 py-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">{label}</span>
+                      <span className="font-semibold text-slate-800">{property.rating.breakdown?.[key]}/5</span>
+                    </div>
+                    <div className="mt-2 h-1.5 rounded-full bg-slate-200">
+                      <div
+                        className="h-1.5 rounded-full bg-emerald-600"
+                        style={{ width: `${((property.rating.breakdown?.[key] ?? 0) / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {property.reviews.length > 0 && (
+              <div className="mt-6 grid gap-4">
+                {property.reviews.slice(0, 6).map((review) => (
+                  <article key={review.id} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-semibold text-slate-900">{review.guest.name}</p>
+                        <p className="mt-0.5 text-xs text-slate-400">{formatDate(review.createdAt)}</p>
+                      </div>
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-sm font-semibold text-emerald-700">
+                        ★ {review.rating}/5
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-700">{review.comment}</p>
+                    {review.images.length > 0 && (
+                      <div className="mt-3 flex gap-2 overflow-x-auto">
+                        {review.images.map((image) => (
+                          <img key={image.id} src={image.url} alt="" className="h-20 w-24 rounded-xl object-cover" />
+                        ))}
+                      </div>
+                    )}
+                    {review.hostReply && (
+                      <div className="mt-3 rounded-xl bg-white px-4 py-3 text-sm">
+                        <p className="font-medium text-slate-800">Phản hồi từ chủ nhà</p>
+                        <p className="mt-1 text-slate-600">{review.hostReply}</p>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6">
               <h2 className="text-2xl font-semibold">Nội quy nhà</h2>
@@ -302,6 +380,8 @@ export default async function PropertyDetailPage({
             pricePerNight={property.pricePerNight}
             cleaningFee={property.cleaningFee}
             maxGuests={property.capacity.maxGuests}
+            ratePlans={property.ratePlans ?? []}
+            promotions={property.promotions ?? []}
           />
         </div>
       </div>

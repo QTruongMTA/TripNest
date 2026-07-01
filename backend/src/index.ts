@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import path from "path";
+import { startExpireBookingsJob } from "./jobs/expire-bookings.job";
 import { prisma } from "./lib/prisma";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { rateLimitMiddleware } from "./middlewares/rateLimit.middleware";
@@ -16,7 +17,6 @@ import { operatorRouter } from "./routes/operator.routes";
 import { promotionRouter } from "./routes/promotion.routes";
 import { provinceRouter } from "./routes/province.routes";
 import { reviewRouter } from "./routes/review.routes";
-import { tourRouter } from "./routes/tour.routes";
 
 const app = express();
 
@@ -60,7 +60,6 @@ app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/availability", availabilityRouter);
 app.use("/api/v1/properties", propertyRouter);
-app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use("/api/v1/host", hostRouter);
 app.use("/api/v1/notifications", notificationRouter);
@@ -75,7 +74,10 @@ const server = app.listen(port, () =>
   console.log(`TripNest API listening on port ${port}`)
 );
 
+const expireJobTimer = startExpireBookingsJob();
+
 const shutdown = async () => {
+  clearInterval(expireJobTimer);
   server.close();
   await prisma.$disconnect();
   process.exit(0);

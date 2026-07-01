@@ -1,6 +1,14 @@
 export type PropertyRating = {
   average: number | null;
   count: number;
+  breakdown?: {
+    cleanliness: number;
+    comfort: number;
+    location: number;
+    facilities: number;
+    staff: number;
+    valueForMoney: number;
+  } | null;
 };
 
 export type PropertyListItem = {
@@ -17,6 +25,12 @@ export type PropertyListItem = {
   amenityNames?: string[];
   thumbnailUrl: string | null;
   rating: PropertyRating;
+  promotion?: {
+    id: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+  } | null;
 };
 
 export type PropertyDetail = PropertyListItem & {
@@ -80,6 +94,46 @@ export type PropertyDetail = PropertyListItem & {
       status: "BLOCKED" | "MAINTENANCE";
     }>;
   };
+  ratePlans: Array<{
+    id: string;
+    name: string;
+    type: string;
+    priceAdjustmentType: string;
+    priceAdjustmentValue: number;
+    cancellationPolicy: string | null;
+    cancellationFreeDays: number | null;
+    minStay: number | null;
+    maxStay: number | null;
+    breakfastIncluded: boolean;
+    sortOrder: number;
+  }>;
+  promotions: Array<{
+    id: string;
+    code: string;
+    description: string | null;
+    discountType: string;
+    discountValue: number;
+    minOrderValue: number | null;
+    maxUses: number | null;
+    usedCount: number;
+    endDate: string;
+  }>;
+  reviews: Array<{
+    id: string;
+    rating: number;
+    cleanliness: number;
+    comfort: number;
+    location: number;
+    facilities: number;
+    staff: number;
+    valueForMoney: number;
+    comment: string;
+    hostReply: string | null;
+    hostRepliedAt: string | null;
+    createdAt: string;
+    guest: { id: string; name: string; avatar: string | null };
+    images: Array<{ id: string; url: string }>;
+  }>;
   createdAt: string;
   updatedAt: string;
 };

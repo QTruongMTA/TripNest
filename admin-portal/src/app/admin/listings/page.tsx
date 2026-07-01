@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/layout/PortalShell";
 import api from "@/lib/api";
@@ -6,7 +6,7 @@ import api from "@/lib/api";
 interface Listing {
   id: string; title: string; city: string; status: string;
   type: string; host: { email: string }; createdAt: string;
-  pricePerNight?: number; pricePerPerson?: number;
+  pricePerNight?: number;
   images?: { url: string }[];
 }
 
@@ -27,15 +27,15 @@ export default function ListingsPage() {
 
   const listings = data.listings ?? [];
 
-  async function updateStatus(kind: "properties" | "tours", id: string, status: string) {
+  async function updateStatus(kind: "properties", id: string, status: string) {
     await api.patch(`/admin/listings/${kind}/${id}/status`, { status });
     api.get("/admin/listings").then((r) => setData(r.data.data ?? {}));
   }
 
   return (
-    <PortalShell title="Chỗ ở & Tour">
+    <PortalShell title="Chá»— á»Ÿ">
       <div className="space-y-5">
-        <p className="text-sm text-slate-500">{listings.length} chỗ ở & tour</p>
+        <p className="text-sm text-slate-500">{listings.length} Chá»— á»Ÿ</p>
 
         {loading ? (
           <div className="flex justify-center py-16"><div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" /></div>
@@ -45,17 +45,17 @@ export default function ListingsPage() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Tên</th>
-                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Địa điểm</th>
-                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Loại</th>
+                    <th className="text-left px-6 py-3 text-slate-500 font-medium">TÃªn</th>
+                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Äá»‹a Ä‘iá»ƒm</th>
+                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Loáº¡i</th>
                     <th className="text-left px-6 py-3 text-slate-500 font-medium">Host</th>
-                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Trạng thái</th>
+                    <th className="text-left px-6 py-3 text-slate-500 font-medium">Tráº¡ng thÃ¡i</th>
                     <th className="px-6 py-3" />
                   </tr>
                 </thead>
                 <tbody>
                   {listings.length === 0 && (
-                    <tr><td colSpan={6} className="text-center text-slate-400 py-12">Không có dữ liệu.</td></tr>
+                    <tr><td colSpan={6} className="text-center text-slate-400 py-12">KhÃ´ng cÃ³ dá»¯ liá»‡u.</td></tr>
                   )}
                   {listings.map((l) => (
                     <tr key={l.id} className="border-b border-slate-50 last:border-0">
@@ -86,3 +86,4 @@ export default function ListingsPage() {
     </PortalShell>
   );
 }
+

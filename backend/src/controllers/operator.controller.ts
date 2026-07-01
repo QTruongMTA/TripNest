@@ -154,15 +154,28 @@ export const operatorController = {
 
   async updateListingStatus(req: Request, res: Response) {
     const { id } = req.params;
-    const { status } = req.body ?? {};
-    if (!status) return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "status is required" } });
+    const { status, notes, checklist, issues } = req.body ?? {};
+    if (typeof id !== "string" || !id || !["ACTIVE", "INACTIVE", "SUSPENDED", "PENDING"].includes(status)) {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "valid status is required" } });
+    }
 
-    const { prisma } = await import("../lib/prisma.js");
-    const property = await prisma.property.update({
-      where: { id: id as string },
-      data: { status },
+    const provinces = await operatorService.getOperatorProvinces(req.user!.id);
+    const result = await operatorService.reviewProvinceListing({
+      cities: provinces.map((p) => p.name),
+      propertyId: id,
+      reviewerId: req.user!.id,
+      status,
+      notes: typeof notes === "string" ? notes : null,
+      checklist,
+      issues,
     });
-    return res.json({ data: property });
+    if (result.kind === "LISTING_NOT_FOUND") {
+      return res.status(404).json({ error: { code: "LISTING_NOT_FOUND", message: "Listing not found in assigned provinces" } });
+    }
+    if (result.kind === "NOTES_REQUIRED") {
+      return res.status(400).json({ error: { code: "NOTES_REQUIRED", message: "notes are required for rejection or suspension" } });
+    }
+    return res.json({ data: result.data });
   },
 
   async hostApprovals(req: Request, res: Response) {

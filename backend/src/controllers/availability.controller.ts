@@ -54,36 +54,4 @@ export const availabilityController = {
 
     return res.json({ data: result });
   },
-
-  async tour(req: Request, res: Response) {
-    const { id } = req.params;
-    const date = parseDateOnly(req.query.date);
-    const guests = parsePositiveInteger(req.query.guests, 1);
-
-    if (typeof id !== "string" || !id || !date || guests === null) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_QUERY",
-          message: "Invalid tour availability query parameters",
-        },
-      });
-    }
-
-    const result = await availabilityService.checkTourAvailability({
-      tourId: id,
-      date,
-      guests,
-    });
-
-    if (!result) {
-      return res.status(404).json({
-        error: {
-          code: "TOUR_NOT_FOUND",
-          message: "Tour not found",
-        },
-      });
-    }
-
-    return res.json({ data: result });
-  },
 };

@@ -76,6 +76,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
   const strength = getPasswordStrength(password);
   const canSubmit = strength.score === 3;
@@ -103,12 +104,54 @@ export default function RegisterPage() {
       }
 
       setSession(payload.data.user, payload.data.accessToken);
-      router.push("/");
+      setDone(true);
     } catch {
       setError("Không thể kết nối tới máy chủ.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (done) {
+    return (
+      <section className="mx-auto flex min-h-[70vh] w-full max-w-2xl items-center px-6 py-10">
+        <div className="relative w-full rounded-[32px] border border-slate-200 bg-white p-8 text-slate-900 shadow-2xl">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            aria-label="Đóng"
+            className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          >
+            ×
+          </button>
+          <p className="text-sm uppercase tracking-[0.2em] text-teal-600">TripNest</p>
+          <div className="mt-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50">
+            <svg viewBox="0 0 24 24" className="h-7 w-7 text-teal-600" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.95-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h1 className="mt-4 text-2xl font-semibold">Kiểm tra email của bạn</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Link xác thực đã được gửi tới <strong className="text-slate-700">{email}</strong>.
+            Vui lòng mở email và nhấn vào link xác thực để hoàn tất đăng ký.
+          </p>
+          <p className="mt-3 text-sm text-slate-400">Không thấy email? Kiểm tra thư mục spam hoặc junk.</p>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="mt-6 w-full rounded-full bg-teal-600 py-3 text-sm font-medium text-white transition hover:bg-teal-700"
+          >
+            Về trang chủ
+          </button>
+          <p className="mt-4 text-center text-sm text-slate-500">
+            Đã xác thực?{" "}
+            <a href="/login" className="font-medium text-teal-600">
+              Đăng nhập
+            </a>
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (

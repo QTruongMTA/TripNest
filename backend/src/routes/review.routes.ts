@@ -1,5 +1,10 @@
 import { Router } from "express";
 import { reviewController } from "../controllers/review.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { requireRole } from "../middlewares/rbac.middleware";
 const router = Router();
 router.get("/", reviewController.list);
+router.post("/", authMiddleware, reviewController.create);
+router.get("/host/mine", authMiddleware, requireRole("HOST"), reviewController.listHost);
+router.patch("/:id/host-reply", authMiddleware, requireRole("HOST"), reviewController.hostReply);
 export { router as reviewRouter };

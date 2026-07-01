@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -48,14 +48,15 @@ interface SidebarProps {
 
 const ADMIN_NAV: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard size={18} /> },
-  { label: "Tài khoản khách hàng", href: "/admin/users", icon: <Users size={18} /> },
-  { label: "Tài khoản nhân viên", href: "/admin/operators", icon: <UserCog size={18} /> },
-  { label: "Chỗ ở & Tour", href: "/admin/listings", icon: <Building2 size={18} /> },
-  { label: "Đặt chỗ", href: "/admin/bookings", icon: <BookOpen size={18} /> },
+  { label: "TÃ i khoáº£n khÃ¡ch hÃ ng", href: "/admin/users", icon: <Users size={18} /> },
+  { label: "TÃ i khoáº£n nhÃ¢n viÃªn", href: "/admin/operators", icon: <UserCog size={18} /> },
+  { label: "Chá»— á»Ÿ", href: "/admin/listings", icon: <Building2 size={18} /> },
+  { label: "Äáº·t chá»—", href: "/admin/bookings", icon: <BookOpen size={18} /> },
   { label: "Doanh thu", href: "/admin/payments", icon: <CreditCard size={18} /> },
-  { label: "Khuyến mãi", href: "/admin/promotions", icon: <Tag size={18} /> },
-  { label: "Hoa hồng", href: "/admin/commission", icon: <BarChart2 size={18} /> },
-  { label: "Đánh giá", href: "/admin/reviews", icon: <ClipboardList size={18} /> },
+  { label: "Payout Host", href: "/admin/payouts", icon: <BarChart2 size={18} /> },
+  { label: "Khuyáº¿n mÃ£i", href: "/admin/promotions", icon: <Tag size={18} /> },
+  { label: "Hoa há»“ng", href: "/admin/commission", icon: <BarChart2 size={18} /> },
+  { label: "ÄÃ¡nh giÃ¡", href: "/admin/reviews", icon: <ClipboardList size={18} /> },
   { label: "Audit log", href: "/admin/audit-log", icon: <Shield size={18} /> },
 ];
 
@@ -106,61 +107,61 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       icon: <LayoutDashboard size={18} />,
     },
     {
-      label: "Duyệt cơ sở lưu trú",
+      label: "Duyá»‡t cÆ¡ sá»Ÿ lÆ°u trÃº",
       icon: <CheckSquare size={18} />,
       badge: (stats.pendingListings ?? 0) + (stats.pendingApprovals ?? 0),
       items: [
-        { label: "Chờ duyệt", href: "/operator/listings?status=PENDING", badge: stats.pendingListings },
-        { label: "Từ chối", href: "/operator/listings?status=INACTIVE&view=approval" },
+        { label: "Chá» duyá»‡t", href: "/operator/listings?status=PENDING", badge: stats.pendingListings },
+        { label: "Tá»« chá»‘i", href: "/operator/listings?status=INACTIVE&view=approval" },
       ],
     },
     {
-      label: "Giải quyết tranh chấp",
+      label: "Giáº£i quyáº¿t tranh cháº¥p",
       icon: <MessagesSquare size={18} />,
       badge: stats.openDisputes,
       items: [
-        { label: "Đang xử lý", href: "/operator/disputes?status=ACTIVE", badge: stats.openDisputes, timer: "24h" },
-        { label: "Đã giải quyết", href: "/operator/disputes?status=RESOLVED" },
+        { label: "Äang xá»­ lÃ½", href: "/operator/disputes?status=ACTIVE", badge: stats.openDisputes, timer: "24h" },
+        { label: "ÄÃ£ giáº£i quyáº¿t", href: "/operator/disputes?status=RESOLVED" },
       ],
     },
     {
-      label: "Đặt phòng trong tỉnh",
+      label: "Äáº·t phÃ²ng trong tá»‰nh",
       icon: <BookOpen size={18} />,
       badge: stats.pendingBookings,
       items: [
-        { label: "Chờ duyệt", href: "/operator/bookings?status=PENDING", badge: stats.pendingBookings },
-        { label: "Đã xác nhận", href: "/operator/bookings?status=CONFIRMED" },
-        { label: "Đã hủy", href: "/operator/bookings?status=CANCELLED" },
+        { label: "Chá» duyá»‡t", href: "/operator/bookings?status=PENDING", badge: stats.pendingBookings },
+        { label: "ÄÃ£ xÃ¡c nháº­n", href: "/operator/bookings?status=CONFIRMED" },
+        { label: "ÄÃ£ há»§y", href: "/operator/bookings?status=CANCELLED" },
       ],
     },
     {
-      label: "Quản lý cơ sở",
+      label: "Quáº£n lÃ½ cÆ¡ sá»Ÿ",
       icon: <Building2 size={18} />,
       items: [
-        { label: "Đang hoạt động", href: "/operator/listings?status=ACTIVE" },
-        { label: "Đã khóa", href: "/operator/listings?status=SUSPENDED" },
+        { label: "Äang hoáº¡t Ä‘á»™ng", href: "/operator/listings?status=ACTIVE" },
+        { label: "ÄÃ£ khÃ³a", href: "/operator/listings?status=SUSPENDED" },
       ],
     },
     {
-      label: "Báo cáo vi phạm",
+      label: "BÃ¡o cÃ¡o vi pháº¡m",
       icon: <FileWarning size={18} />,
       items: [
-        { label: "Chưa xử lý", href: "/operator/reports?status=OPEN" },
-        { label: "Đã xử lý", href: "/operator/reports?status=RESOLVED" },
+        { label: "ChÆ°a xá»­ lÃ½", href: "/operator/reports?status=OPEN" },
+        { label: "ÄÃ£ xá»­ lÃ½", href: "/operator/reports?status=RESOLVED" },
       ],
     },
     {
-      label: "Doanh thu tỉnh",
+      label: "Doanh thu tá»‰nh",
       href: "/operator/revenue",
       icon: <CreditCard size={18} />,
     },
     {
-      label: "Thông báo",
+      label: "ThÃ´ng bÃ¡o",
       href: "/operator/notifications",
       icon: <Bell size={18} />,
     },
     {
-      label: "Hồ sơ cá nhân",
+      label: "Há»“ sÆ¡ cÃ¡ nhÃ¢n",
       href: "/operator/profile",
       icon: <User size={18} />,
     },
@@ -168,10 +169,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   const roleLabel =
     user?.role === "ADMIN"
-      ? "Quản trị hệ thống"
+      ? "Quáº£n trá»‹ há»‡ thá»‘ng"
       : user?.role === "OPERATOR_PROVINCE"
-        ? "Operator tỉnh"
-        : "Operator thực địa";
+        ? "Operator tá»‰nh"
+        : "Operator thá»±c Ä‘á»‹a";
 
   async function handleLogout() {
     await api.post("/auth/logout").catch(() => undefined);
@@ -304,9 +305,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         <div className="mx-4 mb-3 rounded-md border border-white/10 bg-white/5 p-3 text-xs leading-5 text-white/62">
           <div className="mb-1 flex items-center gap-2 font-semibold text-white/80">
             <Lock size={13} />
-            Phạm vi vận hành
+            Pháº¡m vi váº­n hÃ nh
           </div>
-          Dữ liệu và tác vụ được đồng bộ theo địa bàn phụ trách. Các thiết lập nền tảng do bộ phận quản trị hệ thống điều phối.
+          Dá»¯ liá»‡u vÃ  tÃ¡c vá»¥ Ä‘Æ°á»£c Ä‘á»“ng bá»™ theo Ä‘á»‹a bÃ n phá»¥ trÃ¡ch. CÃ¡c thiáº¿t láº­p ná»n táº£ng do bá»™ pháº­n quáº£n trá»‹ há»‡ thá»‘ng Ä‘iá»u phá»‘i.
         </div>
       ) : null}
 
@@ -316,9 +317,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-[#a26f22]/40 bg-[#b9822f] px-4 text-sm font-semibold text-white shadow-sm shadow-amber-950/10 transition hover:bg-[#a87429] active:scale-[0.99]"
         >
           <LogOut size={17} />
-          Đăng xuất
+          ÄÄƒng xuáº¥t
         </button>
       </div>
     </aside>
   );
 }
+

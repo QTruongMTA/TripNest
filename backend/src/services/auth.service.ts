@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { prisma } from "../lib/prisma";
+import { emailService } from "./email.service";
 import { sessionService } from "./session.service";
 import { signAccessToken } from "../utils/jwt.utils";
 
@@ -47,7 +49,7 @@ export const authService = {
       data: {
         email,
         password,
-        emailVerified: true,
+        emailVerified: false,
       },
       select: {
         id: true,
@@ -65,7 +67,7 @@ export const authService = {
       },
     });
 
-    const token = signAccessToken({
+    const accessToken = signAccessToken({
       sub: user.id,
       role: user.role,
       email: user.email,
@@ -80,10 +82,26 @@ export const authService = {
       },
     });
 
+    // Create email verification token and send (best-effort — don't fail registration)
+    try {
+      const verifyToken = crypto.randomBytes(32).toString("hex");
+      await prisma.verificationToken.create({
+        data: {
+          userId: user.id,
+          token: verifyToken,
+          type: "EMAIL_VERIFY",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+      await emailService.sendVerificationEmail(user.email, verifyToken);
+    } catch (err) {
+      console.error("[register] Failed to send verification email:", err);
+    }
+
     return {
       kind: "SUCCESS" as const,
       data: {
-        accessToken: token,
+        accessToken,
         user: toPublicUser(user),
       },
     };
@@ -241,6 +259,59 @@ export const authService = {
   async changePassword(id: string, newPassword: string) {
     const hashed = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({ where: { id }, data: { password: hashed } });
+    return { kind: "SUCCESS" as const };
+  },
+
+  async verifyEmail(token: string) {
+    const record = await prisma.verificationToken.findUnique({
+      where: { token },
+      include: { user: { select: { id: true, emailVerified: true } } },
+    });
+
+    if (!record) return { kind: "INVALID_TOKEN" as const };
+    if (record.type !== "EMAIL_VERIFY") return { kind: "INVALID_TOKEN" as const };
+    if (record.expiresAt < new Date()) return { kind: "TOKEN_EXPIRED" as const };
+    if (record.user.emailVerified) {
+      await prisma.verificationToken.delete({ where: { id: record.id } });
+      return { kind: "ALREADY_VERIFIED" as const };
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: record.userId }, data: { emailVerified: true } }),
+      prisma.verificationToken.delete({ where: { id: record.id } }),
+      prisma.auditLog.create({
+        data: { userId: record.userId, action: "EMAIL_VERIFY", entity: "USER", entityId: record.userId },
+      }),
+    ]);
+
+    return { kind: "SUCCESS" as const };
+  },
+
+  async resendVerification(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, emailVerified: true },
+    });
+
+    if (!user) return { kind: "NOT_FOUND" as const };
+    if (user.emailVerified) return { kind: "ALREADY_VERIFIED" as const };
+
+    // Delete any existing EMAIL_VERIFY tokens for this user
+    await prisma.verificationToken.deleteMany({
+      where: { userId, type: "EMAIL_VERIFY" },
+    });
+
+    const token = crypto.randomBytes(32).toString("hex");
+    await prisma.verificationToken.create({
+      data: {
+        userId,
+        token,
+        type: "EMAIL_VERIFY",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+
+    await emailService.sendVerificationEmail(user.email, token);
     return { kind: "SUCCESS" as const };
   },
 

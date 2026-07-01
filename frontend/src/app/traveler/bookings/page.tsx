@@ -14,6 +14,7 @@ export default function TravelerBookingsPage() {
   const [bookings, setBookings] = useState<TravelerBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     const accessToken = getAccessToken();
@@ -51,6 +52,45 @@ export default function TravelerBookingsPage() {
     loadBookings();
   }, [router]);
 
+  async function handleCancel(bookingId: string) {
+    const accessToken = getAccessToken();
+    if (!accessToken) return;
+
+    setCancellingId(bookingId);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/bookings/${bookingId}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setError(payload.error?.message ?? "Không thể hủy booking.");
+        return;
+      }
+
+      setBookings((current) =>
+        current.map((b) =>
+          b.id === bookingId
+            ? { ...b, status: payload.data.status, cancelledAt: payload.data.cancelledAt }
+            : b
+        )
+      );
+    } catch {
+      setError("Không thể kết nối tới máy chủ.");
+    } finally {
+      setCancellingId(null);
+    }
+  }
+
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -83,7 +123,12 @@ export default function TravelerBookingsPage() {
 
       <div className="grid gap-5">
         {bookings.map((booking) => (
-          <BookingCard key={booking.id} booking={booking} />
+          <BookingCard
+            key={booking.id}
+            booking={booking}
+            onCancel={handleCancel}
+            cancelling={cancellingId === booking.id}
+          />
         ))}
       </div>
     </section>

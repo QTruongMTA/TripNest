@@ -1,4 +1,4 @@
-# TripNest - He thong dat phong luu tru truc tuyen
+﻿# TripNest - He thong dat phong luu tru truc tuyen
 
 > Phien ban: v1.0  
 > Nhom: Nhom 4  
@@ -25,6 +25,7 @@ Repository: [https://github.com/QTruongMTA/TripNest](https://github.com/QTruongM
 ### Nguoi dung va xac thuc
 
 - Dang ky tai khoan bang email va mat khau.
+- Xac thuc email bang link gui qua email va co chuc nang gui lai email xac thuc.
 - Dang nhap bang JWT access token.
 - Dang xuat va lay thong tin nguoi dung hien tai.
 - Cap nhat ho so ca nhan.
@@ -40,12 +41,6 @@ Repository: [https://github.com/QTruongMTA/TripNest](https://github.com/QTruongM
 - Hien thi anh, tien nghi, diem danh gia trung binh va so luong danh gia neu co du lieu.
 - Ho tro cac loai luu tru trong schema: `HOUSE`, `APARTMENT`, `VILLA`, `HOMESTAY`, `HOTEL`, `RESORT`, `UNIQUE`.
 
-### Tour
-
-- Danh sach tour.
-- Trang chi tiet tour.
-- Quan ly lich trinh, hinh anh, diem den, gia, quy mo nhom va lich mo ban trong database.
-
 ### Dat phong
 
 - Tao booking cho property.
@@ -53,24 +48,46 @@ Repository: [https://github.com/QTruongMTA/TripNest](https://github.com/QTruongM
 - Tinh tong tien dua tren gia moi dem va phi don dep.
 - Khach hang xem danh sach booking cua minh.
 - Host xem booking cua property minh quan ly.
-- Host co the xac nhan hoac huy booking dang cho xu ly.
+- Host co the xac nhan, huy, danh dau no-show hoac hoan tat booking theo trang thai.
 - Admin co the cap nhat trang thai booking.
+- Booking co event timeline de theo doi cac moc: tao booking, xac nhan, tao payment, huy, hoan tien, no-show, hoan tat va thay doi booking.
+- Ho tro yeu cau thay doi booking giua khach va host: doi ngay, doi so khach, tinh lai gia, chap nhan/tu choi/huy yeu cau.
+- Ho tro thread tin nhan theo booking, tin nhan he thong va dem tin nhan chua doc cho host.
 
 ### Quan ly chu nha
 
 - Host co dashboard rieng.
-- Host co trang quan ly property, booking, lich phong va doanh thu.
+- Host co trang quan ly property, booking, lich phong, doanh thu va ky thanh toan.
 - Form tao property moi da co nhieu truong chi tiet: dia chi, loai cho o, phong ngu, tien nghi, ngon ngu, chinh sach, gia, anh va thong tin phap ly.
+- Trang danh sach booking cua host co tab/trang thai van hanh: can xu ly, cho xac nhan, sap den, dang luu tru, da huy, hoan tat va no-show.
+- Trang chi tiet booking cua host hien thi thong tin khach, property, payment, chinh sach huy, refund estimate, timeline va thread tin nhan.
+- Trang doanh thu cua host tinh doanh thu theo `payment.paidAt`, hien thi booking cho xac nhan chuyen khoan, booking da hoan tien, hoa hong, thuc nhan va lich su payout.
+- Host co the xac nhan da nhan tien doi voi booking chuyen khoan thu cong.
+
+### Thanh toan, doanh thu va payout
+
+- Moi booking `CONFIRMED` cua property co Payment record tuong ung voi trang thai ban dau `UNPAID`.
+- Ho tro flow chuyen khoan thu cong:
+  - Khach danh dau da chuyen khoan.
+  - Payment chuyen sang `PENDING_PAYMENT`.
+  - Host hoac Admin xac nhan da nhan tien.
+  - Payment chuyen sang `PAID` va set `paidAt`.
+- Ho tro cac trang thai payment: `UNPAID`, `PENDING_PAYMENT`, `PAID`, `REFUNDED`, `PARTIALLY_REFUNDED`, `FAILED`.
+- Hoan tien co `refundAmount` va `refundedAt` de bao cao doanh thu theo thang chinh xac hon.
+- Doanh thu host tinh theo booking da thanh toan trong thang, hoa hong theo ty le `property.commission`, hoan tien va thuc nhan.
+- `HostPayout` quan ly ky thanh toan theo host va thang, gom `PENDING`, `READY`, `PAID`.
+- Admin co the xem danh sach payout host, loc theo trang thai/thang/host, xac nhan da tra tien va dieu chinh payout bang `adjustmentAmount` + `adjustmentReason`.
 
 ### Quan tri he thong
 
 - Admin dashboard.
 - Quan ly nguoi dung.
-- Quan ly listing property va tour.
+- Quan ly listing co so luu tru/property.
 - Quan ly booking.
 - Quan ly thanh toan o muc du lieu he thong.
 - Quan ly khuyen mai.
 - Quan ly quy tac hoa hong.
+- Quan ly payout host trong admin portal rieng tai `/admin/payouts`.
 - Xem review.
 - Xem audit log.
 - Quan ly tinh/thanh pho.
@@ -89,8 +106,8 @@ Repository: [https://github.com/QTruongMTA/TripNest](https://github.com/QTruongM
 ### Du lieu nen tang
 
 - PostgreSQL la database chinh.
-- Prisma schema da co cac model cho user, property, tour, booking, payment, review, promotion, commission, notification, audit log, province, operator task va dispute.
-- Seed du lieu mau co admin, tinh/thanh pho, tien nghi, khuyen mai, tour va hinh anh tour mau. Seed khong tao property/cho o mau.
+- Prisma schema da co cac model cho user, property, booking, payment, review, promotion, commission, notification, audit log, province, operator task va dispute.
+- Seed du lieu mau co admin, tinh/thanh pho, tien nghi va khuyen mai. Seed khong tao property/cho o mau.
 
 ## Tinh nang dang phat trien hoac moi o muc placeholder
 
@@ -98,15 +115,15 @@ Mot so noi dung trong thiet ke ban dau chua duoc trien khai day du trong source 
 
 - Google Maps API chua duoc tich hop that.
 - Dang nhap Google/Facebook OAuth hien moi la placeholder.
-- VNPay, MoMo va QR payment chua co flow thanh toan that.
+- VNPay, MoMo va QR payment chua co flow thanh toan that; hien dang dung flow chuyen khoan thu cong.
 - Email OTP va xac thuc 2 lop chua hoan thien.
-- Email service hien moi la placeholder.
-- Payment service hien moi la placeholder.
+- Email service da co Nodemailer cho verify email/password reset, nhung can cau hinh SMTP that trong moi truong trien khai.
 - Review service hien moi tra ve du lieu placeholder cho public review route.
 - Chua co tich hop Redis cache.
 - Chua co tich hop Cloudinary hoac Multer de upload file len cloud.
 - Chua co chuc nang export Excel/PDF.
 - Chua co ma hoa AES-256 cho du lieu ca nhan; hien chi co helper hash SHA-256.
+- Payout adjustment sau khi ky thanh toan da `PAID` hien la dieu chinh truc tiep co canh bao; neu can nghiep vu ke toan chat che hon nen tach thanh bang adjustment rieng va bu tru vao ky sau.
 
 ## Cong nghe su dung
 
@@ -237,6 +254,12 @@ DATABASE_URL="postgresql://username:password@localhost:5432/tripnest_db"
 JWT_SECRET="your-development-secret"
 PORT=5000
 NODE_ENV=development
+EMAIL_FROM="TripNest <no-reply@tripnest.vn>"
+SMTP_HOST="smtp.example.com"
+SMTP_PORT=587
+SMTP_USER="smtp-user"
+SMTP_PASS="smtp-password"
+APP_URL="http://localhost:3000"
 ```
 
 Tao file `frontend/.env.local`:
@@ -259,6 +282,18 @@ Chay trong thu muc `backend`:
 
 ```bash
 npx prisma migrate dev
+```
+
+Neu dang cap nhat database da co san bang migration production/dev hien tai, chay:
+
+```bash
+npx prisma migrate deploy
+```
+
+Sau khi apply migration, tao lai Prisma client:
+
+```bash
+npx prisma generate
 ```
 
 Neu can tao Prisma client:
@@ -380,15 +415,56 @@ Mot so nhom endpoint dang co:
 | Auth | `/api/v1/auth` |
 | Availability | `/api/v1/availability` |
 | Properties | `/api/v1/properties` |
-| Tours | `/api/v1/tours` |
 | Bookings | `/api/v1/bookings` |
 | Host | `/api/v1/host` |
+| Host revenue | `GET /api/v1/host/revenue?month=YYYY-MM` |
+| Host payouts | `GET /api/v1/host/payouts` |
 | Notifications | `/api/v1/notifications` |
 | Reviews | `/api/v1/reviews` |
 | Admin | `/api/v1/admin` |
+| Admin payouts | `GET /api/v1/admin/payouts`, `PATCH /api/v1/admin/payouts/:id/confirm`, `PATCH /api/v1/admin/payouts/:id/adjust` |
 | Operator | `/api/v1/operator` |
 | Provinces | `/api/v1/provinces` |
 | Promotions | `/api/v1/promotions` |
+
+## Checklist sau khi cap nhat payout
+
+Sau khi them migration `20260630000000_add_payout_adjustment`, can chay trong `backend`:
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```
+
+Sau do nen kiem tra nhanh:
+
+1. Backend build:
+
+   ```bash
+   npm run build
+   ```
+
+2. Admin portal build:
+
+   ```bash
+   cd ../admin-portal
+   npm run build
+   ```
+
+3. API admin payout:
+
+   - `GET /api/v1/admin/payouts`
+   - `PATCH /api/v1/admin/payouts/:id/adjust`
+   - `PATCH /api/v1/admin/payouts/:id/confirm`
+
+4. UI admin portal:
+
+   - Mo `http://localhost:4000/admin/payouts`.
+   - Kiem tra menu "Payout Host" trong sidebar.
+   - Loc theo status/thang.
+   - Dieu chinh payout `PENDING`/`READY`.
+   - Dieu chinh payout `PAID` voi canh bao `allowPaid=true`.
+   - Xac nhan payout `READY` sang `PAID`.
 
 ## Ghi chu phat trien
 
@@ -415,3 +491,4 @@ MIT License
 Chi dung cho muc dich hoc tap, nghien cuu.
 Khong su dung cho muc dich thuong mai khi chua co su cho phep.
 ```
+

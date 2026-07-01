@@ -66,4 +66,30 @@ export const authController = {
     await authService.logout(req.user!.id);
     return res.json({ data: { message: "Logged out" } });
   },
+
+  async verifyEmail(req: Request, res: Response) {
+    const token = typeof req.query.token === "string" ? req.query.token : "";
+    if (!token) {
+      return res.status(400).json({ error: { code: "MISSING_TOKEN", message: "Token xác thực bị thiếu." } });
+    }
+    const result = await authService.verifyEmail(token);
+    if (result.kind === "INVALID_TOKEN") {
+      return res.status(400).json({ error: { code: "INVALID_TOKEN", message: "Link xác thực không hợp lệ." } });
+    }
+    if (result.kind === "TOKEN_EXPIRED") {
+      return res.status(410).json({ error: { code: "TOKEN_EXPIRED", message: "Link xác thực đã hết hạn. Vui lòng yêu cầu gửi lại." } });
+    }
+    return res.json({ data: { message: "Email đã được xác thực thành công." } });
+  },
+
+  async resendVerification(req: Request, res: Response) {
+    const result = await authService.resendVerification(req.user!.id);
+    if (result.kind === "NOT_FOUND") {
+      return res.status(404).json({ error: { code: "NOT_FOUND", message: "Không tìm thấy tài khoản." } });
+    }
+    if (result.kind === "ALREADY_VERIFIED") {
+      return res.json({ data: { message: "Email đã được xác thực." } });
+    }
+    return res.json({ data: { message: "Email xác thực đã được gửi lại." } });
+  },
 };

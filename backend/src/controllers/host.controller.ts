@@ -268,6 +268,84 @@ export const hostController = {
     return res.json({ data: calendar });
   },
 
+  async setDailyRates(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const items = Array.isArray(req.body?.items) ? req.body.items : [];
+    if (items.length === 0) {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "items array is required" } });
+    }
+    const result = await hostPropertyService.setDailyRates(req.user!.id, id, items);
+    if (!result) {
+      return res.status(404).json({ error: { code: "PROPERTY_NOT_FOUND", message: "Property not found" } });
+    }
+    return res.json({ data: result });
+  },
+
+  // ── Rate plan handlers ───────────────────────────────────────────────────
+
+  async listRatePlans(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const plans = await hostPropertyService.listRatePlans(req.user!.id, id);
+    if (plans === null) return res.status(404).json({ error: { code: "PROPERTY_NOT_FOUND", message: "Property not found" } });
+    return res.json({ data: plans });
+  },
+
+  async createRatePlan(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const body = req.body ?? {};
+    if (!body.name || typeof body.name !== "string") {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "name is required" } });
+    }
+    const plan = await hostPropertyService.createRatePlan(req.user!.id, id, {
+      name: body.name,
+      type: body.type,
+      priceAdjustmentType: body.priceAdjustmentType,
+      priceAdjustmentValue: typeof body.priceAdjustmentValue === "number" ? body.priceAdjustmentValue : undefined,
+      cancellationPolicy: body.cancellationPolicy ?? null,
+      cancellationFreeDays: typeof body.cancellationFreeDays === "number" ? body.cancellationFreeDays : null,
+      minStay: typeof body.minStay === "number" ? body.minStay : null,
+      maxStay: typeof body.maxStay === "number" ? body.maxStay : null,
+      breakfastIncluded: body.breakfastIncluded === true,
+      sortOrder: typeof body.sortOrder === "number" ? body.sortOrder : 0,
+    });
+    if (!plan) return res.status(404).json({ error: { code: "PROPERTY_NOT_FOUND", message: "Property not found" } });
+    return res.status(201).json({ data: plan });
+  },
+
+  async updateRatePlan(req: Request, res: Response) {
+    const { id, planId } = req.params as { id: string; planId: string };
+    const body = req.body ?? {};
+    const plan = await hostPropertyService.updateRatePlan(req.user!.id, id, planId, {
+      ...(body.name !== undefined && { name: body.name }),
+      ...(body.type !== undefined && { type: body.type }),
+      ...(body.priceAdjustmentType !== undefined && { priceAdjustmentType: body.priceAdjustmentType }),
+      ...(body.priceAdjustmentValue !== undefined && { priceAdjustmentValue: body.priceAdjustmentValue }),
+      ...(body.cancellationPolicy !== undefined && { cancellationPolicy: body.cancellationPolicy }),
+      ...(body.cancellationFreeDays !== undefined && { cancellationFreeDays: body.cancellationFreeDays }),
+      ...(body.minStay !== undefined && { minStay: body.minStay }),
+      ...(body.maxStay !== undefined && { maxStay: body.maxStay }),
+      ...(body.breakfastIncluded !== undefined && { breakfastIncluded: body.breakfastIncluded }),
+      ...(body.sortOrder !== undefined && { sortOrder: body.sortOrder }),
+    });
+    if (!plan) return res.status(404).json({ error: { code: "RATE_PLAN_NOT_FOUND", message: "Rate plan not found" } });
+    return res.json({ data: plan });
+  },
+
+  async toggleRatePlan(req: Request, res: Response) {
+    const { id, planId } = req.params as { id: string; planId: string };
+    const isActive = req.body?.isActive === true;
+    const plan = await hostPropertyService.toggleRatePlan(req.user!.id, id, planId, isActive);
+    if (!plan) return res.status(404).json({ error: { code: "RATE_PLAN_NOT_FOUND", message: "Rate plan not found" } });
+    return res.json({ data: plan });
+  },
+
+  async deleteRatePlan(req: Request, res: Response) {
+    const { id, planId } = req.params as { id: string; planId: string };
+    const result = await hostPropertyService.deleteRatePlan(req.user!.id, id, planId);
+    if (!result) return res.status(404).json({ error: { code: "RATE_PLAN_NOT_FOUND", message: "Rate plan not found" } });
+    return res.status(204).send();
+  },
+
   async blockDates(req: Request, res: Response) {
     const id = req.params.id as string;
     const body = req.body ?? {};
@@ -372,35 +450,104 @@ export const hostController = {
     return res.json({ data: bookings });
   },
 
+  async getBookingDetail(req: Request, res: Response) {
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
+    }
+
+    const booking = await bookingService.getHostBookingDetail({ hostId: req.user!.id, bookingId: id });
+    if (!booking) {
+      return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
+    }
+    return res.json({ data: booking });
+  },
+
   async confirmBooking(req: Request, res: Response) {
-    return handleUpdateStatus(req, res, "CONFIRMED");
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
+    }
+
+    const result = await bookingService.updateHostPropertyBookingStatus({
+      hostId: req.user!.id,
+      bookingId: id,
+      status: "CONFIRMED",
+    });
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
+    }
+    if (result.kind === "BOOKING_NOT_PENDING") {
+      return res.status(409).json({ error: { code: "BOOKING_NOT_PENDING", message: "Only pending bookings can be confirmed" } });
+    }
+    return res.json({ data: result.data });
   },
 
   async cancelBooking(req: Request, res: Response) {
-    return handleUpdateStatus(req, res, "CANCELLED");
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
+    }
+
+    const result = await bookingService.cancelByHost({
+      hostId: req.user!.id,
+      bookingId: id,
+      reason: typeof req.body?.reason === "string" ? req.body.reason : null,
+    });
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
+    }
+    if (result.kind === "BOOKING_NOT_CANCELLABLE") {
+      return res.status(409).json({ error: { code: "BOOKING_NOT_CANCELLABLE", message: "Booking cannot be cancelled in its current state" } });
+    }
+    return res.json({ data: result.data });
+  },
+
+  async noShowBooking(req: Request, res: Response) {
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
+    }
+
+    const result = await bookingService.markNoShow({
+      hostId: req.user!.id,
+      bookingId: id,
+    });
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
+    }
+    if (result.kind === "BOOKING_NOT_CONFIRMED") {
+      return res.status(409).json({ error: { code: "BOOKING_NOT_CONFIRMED", message: "Only confirmed bookings can be marked as no-show" } });
+    }
+    if (result.kind === "CHECK_IN_NOT_REACHED") {
+      return res.status(409).json({ error: { code: "CHECK_IN_NOT_REACHED", message: "Check-in date has not been reached yet" } });
+    }
+    return res.json({ data: result.data });
+  },
+
+  async completeBooking(req: Request, res: Response) {
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
+    }
+
+    const result = await bookingService.markCompleted({
+      hostId: req.user!.id,
+      bookingId: id,
+    });
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
+    }
+    if (result.kind === "BOOKING_NOT_CONFIRMED") {
+      return res.status(409).json({ error: { code: "BOOKING_NOT_CONFIRMED", message: "Only confirmed bookings can be marked as completed" } });
+    }
+    if (result.kind === "CHECK_OUT_NOT_REACHED") {
+      return res.status(409).json({ error: { code: "CHECK_OUT_NOT_REACHED", message: "Check-out date has not been reached yet" } });
+    }
+    return res.json({ data: result.data });
   },
 };
-
-async function handleUpdateStatus(req: Request, res: Response, status: "CONFIRMED" | "CANCELLED") {
-  const { id } = req.params;
-
-  if (typeof id !== "string" || !id) {
-    return res.status(400).json({ error: { code: "INVALID_BOOKING_ID", message: "Booking id is required" } });
-  }
-
-  const result = await bookingService.updateHostPropertyBookingStatus({
-    hostId: req.user!.id,
-    bookingId: id,
-    status,
-  });
-
-  if (result.kind === "BOOKING_NOT_FOUND") {
-    return res.status(404).json({ error: { code: "BOOKING_NOT_FOUND", message: "Booking not found" } });
-  }
-
-  if (result.kind === "BOOKING_NOT_PENDING") {
-    return res.status(409).json({ error: { code: "BOOKING_NOT_PENDING", message: "Only pending bookings can be updated" } });
-  }
-
-  return res.json({ data: result.data });
-}

@@ -67,6 +67,7 @@ export interface OperatorTask {
 
 export interface Dispute {
   id: string;
+  bookingId?: string | null;
   subject: string;
   description: string;
   status: "OPEN" | "INVESTIGATING" | "RESOLVED" | "ESCALATED";
@@ -76,4 +77,12 @@ export interface Dispute {
   guest: { email: string };
   resolver?: { email: string };
   province?: { name: string };
+  booking?: {
+    id: string;
+    status: string;
+    paymentStatus: string;
+    checkIn: string | null;
+    checkOut: string | null;
+    property?: { id: string; title: string; city: string } | null;
+  } | null;
 }

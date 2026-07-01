@@ -119,6 +119,19 @@ export default function DisputesPage() {
                     </div>
                     <p className="font-medium text-slate-800">{d.subject}</p>
                     <p className="mt-1 text-sm text-slate-500">{d.description}</p>
+                    {d.booking && (
+                      <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                        <p className="font-semibold text-slate-800">
+                          Booking #{d.booking.id.slice(-8).toUpperCase()} · {d.booking.property?.title ?? "Chỗ nghỉ"}
+                        </p>
+                        <p className="mt-1">
+                          {d.booking.checkIn ? new Date(d.booking.checkIn).toLocaleDateString("vi-VN") : "—"}
+                          {" → "}
+                          {d.booking.checkOut ? new Date(d.booking.checkOut).toLocaleDateString("vi-VN") : "—"}
+                          {d.booking.property?.city ? ` · ${d.booking.property.city}` : ""}
+                        </p>
+                      </div>
+                    )}
                     <div className="mt-2 flex flex-wrap gap-4 text-xs text-slate-400">
                       <span>Host: {d.host.email}</span>
                       <span>Guest: {d.guest.email}</span>

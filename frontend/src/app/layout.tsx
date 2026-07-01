@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
 import { SessionBootstrap } from "@/components/auth/SessionBootstrap";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body className={bodyFont.variable}>
         <SessionBootstrap />
+        <EmailVerificationBanner />
         {children}
       </body>
     </html>

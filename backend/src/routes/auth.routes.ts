@@ -35,4 +35,7 @@ router.patch(
   authController.changePassword
 );
 
+router.get("/verify-email", authController.verifyEmail);
+router.post("/resend-verification", authMiddleware, authController.resendVerification);
+
 export { router as authRouter };

@@ -44,13 +44,14 @@ type HostProperty = {
   updatedAt: string;
 };
 
-const TABS = ["info", "photos", "pricing", "policies", "availability"] as const;
+const TABS = ["info", "photos", "pricing", "rate-plans", "policies", "availability"] as const;
 type Tab = (typeof TABS)[number];
 
 const TAB_LABELS: Record<Tab, string> = {
   info: "Thông tin",
   photos: "Ảnh",
   pricing: "Giá",
+  "rate-plans": "Gói giá",
   policies: "Chính sách",
   availability: "Lịch",
 };
@@ -500,6 +501,10 @@ export default function ManagePropertyPage() {
           />
         )}
 
+        {activeTab === "rate-plans" && token && (
+          <TabRatePlans propertyId={propertyId} token={token} />
+        )}
+
         {activeTab === "availability" && token && (
           <div className="space-y-4">
             <div>
@@ -792,6 +797,440 @@ function TabPolicies({
       <div className="pt-2">
         <SaveButton onSave={onSave} saving={saving} />
       </div>
+    </div>
+  );
+}
+
+// ── Tab: Rate Plans ────────────────────────────────────────────────────────────
+
+type RatePlan = {
+  id: string;
+  name: string;
+  type: string;
+  isActive: boolean;
+  priceAdjustmentType: string;
+  priceAdjustmentValue: number;
+  cancellationPolicy: string | null;
+  cancellationFreeDays: number | null;
+  minStay: number | null;
+  maxStay: number | null;
+  breakfastIncluded: boolean;
+  sortOrder: number;
+};
+
+const RATE_PLAN_TYPES = [
+  { value: "STANDARD", label: "Tiêu chuẩn" },
+  { value: "NON_REFUNDABLE", label: "Không hoàn tiền" },
+  { value: "WEEKLY", label: "Theo tuần" },
+  { value: "MONTHLY", label: "Theo tháng" },
+];
+
+const ADJ_TYPE_LABELS: Record<string, string> = {
+  NONE: "Không điều chỉnh",
+  PERCENT: "Theo %",
+  FIXED: "Cố định / đêm",
+};
+
+const CANCEL_LABELS: Record<string, string> = {
+  FLEXIBLE: "Linh hoạt",
+  MODERATE: "Trung bình",
+  STRICT: "Nghiêm ngặt",
+  NON_REFUNDABLE: "Không hoàn tiền",
+};
+
+const PLAN_TYPE_LABELS: Record<string, string> = {
+  STANDARD: "Tiêu chuẩn",
+  NON_REFUNDABLE: "Không hoàn tiền",
+  WEEKLY: "Theo tuần",
+  MONTHLY: "Theo tháng",
+};
+
+const emptyForm = {
+  name: "",
+  type: "STANDARD",
+  priceAdjustmentType: "NONE",
+  priceAdjustmentValue: 0,
+  cancellationPolicy: "",
+  cancellationFreeDays: "",
+  minStay: "",
+  maxStay: "",
+  breakfastIncluded: false,
+  sortOrder: 0,
+};
+
+function TabRatePlans({ propertyId, token }: { propertyId: string; token: string }) {
+  const [plans, setPlans] = useState<RatePlan[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null); // planId being edited
+  const [form, setForm] = useState(emptyForm);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSaving, setFormSaving] = useState(false);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const activeCount = plans.filter((p) => p.isActive).length;
+  const discountedCount = plans.filter((p) => p.priceAdjustmentType !== "NONE" && p.priceAdjustmentValue < 0).length;
+
+  useEffect(() => { load(); }, [propertyId]);
+
+  async function load() {
+    setLoadError(null);
+    try {
+      const res = await fetch(`${API_BASE}/host/properties/${propertyId}/rate-plans`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok) { setLoadError(json.error?.message ?? "Lỗi tải gói giá"); return; }
+      setPlans(json.data);
+    } catch {
+      setLoadError("Không thể kết nối máy chủ.");
+    }
+  }
+
+  function openCreate() {
+    setEditing(null);
+    setForm(emptyForm);
+    setFormError(null);
+    setShowForm(true);
+  }
+
+  function openEdit(plan: RatePlan) {
+    setEditing(plan.id);
+    setForm({
+      name: plan.name,
+      type: plan.type,
+      priceAdjustmentType: plan.priceAdjustmentType,
+      priceAdjustmentValue: plan.priceAdjustmentValue,
+      cancellationPolicy: plan.cancellationPolicy ?? "",
+      cancellationFreeDays: plan.cancellationFreeDays != null ? String(plan.cancellationFreeDays) : "",
+      minStay: plan.minStay != null ? String(plan.minStay) : "",
+      maxStay: plan.maxStay != null ? String(plan.maxStay) : "",
+      breakfastIncluded: plan.breakfastIncluded,
+      sortOrder: plan.sortOrder,
+    });
+    setFormError(null);
+    setShowForm(true);
+  }
+
+  async function handleSave() {
+    if (!form.name.trim()) { setFormError("Tên gói giá không được trống."); return; }
+    setFormSaving(true);
+    setFormError(null);
+    const body = {
+      name: form.name.trim(),
+      type: form.type,
+      priceAdjustmentType: form.priceAdjustmentType,
+      priceAdjustmentValue: form.priceAdjustmentType === "NONE" ? 0 : Number(form.priceAdjustmentValue),
+      cancellationPolicy: form.cancellationPolicy || null,
+      cancellationFreeDays: form.cancellationFreeDays ? Number(form.cancellationFreeDays) : null,
+      minStay: form.minStay ? Number(form.minStay) : null,
+      maxStay: form.maxStay ? Number(form.maxStay) : null,
+      breakfastIncluded: form.breakfastIncluded,
+      sortOrder: form.sortOrder,
+    };
+    try {
+      const url = editing
+        ? `${API_BASE}/host/properties/${propertyId}/rate-plans/${editing}`
+        : `${API_BASE}/host/properties/${propertyId}/rate-plans`;
+      const res = await fetch(url, {
+        method: editing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) { setFormError(json.error?.message ?? "Lỗi lưu gói giá"); return; }
+      setShowForm(false);
+      await load();
+    } catch {
+      setFormError("Không thể kết nối máy chủ.");
+    } finally {
+      setFormSaving(false);
+    }
+  }
+
+  async function handleToggle(plan: RatePlan) {
+    setToggling(plan.id);
+    try {
+      await fetch(`${API_BASE}/host/properties/${propertyId}/rate-plans/${plan.id}/toggle`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ isActive: !plan.isActive }),
+      });
+      await load();
+    } finally {
+      setToggling(null);
+    }
+  }
+
+  async function handleDelete(planId: string) {
+    if (!confirm("Xoá gói giá này?")) return;
+    setDeleting(planId);
+    try {
+      await fetch(`${API_BASE}/host/properties/${propertyId}/rate-plans/${planId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await load();
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-800">Gói giá</h2>
+          <p className="mt-0.5 text-sm text-slate-500">
+            Quản lý các lựa chọn giá như tiêu chuẩn, không hoàn tiền, lưu trú tuần/tháng.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={openCreate}
+          className="rounded-full bg-teal-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-teal-800"
+        >
+          + Thêm gói giá
+        </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Tổng gói</p>
+          <p className="mt-1 text-xl font-semibold text-slate-900">{plans.length}</p>
+        </div>
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-emerald-600">Đang bán</p>
+          <p className="mt-1 text-xl font-semibold text-emerald-800">{activeCount}</p>
+        </div>
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">Có giảm giá</p>
+          <p className="mt-1 text-xl font-semibold text-amber-800">{discountedCount}</p>
+        </div>
+      </div>
+
+      {loadError && <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{loadError}</div>}
+
+      {plans.length === 0 && !loadError && (
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/70 px-6 py-12 text-center">
+          <p className="text-sm font-semibold text-slate-700">Chưa có gói giá nào</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Tạo gói “Tiêu chuẩn” hoặc “Không hoàn tiền” để khách có nhiều lựa chọn khi đặt phòng.
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {plans.map((plan) => (
+          <div
+            key={plan.id}
+            className={`overflow-hidden rounded-2xl border transition ${
+              plan.isActive ? "border-slate-200 bg-white shadow-sm" : "border-dashed border-slate-200 bg-slate-50 opacity-80"
+            }`}
+          >
+            <div className={`h-1.5 ${plan.isActive ? "bg-teal-600" : "bg-slate-300"}`} />
+            <div className="flex flex-wrap items-start justify-between gap-3 p-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-slate-900">{plan.name}</span>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-600">
+                    {PLAN_TYPE_LABELS[plan.type] ?? plan.type}
+                  </span>
+                  {plan.breakfastIncluded && (
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs text-amber-700">Bữa sáng</span>
+                  )}
+                  {!plan.isActive && (
+                    <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs text-slate-500">Tắt</span>
+                  )}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
+                  {plan.priceAdjustmentType !== "NONE" && (
+                    <span className="rounded-full bg-teal-50 px-2.5 py-1 font-medium text-teal-700">
+                      {plan.priceAdjustmentType === "PERCENT"
+                        ? `${plan.priceAdjustmentValue >= 0 ? "+" : ""}${plan.priceAdjustmentValue}% / đêm`
+                        : `${plan.priceAdjustmentValue >= 0 ? "+" : ""}${plan.priceAdjustmentValue.toLocaleString("vi-VN")}₫ / đêm`}
+                    </span>
+                  )}
+                  {plan.cancellationPolicy && (
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1">Huỷ: {CANCEL_LABELS[plan.cancellationPolicy] ?? plan.cancellationPolicy}</span>
+                  )}
+                  {plan.minStay && <span className="rounded-full bg-slate-100 px-2.5 py-1">Tối thiểu {plan.minStay} đêm</span>}
+                  {plan.maxStay && <span className="rounded-full bg-slate-100 px-2.5 py-1">Tối đa {plan.maxStay} đêm</span>}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleToggle(plan)}
+                  disabled={toggling === plan.id}
+                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  {toggling === plan.id ? "..." : plan.isActive ? "Tắt" : "Bật"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEdit(plan)}
+                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  Sửa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(plan.id)}
+                  disabled={deleting === plan.id}
+                  className="rounded-lg border border-rose-100 px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                >
+                  {deleting === plan.id ? "..." : "Xoá"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Create / Edit form */}
+      {showForm && (
+        <div className="rounded-3xl border border-teal-200 bg-gradient-to-br from-teal-50 to-white p-5 shadow-sm">
+          <div className="mb-4">
+            <h3 className="font-semibold text-slate-900">{editing ? "Chỉnh sửa gói giá" : "Thêm gói giá mới"}</h3>
+            <p className="mt-1 text-sm text-slate-500">Các thay đổi sẽ áp dụng cho booking mới sau khi lưu.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-slate-700">Tên gói giá *</label>
+              <input
+                className={inputClass}
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="VD: Giá tiêu chuẩn, Không hoàn tiền -10%..."
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Loại gói</label>
+              <select className={selectClass} value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}>
+                {RATE_PLAN_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Điều chỉnh giá</label>
+              <select
+                className={selectClass}
+                value={form.priceAdjustmentType}
+                onChange={(e) => setForm((f) => ({ ...f, priceAdjustmentType: e.target.value, priceAdjustmentValue: 0 }))}
+              >
+                {Object.entries(ADJ_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+
+            {form.priceAdjustmentType !== "NONE" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Giá trị ({form.priceAdjustmentType === "PERCENT" ? "% — âm = giảm giá" : "₫/đêm — âm = giảm giá"})
+                </label>
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={form.priceAdjustmentValue}
+                  onChange={(e) => setForm((f) => ({ ...f, priceAdjustmentValue: Number(e.target.value) }))}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Chính sách huỷ (ghi đè)</label>
+              <select
+                className={selectClass}
+                value={form.cancellationPolicy}
+                onChange={(e) => setForm((f) => ({ ...f, cancellationPolicy: e.target.value }))}
+              >
+                <option value="">Dùng chính sách mặc định của phòng</option>
+                {CANCELLATION_POLICIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Số ngày huỷ miễn phí</label>
+              <input
+                type="number"
+                min={0}
+                className={inputClass}
+                value={form.cancellationFreeDays}
+                onChange={(e) => setForm((f) => ({ ...f, cancellationFreeDays: e.target.value }))}
+                placeholder="Không giới hạn"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Lưu trú tối thiểu (đêm)</label>
+              <input
+                type="number"
+                min={1}
+                className={inputClass}
+                value={form.minStay}
+                onChange={(e) => setForm((f) => ({ ...f, minStay: e.target.value }))}
+                placeholder="Không giới hạn"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Lưu trú tối đa (đêm)</label>
+              <input
+                type="number"
+                min={1}
+                className={inputClass}
+                value={form.maxStay}
+                onChange={(e) => setForm((f) => ({ ...f, maxStay: e.target.value }))}
+                placeholder="Không giới hạn"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Thứ tự hiển thị</label>
+              <input
+                type="number"
+                min={0}
+                className={inputClass}
+                value={form.sortOrder}
+                onChange={(e) => setForm((f) => ({ ...f, sortOrder: Number(e.target.value) }))}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded"
+                  checked={form.breakfastIncluded}
+                  onChange={(e) => setForm((f) => ({ ...f, breakfastIncluded: e.target.checked }))}
+                />
+                Bao gồm bữa sáng
+              </label>
+            </div>
+          </div>
+
+          {formError && <p className="mt-3 text-sm text-rose-600">{formError}</p>}
+
+          <div className="mt-5 flex gap-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={formSaving}
+              className="rounded-full bg-teal-900 px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+            >
+              {formSaving ? "Đang lưu..." : "Lưu gói giá"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="rounded-full border border-slate-200 px-6 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            >
+              Huỷ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

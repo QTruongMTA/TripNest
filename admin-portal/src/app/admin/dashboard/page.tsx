@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { BookOpen, Building2, CreditCard, MapPin, UserCog, Users } from "lucide-react";
 import { PortalShell } from "@/components/layout/PortalShell";
@@ -7,7 +7,6 @@ import api from "@/lib/api";
 interface DashboardData {
   totalUsers?: number;
   totalProperties?: number;
-  totalTours?: number;
   totalBookings?: number;
   totalRevenue?: number;
   totalOperators?: number;
@@ -73,12 +72,12 @@ export default function AdminDashboard() {
     <PortalShell title="Dashboard">
       <div className="space-y-6">
         <section className="rounded-lg bg-teal-900 p-5 text-white shadow-sm shadow-teal-950/10">
-          <p className="text-sm uppercase tracking-[0.24em] text-teal-100/75">Tổng quan vận hành</p>
+          <p className="text-sm uppercase tracking-[0.24em] text-teal-100/75">Tá»•ng quan váº­n hÃ nh</p>
           <div className="mt-3 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="text-3xl font-semibold">Điều phối TripNest hôm nay</h2>
+              <h2 className="text-3xl font-semibold">Äiá»u phá»‘i TripNest hÃ´m nay</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-                Theo dõi người dùng, booking, doanh thu và độ phủ operator trên toàn hệ thống.
+                Theo dÃµi ngÆ°á»i dÃ¹ng, booking, doanh thu vÃ  Ä‘á»™ phá»§ operator trÃªn toÃ n há»‡ thá»‘ng.
               </p>
             </div>
             <span className="w-fit rounded-md bg-amber-400 px-4 py-2 text-sm font-semibold text-teal-950">
@@ -88,25 +87,25 @@ export default function AdminDashboard() {
         </section>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <StatCard title="Người dùng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
-          <StatCard title="Chỗ ở & Tour" value={(data.totalProperties ?? 0) + (data.totalTours ?? 0)} icon={<Building2 size={20} />} tone="slate" />
-          <StatCard title="Đặt chỗ" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
-          <StatCard title="Doanh thu (VNĐ)" value={(data.totalRevenue ?? 0).toLocaleString("vi-VN")} icon={<CreditCard size={20} />} tone="amber" />
+          <StatCard title="NgÆ°á»i dÃ¹ng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
+          <StatCard title="Chá»— á»Ÿ" value={data.totalProperties ?? 0} icon={<Building2 size={20} />} tone="slate" />
+          <StatCard title="Äáº·t chá»—" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
+          <StatCard title="Doanh thu (VNÄ)" value={(data.totalRevenue ?? 0).toLocaleString("vi-VN")} icon={<CreditCard size={20} />} tone="amber" />
           <StatCard title="Operators" value={operators} icon={<UserCog size={20} />} tone="teal" />
-          <StatCard title="Tỉnh đã phủ" value={operators} icon={<MapPin size={20} />} tone="amber" />
+          <StatCard title="Tá»‰nh Ä‘Ã£ phá»§" value={operators} icon={<MapPin size={20} />} tone="amber" />
         </div>
 
         {(data.recentBookings?.length ?? 0) > 0 ? (
           <div className="portal-card p-5">
-            <h2 className="mb-4 text-xl font-semibold text-slate-950">Đặt chỗ gần đây</h2>
+            <h2 className="mb-4 text-xl font-semibold text-slate-950">Äáº·t chá»— gáº§n Ä‘Ã¢y</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100">
                     <th className="py-2 text-left font-medium text-slate-500">ID</th>
-                    <th className="py-2 text-left font-medium text-slate-500">Trạng thái</th>
-                    <th className="py-2 text-right font-medium text-slate-500">Tổng tiền</th>
-                    <th className="py-2 text-right font-medium text-slate-500">Ngày tạo</th>
+                    <th className="py-2 text-left font-medium text-slate-500">Tráº¡ng thÃ¡i</th>
+                    <th className="py-2 text-right font-medium text-slate-500">Tá»•ng tiá»n</th>
+                    <th className="py-2 text-right font-medium text-slate-500">NgÃ y táº¡o</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -116,7 +115,7 @@ export default function AdminDashboard() {
                       <td className="py-2">
                         <span className="rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-800">{b.status}</span>
                       </td>
-                      <td className="py-2 text-right font-medium">{Number(b.totalPrice).toLocaleString("vi-VN")}đ</td>
+                      <td className="py-2 text-right font-medium">{Number(b.totalPrice).toLocaleString("vi-VN")}Ä‘</td>
                       <td className="py-2 text-right text-slate-400">{new Date(b.createdAt).toLocaleDateString("vi-VN")}</td>
                     </tr>
                   ))}
@@ -129,3 +128,4 @@ export default function AdminDashboard() {
     </PortalShell>
   );
 }
+

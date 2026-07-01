@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { PortalShell } from "@/components/layout/PortalShell";
@@ -28,7 +28,7 @@ export default function BookingsPage() {
       .get("/admin/bookings")
       .then((response) => setBookings(response.data.data ?? []))
       .catch((err) =>
-        setError(err.response?.data?.error?.message ?? "Không thể tải danh sách đặt phòng.")
+        setError(err.response?.data?.error?.message ?? "KhÃ´ng thá»ƒ táº£i danh sÃ¡ch Ä‘áº·t phÃ²ng.")
       )
       .finally(() => setLoading(false));
   }, []);
@@ -45,22 +45,22 @@ export default function BookingsPage() {
             ? {
                 ...item,
                 rawStatus: response.data.data.status,
-                status: status === "CONFIRMED" ? "Đã xác nhận" : "Đã hủy",
+                status: status === "CONFIRMED" ? "ÄÃ£ xÃ¡c nháº­n" : "ÄÃ£ há»§y",
               }
             : item
         )
       );
     } catch (err: any) {
-      setError(err.response?.data?.error?.message ?? "Không thể cập nhật đặt phòng.");
+      setError(err.response?.data?.error?.message ?? "KhÃ´ng thá»ƒ cáº­p nháº­t Ä‘áº·t phÃ²ng.");
     } finally {
       setUpdatingId(null);
     }
   }
 
   return (
-    <PortalShell title="Đặt chỗ">
+    <PortalShell title="Äáº·t chá»—">
       <div className="space-y-5">
-        <p className="text-sm text-slate-500">{bookings.length} đặt chỗ</p>
+        <p className="text-sm text-slate-500">{bookings.length} Ä‘áº·t chá»—</p>
         {error ? (
           <p className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>
         ) : null}
@@ -76,19 +76,19 @@ export default function BookingsPage() {
                 <thead className="border-b border-slate-100 bg-slate-50">
                   <tr>
                     <th className="px-6 py-3 text-left font-medium text-slate-500">ID</th>
-                    <th className="px-6 py-3 text-left font-medium text-slate-500">Chỗ ở / Tour</th>
-                    <th className="px-6 py-3 text-left font-medium text-slate-500">Khách</th>
-                    <th className="px-6 py-3 text-left font-medium text-slate-500">Ngày</th>
-                    <th className="px-6 py-3 text-left font-medium text-slate-500">Trạng thái</th>
-                    <th className="px-6 py-3 text-right font-medium text-slate-500">Tổng tiền</th>
-                    <th className="px-6 py-3 text-right font-medium text-slate-500">Duyệt</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Chá»— á»Ÿ</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">KhÃ¡ch</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">NgÃ y</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Tráº¡ng thÃ¡i</th>
+                    <th className="px-6 py-3 text-right font-medium text-slate-500">Tá»•ng tiá»n</th>
+                    <th className="px-6 py-3 text-right font-medium text-slate-500">Duyá»‡t</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bookings.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-slate-400">
-                        Chưa có đặt chỗ.
+                        ChÆ°a cÃ³ Ä‘áº·t chá»—.
                       </td>
                     </tr>
                   ) : null}
@@ -114,7 +114,7 @@ export default function BookingsPage() {
                               onClick={() => updateStatus(booking, "CONFIRMED")}
                               className="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:opacity-50"
                             >
-                              Duyệt
+                              Duyá»‡t
                             </button>
                             <button
                               type="button"
@@ -122,7 +122,7 @@ export default function BookingsPage() {
                               onClick={() => updateStatus(booking, "CANCELLED")}
                               className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                             >
-                              Hủy
+                              Há»§y
                             </button>
                           </div>
                         ) : (
@@ -140,3 +140,4 @@ export default function BookingsPage() {
     </PortalShell>
   );
 }
+

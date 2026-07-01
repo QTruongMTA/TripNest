@@ -4,7 +4,16 @@ import { PortalShell } from "@/components/layout/PortalShell";
 import api from "@/lib/api";
 import { Star } from "lucide-react";
 
-interface Review { id: string; rating: number; comment: string; createdAt: string; user?: { email: string }; booking?: { property?: { title: string }; tour?: { title: string } }; }
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  images?: Array<{ id: string; url: string }>;
+  hostReply?: string | null;
+  user?: { email: string };
+  booking?: { property?: { title: string } };
+}
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -22,13 +31,25 @@ export default function ReviewsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-slate-800">{r.user?.email ?? "Người dùng"}</p>
-                    <p className="text-xs text-slate-400">{r.booking?.property?.title ?? r.booking?.tour?.title ?? "-"}</p>
+                    <p className="text-xs text-slate-400">{r.booking?.property?.title ?? "-"}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < r.rating ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"} />)}
                   </div>
                 </div>
                 <p className="text-sm text-slate-600 mt-2">{r.comment}</p>
+                {r.images && r.images.length > 0 && (
+                  <div className="mt-3 flex gap-2 overflow-x-auto">
+                    {r.images.map((image) => (
+                      <img key={image.id} src={image.url} alt="" className="h-20 w-28 rounded-lg object-cover" />
+                    ))}
+                  </div>
+                )}
+                {r.hostReply && (
+                  <div className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                    Phản hồi host: {r.hostReply}
+                  </div>
+                )}
                 <p className="text-xs text-slate-400 mt-1">{new Date(r.createdAt).toLocaleDateString("vi-VN")}</p>
               </div>
             ))}

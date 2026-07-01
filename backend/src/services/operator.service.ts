@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+﻿import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma";
 
 function formatOperatorNumber(value: number) {
@@ -6,38 +6,78 @@ function formatOperatorNumber(value: number) {
 }
 
 function formatVND(amount: number): string {
-  return `₫${amount.toLocaleString("vi-VN")}`;
+  return `â‚«${amount.toLocaleString("vi-VN")}`;
 }
 
 function mapPaymentStatus(status: string): string {
   const map: Record<string, string> = {
-    UNPAID: "Chưa thanh toán",
-    PAID: "Đã thanh toán",
-    REFUNDED: "Đã hoàn tiền",
+    UNPAID: "ChÆ°a thanh toÃ¡n",
+    PAID: "ÄÃ£ thanh toÃ¡n",
+    REFUNDED: "ÄÃ£ hoÃ n tiá»n",
   };
   return map[status] ?? status;
 }
 
 function mapPaymentMethod(method: string): string {
   const map: Record<string, string> = {
-    CASH: "Tiền mặt",
-    BANK_TRANSFER: "Chuyển khoản",
+    CASH: "Tiá»n máº·t",
+    BANK_TRANSFER: "Chuyá»ƒn khoáº£n",
     MOMO: "MoMo",
     VNPAY: "VNPay",
     ZALOPAY: "ZaloPay",
-    CREDIT_CARD: "Thẻ tín dụng",
+    CREDIT_CARD: "Tháº» tÃ­n dá»¥ng",
   };
   return map[method] ?? method;
 }
 
 function mapBookingStatus(status: string): string {
   const map: Record<string, string> = {
-    PENDING: "Chờ duyệt",
-    CONFIRMED: "Đã xác nhận",
-    CANCELLED: "Đã hủy",
-    COMPLETED: "Hoàn tất",
+    PENDING: "Chá» duyá»‡t",
+    CONFIRMED: "ÄÃ£ xÃ¡c nháº­n",
+    CANCELLED: "ÄÃ£ há»§y",
+    COMPLETED: "HoÃ n táº¥t",
   };
   return map[status] ?? status;
+}
+
+function buildListingChecklist(property: {
+  title: string;
+  description: string | null;
+  addressLine1: string;
+  city: string;
+  pricePerNight: { toNumber(): number };
+  maxGuests: number;
+  bedroomCount: number;
+  bathrooms: number;
+  checkInFrom: string | null;
+  checkInTo: string | null;
+  checkOutFrom: string | null;
+  checkOutTo: string | null;
+  cancellationPolicy: string;
+  images: Array<{ id: string; isPrimary: boolean }>;
+  amenities: Array<{ id: string }>;
+  bedrooms: Array<{ id: string }>;
+  owners: Array<{ id: string }>;
+  ratePlans: Array<{ id: string; isActive: boolean }>;
+}) {
+  const items = [
+    { key: "basic", label: "ThÃ´ng tin cÆ¡ báº£n", passed: Boolean(property.title.trim() && property.description && property.description.trim().length >= 30) },
+    { key: "address", label: "Äá»‹a chá»‰", passed: Boolean(property.addressLine1.trim() && property.city.trim()) },
+    { key: "photos", label: "áº¢nh chá»— nghá»‰", passed: property.images.length >= 3 && property.images.some((img) => img.isPrimary) },
+    { key: "pricing", label: "GiÃ¡ & gÃ³i giÃ¡", passed: property.pricePerNight.toNumber() > 0 && property.ratePlans.some((plan) => plan.isActive) },
+    { key: "capacity", label: "Sá»©c chá»©a", passed: property.maxGuests > 0 && property.bedroomCount >= 0 && property.bathrooms > 0 && property.bedrooms.length > 0 },
+    { key: "policies", label: "ChÃ­nh sÃ¡ch lÆ°u trÃº", passed: Boolean(property.cancellationPolicy && property.checkInFrom && property.checkOutTo) },
+    { key: "amenities", label: "Tiá»‡n nghi", passed: property.amenities.length >= 3 },
+    { key: "legal", label: "ThÃ´ng tin chá»§ sá»Ÿ há»¯u", passed: property.owners.length > 0 },
+  ];
+  const passed = items.filter((item) => item.passed).length;
+  return {
+    items,
+    passed,
+    total: items.length,
+    score: Math.round((passed / items.length) * 100),
+    blockingIssues: items.filter((item) => !item.passed).map((item) => item.label),
+  };
 }
 
 async function getNextOperatorCredential() {
@@ -65,7 +105,7 @@ async function getNextOperatorCredential() {
 }
 
 export const operatorService = {
-  // ── Admin: quản lý Operator ──────────────────────────────────────────────────
+  // â”€â”€ Admin: quáº£n lÃ½ Operator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async listOperators() {
     return prisma.user.findMany({
@@ -96,7 +136,7 @@ export const operatorService = {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new Error("EMAIL_TAKEN");
 
-    // Kiểm tra tỉnh chưa có operator
+    // Kiá»ƒm tra tá»‰nh chÆ°a cÃ³ operator
     const occupied = await prisma.operatorProvinceAssignment.findFirst({
       where: { provinceId: { in: data.provinceIds } },
     });
@@ -175,7 +215,7 @@ export const operatorService = {
     });
   },
 
-  // ── Operator tỉnh: lấy tỉnh mình quản lý ────────────────────────────────────
+  // â”€â”€ Operator tá»‰nh: láº¥y tá»‰nh mÃ¬nh quáº£n lÃ½ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getOperatorProvinces(operatorId: string) {
     const assignments = await prisma.operatorProvinceAssignment.findMany({
@@ -193,7 +233,7 @@ export const operatorService = {
     return assignments.map((a) => a.provinceId);
   },
 
-  // ── Lấy tỉnh của Operator con (qua parent) ───────────────────────────────────
+  // â”€â”€ Láº¥y tá»‰nh cá»§a Operator con (qua parent) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getSubOperatorProvinces(subOperatorId: string) {
     const sub = await prisma.user.findUnique({ where: { id: subOperatorId } });
@@ -201,7 +241,7 @@ export const operatorService = {
     return this.getOperatorProvinces(sub.createdById);
   },
 
-  // ── Dashboard operator ───────────────────────────────────────────────────────
+  // â”€â”€ Dashboard operator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getProvinceDashboard(operatorId: string) {
     const provinces = await this.getOperatorProvinces(operatorId);
@@ -217,10 +257,7 @@ export const operatorService = {
         prisma.booking.count({
           where: {
             status: "PENDING",
-            OR: [
-              { property: { city: { in: cities } } },
-              { tour: { city: { in: cities } } },
-            ],
+            property: { city: { in: cities } },
           },
         }),
       ]);
@@ -249,7 +286,7 @@ export const operatorService = {
     return { stats: { activeTasks, completedThisMonth, totalCompleted } };
   },
 
-  // ── Listings trong tỉnh ──────────────────────────────────────────────────────
+  // â”€â”€ Listings trong tá»‰nh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getProvinceListings(cities: string[], filters: { status?: string; page?: number } = {}) {
     const page = filters.page ?? 1;
@@ -264,7 +301,16 @@ export const operatorService = {
         where,
         include: {
           host: { select: { id: true, email: true } },
-          images: { where: { isPrimary: true }, take: 1 },
+          images: { orderBy: [{ isPrimary: "desc" }, { id: "asc" }], select: { id: true, url: true, isPrimary: true } },
+          amenities: { select: { id: true } },
+          bedrooms: { select: { id: true } },
+          owners: { select: { id: true } },
+          ratePlans: { select: { id: true, isActive: true } },
+          approvalReviews: {
+            orderBy: { createdAt: "desc" },
+            take: 3,
+            include: { reviewer: { select: { email: true } } },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * take,
@@ -273,17 +319,147 @@ export const operatorService = {
       prisma.property.count({ where }),
     ]);
 
-    return { items, total, page, totalPages: Math.ceil(total / take) };
+    return {
+      items: items.map((property) => {
+        const approvalChecklist = buildListingChecklist(property);
+        const latestApprovalReview = property.approvalReviews[0] ?? null;
+        return {
+          id: property.id,
+          title: property.title,
+          description: property.description,
+          addressLine1: property.addressLine1,
+          city: property.city,
+          country: property.country,
+          status: property.status,
+          type: property.type,
+          pricePerNight: property.pricePerNight.toNumber(),
+          maxGuests: property.maxGuests,
+          bedroomCount: property.bedroomCount,
+          bathrooms: property.bathrooms,
+          bookingMethod: property.bookingMethod,
+          cancellationPolicy: property.cancellationPolicy,
+          breakfastIncluded: property.breakfastIncluded,
+          parkingType: property.parkingType,
+          petsPolicy: property.petsPolicy,
+          smokingAllowed: property.smokingAllowed,
+          partiesAllowed: property.partiesAllowed,
+          legalEntityType: property.legalEntityType,
+          host: property.host,
+          images: property.images.map((image) => ({ url: image.url })),
+          createdAt: property.createdAt.toISOString(),
+          approvalChecklist,
+          latestApprovalReview: latestApprovalReview
+            ? {
+                id: latestApprovalReview.id,
+                decision: latestApprovalReview.decision,
+                notes: latestApprovalReview.notes,
+                checklist: latestApprovalReview.checklist,
+                issues: latestApprovalReview.issues,
+                createdAt: latestApprovalReview.createdAt.toISOString(),
+                reviewer: latestApprovalReview.reviewer,
+              }
+            : null,
+          approvalHistory: property.approvalReviews.map((review) => ({
+            id: review.id,
+            decision: review.decision,
+            notes: review.notes,
+            checklist: review.checklist,
+            issues: review.issues,
+            createdAt: review.createdAt.toISOString(),
+            reviewer: review.reviewer,
+          })),
+        };
+      }),
+      total,
+      page,
+      totalPages: Math.ceil(total / take),
+    };
+  },
+
+  async reviewProvinceListing(input: {
+    cities: string[];
+    propertyId: string;
+    reviewerId: string;
+    status: "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING";
+    notes?: string | null;
+    checklist?: unknown;
+    issues?: unknown;
+  }) {
+    const property = await prisma.property.findFirst({
+      where: { id: input.propertyId, city: { in: input.cities } },
+      include: {
+        host: { select: { id: true, email: true } },
+        images: { select: { id: true, isPrimary: true } },
+        amenities: { select: { id: true } },
+        bedrooms: { select: { id: true } },
+        owners: { select: { id: true } },
+        ratePlans: { select: { id: true, isActive: true } },
+      },
+    });
+    if (!property) return { kind: "LISTING_NOT_FOUND" as const };
+
+    const checklist = input.checklist ?? buildListingChecklist(property);
+    const decision =
+      input.status === "ACTIVE" ? "APPROVED"
+        : input.status === "PENDING" ? "UNDER_REVIEW"
+          : "REJECTED";
+
+    if ((input.status === "INACTIVE" || input.status === "SUSPENDED") && !input.notes?.trim()) {
+      return { kind: "NOTES_REQUIRED" as const };
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const propertyUpdate = await tx.property.update({
+        where: { id: property.id },
+        data: { status: input.status },
+        select: { id: true, title: true, status: true, updatedAt: true },
+      });
+
+      await tx.listingApprovalReview.create({
+        data: {
+          propertyId: property.id,
+          reviewerId: input.reviewerId,
+          decision,
+          checklist: checklist as never,
+          issues: (input.issues ?? []) as never,
+          notes: input.notes?.trim() || null,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: property.hostId,
+          type: input.status === "ACTIVE" ? "LISTING_APPROVED" : "LISTING_REJECTED",
+          title: input.status === "ACTIVE" ? "Chá»— nghá»‰ Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t" : "Chá»— nghá»‰ cáº§n chá»‰nh sá»­a",
+          message: input.status === "ACTIVE"
+            ? `${property.title} Ä‘Ã£ Ä‘Æ°á»£c má»Ÿ bÃ¡n trÃªn TripNest.`
+            : `${property.title} chÆ°a Ä‘Æ°á»£c má»Ÿ bÃ¡n. ${input.notes?.trim() ?? "Vui lÃ²ng kiá»ƒm tra ghi chÃº duyá»‡t."}`,
+          metadata: { propertyId: property.id, status: input.status, action: "LISTING_REVIEWED" },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.reviewerId,
+          action: "LISTING_REVIEWED",
+          entity: "Property",
+          entityId: property.id,
+          oldValue: { status: property.status },
+          newValue: { status: input.status, notes: input.notes ?? null },
+        },
+      });
+
+      return propertyUpdate;
+    });
+
+    return { kind: "SUCCESS" as const, data: { id: updated.id, title: updated.title, status: updated.status, updatedAt: updated.updatedAt.toISOString() } };
   },
 
   async listProvincePayments(cities: string[]) {
     const payments = await prisma.payment.findMany({
       where: {
         booking: {
-          OR: [
-            { property: { city: { in: cities } } },
-            { tour: { city: { in: cities } } },
-          ],
+          property: { city: { in: cities } },
         },
       },
       include: {
@@ -291,7 +467,6 @@ export const operatorService = {
           include: {
             user: { select: { email: true } },
             property: { select: { title: true, city: true } },
-            tour: { select: { title: true, city: true } },
           },
         },
       },
@@ -306,7 +481,7 @@ export const operatorService = {
       total: payments.length,
       paidTotal: formatVND(paidTotal),
       items: payments.map((payment) => {
-        const listing = payment.booking.property ?? payment.booking.tour;
+        const listing = payment.booking.property;
         return {
           id: `PM-${payment.id.slice(-6).toUpperCase()}`,
           fullId: payment.id,
@@ -328,29 +503,23 @@ export const operatorService = {
     const bookings = await prisma.booking.findMany({
       where: {
         ...(status && { status: status as never }),
-        OR: [
-          { property: { city: { in: cities } } },
-          { tour: { city: { in: cities } } },
-        ],
+        property: { city: { in: cities } },
       },
       orderBy: { createdAt: "desc" },
       include: {
         user: { select: { email: true, name: true, phone: true } },
         property: { select: { title: true, city: true } },
-        tour: { select: { title: true, city: true } },
         payment: { select: { method: true, status: true } },
       },
     });
 
     return bookings.map((booking) => {
-      const listing = booking.property ?? booking.tour;
+      const listing = booking.property;
       let dateRange = "";
       if (booking.checkIn && booking.checkOut) {
         const checkIn = booking.checkIn.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
         const checkOut = booking.checkOut.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
         dateRange = `${checkIn}-${checkOut}`;
-      } else if (booking.tourDate) {
-        dateRange = booking.tourDate.toLocaleDateString("vi-VN");
       }
 
       return {
@@ -386,7 +555,6 @@ export const operatorService = {
           id: input.bookingId,
           OR: [
             { property: { city: { in: input.cities } } },
-            { tour: { city: { in: input.cities } } },
           ],
         },
         select: {
@@ -394,7 +562,6 @@ export const operatorService = {
           status: true,
           userId: true,
           property: { select: { title: true } },
-          tour: { select: { title: true } },
         },
       });
 
@@ -407,16 +574,16 @@ export const operatorService = {
         select: { id: true, status: true, updatedAt: true },
       });
 
-      const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";
+      const itemTitle = booking.property?.title ?? "Ä‘Æ¡n Ä‘áº·t phÃ²ng";
       await tx.notification.create({
         data: {
           userId: booking.userId,
           type: input.status === "CONFIRMED" ? "BOOKING_CONFIRMED" : "BOOKING_CANCELLED",
-          title: input.status === "CONFIRMED" ? "Đặt phòng thành công" : "Đặt phòng đã bị hủy",
+          title: input.status === "CONFIRMED" ? "Äáº·t phÃ²ng thÃ nh cÃ´ng" : "Äáº·t phÃ²ng Ä‘Ã£ bá»‹ há»§y",
           message:
             input.status === "CONFIRMED"
-              ? `Đơn đặt ${itemTitle} của bạn đã được xác nhận.`
-              : `Đơn đặt ${itemTitle} của bạn đã bị hủy.`,
+              ? `ÄÆ¡n Ä‘áº·t ${itemTitle} cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c nháº­n.`
+              : `ÄÆ¡n Ä‘áº·t ${itemTitle} cá»§a báº¡n Ä‘Ã£ bá»‹ há»§y.`,
           metadata: {
             bookingId: booking.id,
             action: input.status === "CONFIRMED" ? "BOOKING_APPROVED" : "BOOKING_CANCELLED",
@@ -435,7 +602,7 @@ export const operatorService = {
     });
   },
 
-  // ── Host approval ────────────────────────────────────────────────────────────
+  // â”€â”€ Host approval â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async listHostApprovals(provinceIds: string[], status?: string) {
     return prisma.hostApprovalRequest.findMany({
@@ -472,7 +639,7 @@ export const operatorService = {
     });
   },
 
-  // ── Tasks ────────────────────────────────────────────────────────────────────
+  // â”€â”€ Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async listTasks(assignedTo?: string, assignedBy?: string, provinceId?: string) {
     return prisma.operatorTask.findMany({
@@ -524,7 +691,7 @@ export const operatorService = {
     });
   },
 
-  // ── Sub-operators ────────────────────────────────────────────────────────────
+  // â”€â”€ Sub-operators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async listSubOperators(createdById: string) {
     return prisma.user.findMany({
@@ -540,12 +707,12 @@ export const operatorService = {
     });
   },
 
-  // ── Disputes ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Disputes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async listDisputes(provinceIds: string[], status?: string) {
     return prisma.dispute.findMany({
       where: {
-        provinceId: { in: provinceIds },
+        OR: [{ provinceId: { in: provinceIds } }, { provinceId: null }],
         ...(status && { status: status as never }),
       },
       include: {
@@ -553,21 +720,50 @@ export const operatorService = {
         guest: { select: { email: true } },
         resolver: { select: { email: true } },
         province: { select: { name: true } },
+        booking: {
+          select: {
+            id: true,
+            status: true,
+            paymentStatus: true,
+            checkIn: true,
+            checkOut: true,
+            property: { select: { id: true, title: true, city: true } },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
   },
 
   async resolveDispute(disputeId: string, resolvedBy: string, resolution: string, escalate = false) {
-    return prisma.dispute.update({
-      where: { id: disputeId },
-      data: {
-        status: escalate ? "ESCALATED" : "RESOLVED",
-        resolvedBy,
-        resolution,
-        resolvedAt: new Date(),
-        ...(escalate && { escalatedAt: new Date() }),
-      },
+    return prisma.$transaction(async (tx) => {
+      const dispute = await tx.dispute.update({
+        where: { id: disputeId },
+        data: {
+          status: escalate ? "ESCALATED" : "RESOLVED",
+          resolvedBy,
+          resolution,
+          resolvedAt: new Date(),
+          ...(escalate && { escalatedAt: new Date() }),
+        },
+      });
+
+      if (dispute.bookingId) {
+        await tx.bookingMessage.create({
+          data: {
+            bookingId: dispute.bookingId,
+            senderRole: "SYSTEM",
+            message: escalate
+              ? `Support case Ä‘Ã£ Ä‘Æ°á»£c chuyá»ƒn lÃªn Admin: ${resolution}`
+              : `Support case Ä‘Ã£ Ä‘Æ°á»£c xá»­ lÃ½: ${resolution}`,
+            isReadByGuest: false,
+            isReadByHost: false,
+          },
+        });
+      }
+
+      return dispute;
     });
   },
 };
+

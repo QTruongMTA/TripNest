@@ -1,14 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useAuthStore } from "@/store/authStore";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { label: "Trang chủ", href: "/host/properties" },
-  { label: "Đặt phòng", href: "/host/bookings" },
-  { label: "Đánh giá", href: "/host/reviews" },
-  { label: "Tài chính", href: "/host/revenue" },
-  { label: "Dữ liệu thị trường", href: "/host/market" },
+  { label: "Trang chá»§", href: "/host/properties" },
+  { label: "Lá»‹ch phÃ²ng", href: "/host/calendar" },
+  { label: "Äáº·t phÃ²ng", href: "/host/bookings" },
+  { label: "Khuyến mãi", href: "/host/promotions" },
+  { label: "ÄÃ¡nh giÃ¡", href: "/host/reviews" },
+  { label: "TÃ i chÃ­nh", href: "/host/revenue" },
+  { label: "Dá»¯ liá»‡u thá»‹ trÆ°á»ng", href: "/host/market" },
 ];
 
 export default function HostLayout({ children }: { children: React.ReactNode }) {
@@ -31,7 +33,7 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
 
           <div className="flex items-center gap-3">
             <a href="/" className="rounded-md border border-white/20 px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10">
-              Trang người dùng
+              Trang ngÆ°á»i dÃ¹ng
             </a>
           </div>
         </div>

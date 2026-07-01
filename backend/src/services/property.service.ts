@@ -28,26 +28,45 @@ function toNumber(value: { toNumber(): number } | null) {
   return value ? value.toNumber() : null;
 }
 
-function buildRating(
-  bookings: Array<{ review: { rating: number } | null }>
-) {
-  const ratings = bookings
-    .map((booking) => booking.review?.rating)
-    .filter((rating): rating is number => rating !== undefined);
+type ReviewForRating = {
+  rating: number;
+  cleanliness: number;
+  comfort: number;
+  location: number;
+  facilities: number;
+  staff: number;
+  valueForMoney: number;
+};
 
-  if (ratings.length === 0) {
-    return { average: null, count: 0 };
+function buildRating(bookings: Array<{ review: ReviewForRating | null }>) {
+  const reviews = bookings
+    .map((booking) => booking.review)
+    .filter((review): review is ReviewForRating => review !== null);
+
+  if (reviews.length === 0) {
+    return { average: null, count: 0, breakdown: null };
   }
 
-  const total = ratings.reduce((sum, rating) => sum + rating, 0);
+  const avg = (key: keyof ReviewForRating) =>
+    Number((reviews.reduce((sum, review) => sum + review[key], 0) / reviews.length).toFixed(1));
+
   return {
-    average: Number((total / ratings.length).toFixed(1)),
-    count: ratings.length,
+    average: avg("rating"),
+    count: reviews.length,
+    breakdown: {
+      cleanliness: avg("cleanliness"),
+      comfort: avg("comfort"),
+      location: avg("location"),
+      facilities: avg("facilities"),
+      staff: avg("staff"),
+      valueForMoney: avg("valueForMoney"),
+    },
   };
 }
 
 export const propertyService = {
   async listPublicProperties(query: PublicPropertyQuery) {
+    const now = new Date();
     const where = {
       status: ListingStatus.ACTIVE,
       ...(query.city
@@ -127,12 +146,25 @@ export const propertyService = {
             where: { review: { isNot: null } },
             select: {
               review: {
-                select: { rating: true },
+                select: {
+                  rating: true, cleanliness: true, comfort: true, location: true,
+                  facilities: true, staff: true, valueForMoney: true,
+                },
               },
             },
           },
           amenities: {
             select: { name: true },
+          },
+          promotions: {
+            where: {
+              isActive: true,
+              startDate: { lte: now },
+              endDate: { gte: now },
+            },
+            take: 1,
+            orderBy: { discountValue: "desc" },
+            select: { id: true, code: true, discountType: true, discountValue: true },
           },
         },
       }),
@@ -153,6 +185,14 @@ export const propertyService = {
         amenityNames: property.amenities.map((amenity) => amenity.name),
         thumbnailUrl: normalizePropertyImageUrl(property.images[0]?.url, property.type),
         rating: buildRating(property.bookings),
+        promotion: property.promotions[0]
+          ? {
+              id: property.promotions[0].id,
+              code: property.promotions[0].code,
+              discountType: property.promotions[0].discountType,
+              discountValue: property.promotions[0].discountValue.toNumber(),
+            }
+          : null,
       })),
       meta: {
         page: query.page,
@@ -164,6 +204,7 @@ export const propertyService = {
   },
 
   async getPublicPropertyById(id: string) {
+    const now = new Date();
     const property = await prisma.property.findFirst({
       where: {
         id,
@@ -181,7 +222,26 @@ export const propertyService = {
           orderBy: { roomNumber: "asc" },
         },
         childPricing: true,
-        ratePlans: true,
+        ratePlans: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
+        promotions: {
+          where: {
+            isActive: true,
+            startDate: { lte: now },
+            endDate: { gte: now },
+          },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            code: true,
+            description: true,
+            discountType: true,
+            discountValue: true,
+            minOrderValue: true,
+            maxUses: true,
+            usedCount: true,
+            endDate: true,
+          },
+        },
         host: {
           select: {
             id: true,
@@ -198,9 +258,25 @@ export const propertyService = {
         },
         bookings: {
           where: { review: { isNot: null } },
+          orderBy: { createdAt: "desc" },
           select: {
             review: {
-              select: { rating: true },
+              select: {
+                id: true,
+                rating: true,
+                cleanliness: true,
+                comfort: true,
+                location: true,
+                facilities: true,
+                staff: true,
+                valueForMoney: true,
+                comment: true,
+                hostReply: true,
+                hostRepliedAt: true,
+                createdAt: true,
+                user: { select: { id: true, name: true, displayName: true, email: true, avatar: true } },
+                images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
+              },
             },
           },
         },
@@ -208,6 +284,30 @@ export const propertyService = {
     });
 
     if (!property) return null;
+
+    const activePromotions = await prisma.promotion.findMany({
+      where: {
+        isActive: true,
+        startDate: { lte: now },
+        endDate: { gte: now },
+        OR: [
+          { propertyId: property.id },
+          { hostId: property.host.id, propertyId: null },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        code: true,
+        description: true,
+        discountType: true,
+        discountValue: true,
+        minOrderValue: true,
+        maxUses: true,
+        usedCount: true,
+        endDate: true,
+      },
+    });
 
     return {
       id: property.id,
@@ -229,6 +329,30 @@ export const propertyService = {
         property.type
       ),
       rating: buildRating(property.bookings),
+      reviews: property.bookings.flatMap((booking) => {
+        const review = booking.review;
+        if (!review) return [];
+        return [{
+          id: review.id,
+          rating: review.rating,
+          cleanliness: review.cleanliness,
+          comfort: review.comfort,
+          location: review.location,
+          facilities: review.facilities,
+          staff: review.staff,
+          valueForMoney: review.valueForMoney,
+          comment: review.comment,
+          hostReply: review.hostReply,
+          hostRepliedAt: review.hostRepliedAt?.toISOString() ?? null,
+          createdAt: review.createdAt.toISOString(),
+          guest: {
+            id: review.user.id,
+            name: review.user.displayName ?? review.user.name ?? review.user.email,
+            avatar: review.user.avatar,
+          },
+          images: review.images.map((img) => ({ id: img.id, url: img.url })),
+        }];
+      }),
       description: property.description,
       address: {
         line1: property.addressLine1,
@@ -273,10 +397,31 @@ export const propertyService = {
       },
       languages: property.languages.map((l) => l.language),
       ratePlans: property.ratePlans.map((rp) => ({
+        id: rp.id,
+        name: rp.name,
         type: rp.type,
-        enabled: rp.enabled,
-        discountPct: rp.discountPct,
+        priceAdjustmentType: rp.priceAdjustmentType,
+        priceAdjustmentValue: rp.priceAdjustmentValue.toNumber(),
+        cancellationPolicy: rp.cancellationPolicy,
+        cancellationFreeDays: rp.cancellationFreeDays,
+        minStay: rp.minStay,
+        maxStay: rp.maxStay,
+        breakfastIncluded: rp.breakfastIncluded,
+        sortOrder: rp.sortOrder,
       })),
+      promotions: activePromotions
+        .filter((promo) => promo.maxUses === null || promo.usedCount < promo.maxUses)
+        .map((promo) => ({
+          id: promo.id,
+          code: promo.code,
+          description: promo.description,
+          discountType: promo.discountType,
+          discountValue: promo.discountValue.toNumber(),
+          minOrderValue: promo.minOrderValue?.toNumber() ?? null,
+          maxUses: promo.maxUses,
+          usedCount: promo.usedCount,
+          endDate: promo.endDate.toISOString().slice(0, 10),
+        })),
       childPricing: property.childPricing
         ? {
             enabled: property.childPricing.enabled,

@@ -1,10 +1,9 @@
-import {
+﻿import {
   BookingStatus,
   CancellationPolicy,
   ListingStatus,
   PaymentStatus,
   PropertyType,
-  TourCategory,
 } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
 import { sessionService } from "./session.service";
@@ -12,43 +11,50 @@ import { sessionService } from "./session.service";
 function formatAge(date: Date): string {
   const diffMs = Date.now() - date.getTime();
   const hours = Math.floor(diffMs / 3_600_000);
-  if (hours < 1) return "Vừa xong";
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 1) return "Vá»«a xong";
+  if (hours < 24) return `${hours} giá» trÆ°á»›c`;
   const days = Math.floor(hours / 24);
-  return days === 1 ? "Hôm qua" : `${days} ngày trước`;
+  return days === 1 ? "HÃ´m qua" : `${days} ngÃ y trÆ°á»›c`;
 }
 
 function formatVND(amount: number): string {
-  return `₫${amount.toLocaleString("vi-VN")}`;
+  return `â‚«${amount.toLocaleString("vi-VN")}`;
 }
 
 function mapBookingStatus(status: string): string {
   const map: Record<string, string> = {
-    PENDING: "Chờ xử lý",
-    CONFIRMED: "Đã xác nhận",
-    CANCELLED: "Đã huỷ",
-    COMPLETED: "Hoàn tất",
+    PENDING: "Chá» xá»­ lÃ½",
+    CONFIRMED: "ÄÃ£ xÃ¡c nháº­n",
+    CANCELLED: "ÄÃ£ huá»·",
+    COMPLETED: "HoÃ n táº¥t",
+    CANCELLED_BY_GUEST: "KhÃ¡ch há»§y",
+    CANCELLED_BY_HOST: "Chá»§ nhÃ  há»§y",
+    EXPIRED: "Háº¿t háº¡n",
+    NO_SHOW: "KhÃ´ng Ä‘áº¿n",
   };
   return map[status] ?? status;
 }
 
 function mapPaymentStatus(status: string): string {
   const map: Record<string, string> = {
-    UNPAID: "Chưa thanh toán",
-    PAID: "Đã thanh toán",
-    REFUNDED: "Đã hoàn tiền",
+    UNPAID: "ChÆ°a thanh toÃ¡n",
+    PAID: "ÄÃ£ thanh toÃ¡n",
+    REFUNDED: "ÄÃ£ hoÃ n tiá»n",
+    PENDING_PAYMENT: "Äang xá»­ lÃ½",
+    FAILED: "Tháº¥t báº¡i",
+    PARTIALLY_REFUNDED: "HoÃ n tiá»n má»™t pháº§n",
   };
   return map[status] ?? status;
 }
 
 function mapPaymentMethod(method: string): string {
   const map: Record<string, string> = {
-    CASH: "Tiền mặt",
-    BANK_TRANSFER: "Chuyển khoản",
+    CASH: "Tiá»n máº·t",
+    BANK_TRANSFER: "Chuyá»ƒn khoáº£n",
     MOMO: "MoMo",
     VNPAY: "VNPay",
     ZALOPAY: "ZaloPay",
-    CREDIT_CARD: "Thẻ tín dụng",
+    CREDIT_CARD: "Tháº» tÃ­n dá»¥ng",
   };
   return map[method] ?? method;
 }
@@ -68,20 +74,6 @@ export type CreatePropertyInput = {
   bathrooms: number;
   type: PropertyType;
   cancellationPolicy: CancellationPolicy;
-  hostId: string;
-  thumbnailUrl?: string;
-};
-
-export type CreateTourInput = {
-  title: string;
-  description: string;
-  city: string;
-  country: string;
-  pricePerPerson: number;
-  durationDays: number;
-  minGroupSize: number;
-  maxGroupSize: number;
-  category: TourCategory;
   hostId: string;
   thumbnailUrl?: string;
 };
@@ -111,11 +103,11 @@ function parseDateFilter(value?: string) {
 
 function mapAuditAction(action: string) {
   const map: Record<string, string> = {
-    LOGIN: "Đăng nhập",
-    LOGOUT: "Đăng xuất",
-    REGISTER: "Đăng ký",
-    SEARCH: "Tìm kiếm",
-    UPDATE_PROFILE: "Cập nhật hồ sơ",
+    LOGIN: "ÄÄƒng nháº­p",
+    LOGOUT: "ÄÄƒng xuáº¥t",
+    REGISTER: "ÄÄƒng kÃ½",
+    SEARCH: "TÃ¬m kiáº¿m",
+    UPDATE_PROFILE: "Cáº­p nháº­t há»“ sÆ¡",
   };
   return map[action] ?? action;
 }
@@ -200,7 +192,6 @@ export const adminService = {
           booking: {
             select: {
               property: { select: { title: true } },
-              tour: { select: { title: true } },
             },
           },
         },
@@ -210,7 +201,6 @@ export const adminService = {
         orderBy: { createdAt: "desc" },
         include: {
           property: { select: { title: true } },
-          tour: { select: { title: true } },
         },
       }),
       prisma.auditLog.findMany({
@@ -224,15 +214,15 @@ export const adminService = {
       ...reviews.map((review) => ({
         id: `review-${review.id}`,
         type: "REVIEW",
-        activityName: "Đánh giá",
-        place: review.booking.property?.title ?? review.booking.tour?.title ?? "Không rõ",
+        activityName: "ÄÃ¡nh giÃ¡",
+        place: review.booking.property?.title ?? "KhÃ´ng rÃµ",
         performedAt: review.createdAt.toISOString(),
       })),
       ...bookings.map((booking) => ({
         id: `booking-${booking.id}`,
         type: "BOOKING",
-        activityName: booking.type === "PROPERTY" ? "Đặt chỗ ở" : "Đặt tour",
-        place: booking.property?.title ?? booking.tour?.title ?? "Không rõ",
+        activityName: "Äáº·t chá»— á»Ÿ",
+        place: booking.property?.title ?? "KhÃ´ng rÃµ",
         performedAt: booking.createdAt.toISOString(),
       })),
       ...auditLogs.map((log) => ({
@@ -271,44 +261,32 @@ export const adminService = {
   },
 
   async getListingSummary() {
-    const [totalProperties, totalTours, pendingProperties, pendingTours, activeProperties, activeTours, inactiveProperties, inactiveTours] =
+    const [totalProperties, pendingProperties, activeProperties, inactiveProperties] =
       await prisma.$transaction([
         prisma.property.count(),
-        prisma.tour.count(),
         prisma.property.count({ where: { status: ListingStatus.PENDING } }),
-        prisma.tour.count({ where: { status: ListingStatus.PENDING } }),
         prisma.property.count({ where: { status: ListingStatus.ACTIVE } }),
-        prisma.tour.count({ where: { status: ListingStatus.ACTIVE } }),
         prisma.property.count({ where: { status: ListingStatus.INACTIVE } }),
-        prisma.tour.count({ where: { status: ListingStatus.INACTIVE } }),
       ]);
 
     return {
-      total: totalProperties + totalTours,
-      pending: pendingProperties + pendingTours,
-      active: activeProperties + activeTours,
-      inactive: inactiveProperties + inactiveTours,
+      total: totalProperties,
+      pending: pendingProperties,
+      active: activeProperties,
+      inactive: inactiveProperties,
     };
   },
 
   async listListings() {
-    const [properties, tours] = await prisma.$transaction([
-      prisma.property.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-          host: { select: { id: true, email: true } },
-        },
-      }),
-      prisma.tour.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-          host: { select: { id: true, email: true } },
-        },
-      }),
-    ]);
+    const properties = await prisma.property.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        host: { select: { id: true, email: true } },
+      },
+    });
 
-    return [
-      ...properties.map((property) => ({
+    return properties
+      .map((property) => ({
         id: property.id,
         kind: "PROPERTY" as const,
         title: property.title,
@@ -318,19 +296,8 @@ export const adminService = {
         price: property.pricePerNight.toNumber(),
         status: property.status,
         createdAt: property.createdAt.toISOString(),
-      })),
-      ...tours.map((tour) => ({
-        id: tour.id,
-        kind: "TOUR" as const,
-        title: tour.title,
-        owner: tour.host.email,
-        ownerEmail: tour.host.email,
-        city: tour.city,
-        price: tour.pricePerPerson.toNumber(),
-        status: tour.status,
-        createdAt: tour.createdAt.toISOString(),
-      })),
-    ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      }))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
   async listHosts() {
@@ -377,57 +344,15 @@ export const adminService = {
     });
   },
 
-  async createTour(input: CreateTourInput) {
-    return prisma.tour.create({
-      data: {
-        title: input.title,
-        description: input.description,
-        city: input.city,
-        country: input.country,
-        pricePerPerson: input.pricePerPerson,
-        durationDays: input.durationDays,
-        minGroupSize: input.minGroupSize,
-        maxGroupSize: input.maxGroupSize,
-        category: input.category,
-        status: ListingStatus.PENDING,
-        hostId: input.hostId,
-        ...(input.thumbnailUrl
-          ? {
-              images: {
-                create: {
-                  url: input.thumbnailUrl,
-                  isPrimary: true,
-                },
-              },
-            }
-          : {}),
-      },
-      include: {
-        host: { select: { id: true, name: true, email: true } },
-      },
-    });
-  },
-
-  async updateListingStatus(kind: "PROPERTY" | "TOUR", id: string, status: ListingStatus) {
-    if (kind === "PROPERTY") {
-      return prisma.property.update({
-        where: { id },
-        data: { status },
-      });
-    }
-
-    return prisma.tour.update({
+  async updateListingStatus(kind: "PROPERTY", id: string, status: ListingStatus) {
+    return prisma.property.update({
       where: { id },
       data: { status },
     });
   },
 
-  async deleteListing(kind: "PROPERTY" | "TOUR", id: string) {
-    if (kind === "PROPERTY") {
-      return prisma.property.delete({ where: { id } });
-    }
-
-    return prisma.tour.delete({ where: { id } });
+  async deleteListing(kind: "PROPERTY", id: string) {
+    return prisma.property.delete({ where: { id } });
   },
 
   async getDashboardMetrics() {
@@ -438,7 +363,6 @@ export const adminService = {
     const [
       totalUsers,
       pendingProperties,
-      pendingTours,
       pendingBookings,
       totalBookingsThisMonth,
       revenueThisMonth,
@@ -447,7 +371,6 @@ export const adminService = {
     ] = await prisma.$transaction([
       prisma.user.count(),
       prisma.property.count({ where: { status: ListingStatus.PENDING } }),
-      prisma.tour.count({ where: { status: ListingStatus.PENDING } }),
       prisma.booking.count({ where: { status: BookingStatus.PENDING } }),
       prisma.booking.count({ where: { createdAt: { gte: startOfMonth } } }),
       prisma.payment.aggregate({
@@ -487,29 +410,16 @@ export const adminService = {
       ).length,
     }));
 
-    const [pendingPropertyItems, pendingTourItems] = await prisma.$transaction([
-      prisma.property.findMany({
-        where: { status: ListingStatus.PENDING },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: { host: { select: { email: true } } },
-      }),
-      prisma.tour.findMany({
-        where: { status: ListingStatus.PENDING },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: { host: { select: { email: true } } },
-      }),
-    ]);
+    const pendingPropertyItems = await prisma.property.findMany({
+      where: { status: ListingStatus.PENDING },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: { host: { select: { email: true } } },
+    });
 
-    const pendingListings = [
-      ...pendingPropertyItems.map((p) => ({
-        name: p.title, type: "Property", host: p.host.email, city: p.city, age: formatAge(p.createdAt),
-      })),
-      ...pendingTourItems.map((t) => ({
-        name: t.title, type: "Tour", host: t.host.email, city: t.city, age: formatAge(t.createdAt),
-      })),
-    ].slice(0, 5);
+    const pendingListings = pendingPropertyItems.map((p) => ({
+      name: p.title, type: "Property", host: p.host.email, city: p.city, age: formatAge(p.createdAt),
+    }));
 
     const completionRate = totalBookings > 0
       ? Math.round((completedBookings / totalBookings) * 1000) / 10
@@ -519,7 +429,7 @@ export const adminService = {
       metrics: {
         revenueThisMonth: revenueThisMonth._sum.amount?.toNumber() ?? 0,
         newBookingsThisMonth: totalBookingsThisMonth,
-        pendingListings: pendingProperties + pendingTours,
+        pendingListings: pendingProperties,
         completionRate,
       },
       revenueSeries,
@@ -534,21 +444,19 @@ export const adminService = {
       orderBy: { createdAt: "desc" },
       include: {
         user: { select: { email: true } },
+        images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
         property: { select: { title: true } },
-        tour: { select: { title: true } },
         payment: { select: { method: true } },
       },
     });
 
     return bookings.map((b) => {
-      const item = b.property?.title ?? b.tour?.title ?? "—";
+      const item = b.property?.title ?? "â€”";
       let dateRange = "";
       if (b.checkIn && b.checkOut) {
         const ci = b.checkIn.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
         const co = b.checkOut.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-        dateRange = `${ci}–${co}`;
-      } else if (b.tourDate) {
-        dateRange = b.tourDate.toLocaleDateString("vi-VN");
+        dateRange = `${ci}â€“${co}`;
       }
 
       return {
@@ -561,7 +469,7 @@ export const adminService = {
         amount: formatVND(b.totalPrice.toNumber()),
         status: mapBookingStatus(b.status),
         rawStatus: b.status,
-        paymentMethod: b.payment ? mapPaymentMethod(b.payment.method) : "—",
+        paymentMethod: b.payment ? mapPaymentMethod(b.payment.method) : "â€”",
       };
     });
   },
@@ -579,10 +487,12 @@ export const adminService = {
       fullId: p.id,
       booking: `BK-${p.booking.id.slice(-8).toUpperCase()}`,
       bookingId: p.booking.id,
+      guestEmail: p.booking.user.email,
       method: mapPaymentMethod(p.method),
       amount: formatVND(p.amount.toNumber()),
+      rawStatus: p.status,
       status: mapPaymentStatus(p.status),
-      paidAt: p.paidAt ? p.paidAt.toLocaleDateString("vi-VN") : "—",
+      paidAt: p.paidAt ? p.paidAt.toLocaleDateString("vi-VN") : "â€”",
     }));
   },
 
@@ -592,17 +502,17 @@ export const adminService = {
     return promotions.map((p) => {
       const now = new Date();
       const expired = p.endDate < now;
-      const status = !p.isActive ? "Tạm dừng" : expired ? "Đã kết thúc" : "Đang chạy";
+      const status = !p.isActive ? "Táº¡m dá»«ng" : expired ? "ÄÃ£ káº¿t thÃºc" : "Äang cháº¡y";
       const value = p.discountType === "PERCENTAGE"
         ? `${p.discountValue.toNumber()}%`
         : formatVND(p.discountValue.toNumber());
       const uses = p.maxUses != null
         ? `${p.usedCount} / ${p.maxUses}`
-        : `${p.usedCount} / Không giới hạn`;
+        : `${p.usedCount} / KhÃ´ng giá»›i háº¡n`;
       const startVN = p.startDate.toLocaleDateString("vi-VN");
       const endVN = p.endDate.toLocaleDateString("vi-VN");
 
-      return { code: p.code, value, uses, period: `${startVN}–${endVN}`, status };
+      return { code: p.code, value, uses, period: `${startVN}â€“${endVN}`, status };
     });
   },
 
@@ -612,12 +522,12 @@ export const adminService = {
     return rules.map((r) => ({
       id: r.id,
       name: r.name,
-      appliesTo: r.listingType ?? "Tất cả",
+      appliesTo: r.listingType ?? "Táº¥t cáº£",
       rate: `${(r.rate.toNumber() * 100).toFixed(0)}%`,
       minValue: r.minBookingValue
         ? formatVND(r.minBookingValue.toNumber())
-        : "Không yêu cầu",
-      status: r.isActive ? "Đang áp dụng" : "Tạm dừng",
+        : "KhÃ´ng yÃªu cáº§u",
+      status: r.isActive ? "Äang Ã¡p dá»¥ng" : "Táº¡m dá»«ng",
     }));
   },
 
@@ -626,10 +536,10 @@ export const adminService = {
       orderBy: { createdAt: "desc" },
       include: {
         user: { select: { email: true } },
+        images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true } },
         booking: {
           select: {
             property: { select: { title: true } },
-            tour: { select: { title: true } },
           },
         },
       },
@@ -638,10 +548,25 @@ export const adminService = {
     return reviews.map((r) => ({
       id: r.id,
       guest: r.user.email,
-      item: r.booking.property?.title ?? r.booking.tour?.title ?? "—",
-      rating: r.rating.toFixed(1),
-      excerpt: r.comment.length > 80 ? r.comment.slice(0, 80) + "…" : r.comment,
-      status: "Hiển thị",
+      item: r.booking.property?.title ?? "â€”",
+      rating: r.rating,
+      cleanliness: r.cleanliness,
+      comfort: r.comfort,
+      location: r.location,
+      facilities: r.facilities,
+      staff: r.staff,
+      valueForMoney: r.valueForMoney,
+      comment: r.comment,
+      hostReply: r.hostReply,
+      hostRepliedAt: r.hostRepliedAt?.toISOString() ?? null,
+      createdAt: r.createdAt.toISOString(),
+      images: r.images,
+      user: { email: r.user.email },
+      booking: {
+        property: r.booking.property,
+      },
+      excerpt: r.comment.length > 80 ? r.comment.slice(0, 80) + "â€¦" : r.comment,
+      status: "Hiá»ƒn thá»‹",
     }));
   },
 
@@ -661,3 +586,4 @@ export const adminService = {
     }));
   },
 };
+

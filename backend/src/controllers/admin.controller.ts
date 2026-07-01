@@ -3,7 +3,6 @@ import {
   CancellationPolicy,
   ListingStatus,
   PropertyType,
-  TourCategory,
 } from "../generated/prisma/enums";
 import { adminService } from "../services/admin.service";
 import { bookingService } from "../services/booking.service";
@@ -113,53 +112,12 @@ export const adminController = {
     return res.status(201).json({ data: property });
   },
 
-  async createTour(req: Request, res: Response) {
-    const body = req.body ?? {};
-
-    if (
-      !isNonEmptyString(body.title) ||
-      !isNonEmptyString(body.description) ||
-      !isNonEmptyString(body.city) ||
-      !isNonEmptyString(body.country) ||
-      !isPositiveNumber(body.pricePerPerson) ||
-      !isPositiveNumber(body.durationDays) ||
-      !isPositiveNumber(body.minGroupSize) ||
-      !isPositiveNumber(body.maxGroupSize) ||
-      body.minGroupSize > body.maxGroupSize ||
-      !isNonEmptyString(body.hostId) ||
-      !Object.values(TourCategory).includes(body.category)
-    ) {
-      return res.status(400).json({
-        error: {
-          code: "INVALID_TOUR_PAYLOAD",
-          message: "Invalid tour payload",
-        },
-      });
-    }
-
-    const tour = await adminService.createTour({
-      title: body.title.trim(),
-      description: body.description.trim(),
-      city: body.city.trim(),
-      country: body.country.trim(),
-      pricePerPerson: body.pricePerPerson,
-      durationDays: body.durationDays,
-      minGroupSize: body.minGroupSize,
-      maxGroupSize: body.maxGroupSize,
-      category: body.category,
-      hostId: body.hostId,
-      ...(isNonEmptyString(body.thumbnailUrl) ? { thumbnailUrl: body.thumbnailUrl.trim() } : {}),
-    });
-
-    return res.status(201).json({ data: tour });
-  },
-
   async updateListingStatus(req: Request, res: Response) {
     const { kind, id } = req.params;
     const { status } = req.body ?? {};
 
     if (
-      (kind !== "PROPERTY" && kind !== "TOUR") ||
+      kind !== "PROPERTY" ||
       typeof id !== "string" ||
       !id ||
       !Object.values(ListingStatus).includes(status)
@@ -180,7 +138,7 @@ export const adminController = {
     const { kind, id } = req.params;
 
     if (
-      (kind !== "PROPERTY" && kind !== "TOUR") ||
+      kind !== "PROPERTY" ||
       typeof id !== "string" ||
       !id
     ) {
