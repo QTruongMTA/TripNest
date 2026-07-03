@@ -371,7 +371,7 @@ export default function Page() {
     services: true,
     languages: languages.length > 0,
     rules: true,
-    photos: photos.length >= 5,
+    photos: photos.length >= 8,
     "booking-method": true,
     "nightly-price": Number(nightlyPrice) > 0,
     "rate-plans": true,
@@ -449,6 +449,7 @@ export default function Page() {
           type: propertyType,
           thumbnailUrl: imageUrls[0],
           imageUrls,
+          amenities,
           legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
           ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
         },
@@ -1226,7 +1227,7 @@ function RulesStep({ rules, setRules, onBack, onSubmit }: { rules: { smoking: bo
 }
 
 function PhotosStep({ photos, setPhotos, onBack, onSubmit, canContinue }: { photos: PhotoItem[]; setPhotos: (photos: PhotoItem[]) => void; onBack: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; canContinue: boolean }) {
-  const remainingPhotos = Math.max(0, 5 - photos.length);
+  const remainingPhotos = Math.max(0, 8 - photos.length);
 
   function addPhotos(files: FileList | null) {
     if (!files?.length) return;
@@ -1268,7 +1269,7 @@ function PhotosStep({ photos, setPhotos, onBack, onSubmit, canContinue }: { phot
       <div>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-950">Chỗ nghỉ của Quý vị trông như thế nào?</h1>
         <Panel className="mt-7">
-          <p className="text-sm font-semibold text-slate-950">Đăng tải ít nhất 5 ảnh của chỗ nghỉ.</p>
+          <p className="text-sm font-semibold text-slate-950">Đăng tải ít nhất 8 ảnh thật của chỗ nghỉ.</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">Càng đăng nhiều, Quý vị càng có cơ hội nhận đặt phòng. Quý vị có thể thêm ảnh sau.</p>
           <label className="mt-5 grid min-h-[118px] cursor-pointer place-items-center rounded-md border border-dashed border-slate-500 bg-white px-4 py-6 text-center transition hover:border-teal-600 hover:bg-teal-50">
             <span className="text-sm font-semibold text-slate-950">Kéo và thả hoặc</span>

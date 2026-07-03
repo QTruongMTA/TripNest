@@ -22,12 +22,27 @@ export type PropertyListItem = {
 export type PropertyDetail = PropertyListItem & {
   description: string;
   livingRoomSofaBeds: number;
+  childrenAllowed: boolean;
+  cribsAvailable: boolean;
+  sizeM2: number | null;
   address: {
     line1: string;
     line2: string | null;
     city: string;
     postalCode: string | null;
     country: string;
+  };
+  provinceHighlight: {
+    provinceName: string;
+    regionName: string;
+    description: string;
+  } | null;
+  priceInsight: {
+    level: "DEAL" | "MID_RANGE" | "PREMIUM" | "UNKNOWN";
+    label: string;
+    averagePrice: number | null;
+    difference: number | null;
+    comparedPropertyCount: number;
   };
   location: {
     latitude: number | null;
@@ -59,6 +74,24 @@ export type PropertyDetail = PropertyListItem & {
     partiesAllowed: boolean;
     petsPolicy: string;
   };
+  services: {
+    breakfastIncluded: boolean;
+    parkingType: string;
+  };
+  languages: string[];
+  ratePlans: Array<{
+    type: string;
+    enabled: boolean;
+    discountPct: number;
+  }>;
+  childPricing: {
+    enabled: boolean;
+    infantFree: boolean;
+    infantPrice: number | null;
+    childMaxAge: number;
+    childFree: boolean;
+    childPrice: number | null;
+  } | null;
   images: Array<{
     id: string;
     url: string;

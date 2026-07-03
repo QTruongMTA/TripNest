@@ -7,6 +7,8 @@ import { prisma } from "../lib/prisma";
 import { CancellationPolicy, PropertyType } from "../generated/prisma/enums";
 import { normalizePropertyImageUrl } from "../utils/property-image.utils";
 
+const MIN_PROPERTY_IMAGES = 8;
+
 export const hostController = {
   async uploadPropertyImage(req: Request, res: Response) {
     const imageData = req.body?.imageData;
@@ -89,6 +91,24 @@ export const hostController = {
         ? imageUrls.map((url: string) => normalizePropertyImageUrl(url, body.type))
         : [normalizePropertyImageUrl(body.thumbnailUrl, body.type)]
     ).filter((url): url is string => typeof url === "string" && url.length > 0);
+    const amenityNames: string[] = Array.isArray(body.amenities)
+      ? Array.from(
+          new Set(
+            body.amenities
+              .filter((name: unknown): name is string => typeof name === "string" && name.trim().length > 0)
+              .map((name: string) => name.trim())
+          )
+        )
+      : [];
+
+    if (normalizedImageUrls.length < MIN_PROPERTY_IMAGES) {
+      return res.status(400).json({
+        error: {
+          code: "NOT_ENOUGH_PROPERTY_IMAGES",
+          message: `Please upload at least ${MIN_PROPERTY_IMAGES} real property images`,
+        },
+      });
+    }
 
     const property = await prisma.$transaction(async (tx) => {
       const created = await tx.property.create({
@@ -116,6 +136,16 @@ export const hostController = {
               isPrimary: index === 0,
             })),
           },
+          ...(amenityNames.length
+            ? {
+                amenities: {
+                  connectOrCreate: amenityNames.map((name) => ({
+                    where: { name },
+                    create: { name },
+                  })),
+                },
+              }
+            : {}),
         },
       });
 
@@ -173,11 +203,11 @@ export const hostController = {
       ? body.imageUrls.filter((url: unknown): url is string => typeof url === "string" && url.trim().length > 0)
       : [];
 
-    if (imageUrls.length === 0) {
+    if (imageUrls.length < MIN_PROPERTY_IMAGES) {
       return res.status(400).json({
         error: {
           code: "INVALID_PROPERTY_IMAGES",
-          message: "At least one image url is required",
+          message: `At least ${MIN_PROPERTY_IMAGES} image urls are required`,
         },
       });
     }

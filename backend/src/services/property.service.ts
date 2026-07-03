@@ -46,6 +46,105 @@ function buildRating(
   };
 }
 
+type ProvinceTravelHighlightRow = {
+  provinceName: string;
+  regionName: string;
+  description: string;
+};
+
+const AREA_PRICE_TOLERANCE = 100_000;
+
+function normalizeProvinceName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/^(tp\.?|thanh pho|tinh)\s+/i, "")
+    .replace(/[.\s]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+async function getProvinceTravelHighlight(city: string) {
+  const highlights = await prisma.$queryRaw<ProvinceTravelHighlightRow[]>`
+    SELECT
+      "provinceName",
+      "regionName",
+      "description"
+    FROM "ProvinceTravelHighlight"
+  `;
+  const normalizedCity = normalizeProvinceName(city);
+  const highlight = highlights.find(
+    (item) => normalizeProvinceName(item.provinceName) === normalizedCity
+  );
+
+  return highlight ?? null;
+}
+
+async function getAreaPriceInsight(
+  propertyId: string,
+  city: string,
+  pricePerNight: number
+) {
+  const stats = await prisma.property.aggregate({
+    where: {
+      id: { not: propertyId },
+      status: ListingStatus.ACTIVE,
+      city: { equals: city, mode: "insensitive" },
+      pricePerNight: { gt: 0 },
+    },
+    _avg: {
+      pricePerNight: true,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
+  const averagePrice = toNumber(stats._avg.pricePerNight);
+  const comparedPropertyCount = stats._count._all;
+
+  if (!averagePrice || comparedPropertyCount === 0) {
+    return {
+      level: "UNKNOWN" as const,
+      label: "Chưa đủ dữ liệu giá trong khu vực",
+      averagePrice: null,
+      difference: null,
+      comparedPropertyCount,
+    };
+  }
+
+  const roundedAveragePrice = Math.round(averagePrice);
+  const difference = Math.round(pricePerNight - roundedAveragePrice);
+
+  if (difference < -AREA_PRICE_TOLERANCE) {
+    return {
+      level: "DEAL" as const,
+      label: "Giá cả ưu đãi trong khu vực",
+      averagePrice: roundedAveragePrice,
+      difference,
+      comparedPropertyCount,
+    };
+  }
+
+  if (Math.abs(difference) <= AREA_PRICE_TOLERANCE) {
+    return {
+      level: "MID_RANGE" as const,
+      label: "Giá cả tầm trung trong khu vực",
+      averagePrice: roundedAveragePrice,
+      difference,
+      comparedPropertyCount,
+    };
+  }
+
+  return {
+    level: "PREMIUM" as const,
+    label: "Giá cả cao cấp trong khu vực",
+    averagePrice: roundedAveragePrice,
+    difference,
+    comparedPropertyCount,
+  };
+}
+
 export const propertyService = {
   async listPublicProperties(query: PublicPropertyQuery) {
     const where = {
@@ -208,6 +307,11 @@ export const propertyService = {
     });
 
     if (!property) return null;
+    const pricePerNight = property.pricePerNight.toNumber();
+    const [provinceHighlight, priceInsight] = await Promise.all([
+      getProvinceTravelHighlight(property.city),
+      getAreaPriceInsight(property.id, property.city, pricePerNight),
+    ]);
 
     return {
       id: property.id,
@@ -215,7 +319,7 @@ export const propertyService = {
       city: property.city,
       country: property.country,
       type: property.type,
-      pricePerNight: property.pricePerNight.toNumber(),
+      pricePerNight,
       cleaningFee: toNumber(property.cleaningFee),
       maxGuests: property.maxGuests,
       bedroomCount: property.bedroomCount,
@@ -237,6 +341,8 @@ export const propertyService = {
         postalCode: property.postalCode,
         country: property.country,
       },
+      provinceHighlight,
+      priceInsight,
       location: {
         latitude: property.latitude,
         longitude: property.longitude,

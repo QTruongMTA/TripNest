@@ -1,0 +1,48 @@
+CREATE TABLE IF NOT EXISTS "ProvinceTravelHighlight" (
+  "provinceName" TEXT NOT NULL,
+  "regionName" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ProvinceTravelHighlight_pkey" PRIMARY KEY ("provinceName")
+);
+
+INSERT INTO "ProvinceTravelHighlight" ("provinceName", "regionName", "description") VALUES
+('TP. Hồ Chí Minh', 'Thành phố trực thuộc Trung ương', 'sầm uất, năng động bậc nhất phương Nam với các hoạt động giải trí xuyên đêm'),
+('TP. Hà Nội', 'Thành phố trực thuộc Trung ương', 'mang đậm dấu ấn văn hóa nghìn năm văn hiến, phố cổ nhộn nhịp và ẩm thực đường phố đa dạng'),
+('TP. Hải Phòng', 'Thành phố trực thuộc Trung ương', 'phát triển sôi động với mô hình du lịch ẩm thực (food tour) đặc sắc kết hợp biển đảo'),
+('TP. Đà Nẵng', 'Thành phố trực thuộc Trung ương', 'hiện đại, đáng sống với các lễ hội sự kiện quốc tế hoành tráng bên dòng sông Hàn'),
+('TP. Cần Thơ', 'Thành phố trực thuộc Trung ương', 'sông nước miền Tây sầm uất, nổi tiếng với chợ nổi và các khu du lịch sinh thái miệt vườn nhộn nhịp'),
+('TP. Huế', 'Thành phố trực thuộc Trung ương', 'cổ kính, trầm mặc, mang không gian nghỉ dưỡng di sản yên bình và chậm rãi'),
+('Tỉnh Tuyên Quang', 'Miền Bắc', 'kỳ vĩ với núi non trùng điệp, các cung đường đèo hoang sơ và văn hóa vùng cao đặc sắc'),
+('Tỉnh Cao Bằng', 'Miền Bắc', 'non nước hữu tình bờ cõi biên thùy, nổi tiếng với thác Bản Giốc hoang sơ và di tích lịch sử'),
+('Tỉnh Sơn La', 'Miền Bắc', 'đại ngàn Tây Bắc hùng vĩ, mộc mạc với các đồi chè xanh mướt và bản làng dân tộc'),
+('Tỉnh Lai Châu', 'Miền Bắc', 'sở hữu những đỉnh núi cao hiểm trở, hoang sơ, thích hợp cho bộ môn leo núi khám phá thiên nhiên'),
+('Tỉnh Lào Cai', 'Miền Bắc', 'sở hữu đỉnh Fansipan hùng vĩ, ruộng bậc thang tầng lớp và thung lũng sương mù mát mẻ'),
+('Tỉnh Thái Nguyên', 'Miền Bắc', 'xanh mướt với những đồi chè và núi rừng chiến khu xưa hoang sơ, trong lành'),
+('Tỉnh Điện Biên', 'Miền Bắc', 'oai hùng, sở hữu địa hình thung lũng lòng chảo và các di tích lịch sử lừng lẫy năm châu'),
+('Tỉnh Lạng Sơn', 'Miền Bắc', 'biên giới xứ Lạng với các hang động kỳ thú, chợ cửa khẩu nhộn nhịp và đỉnh Mẫu Sơn quanh năm trong lành'),
+('Tỉnh Phú Thọ', 'Miền Bắc', 'cội nguồn dân tộc với không gian đồi cọ, rừng chè hoang sơ và các khu nghỉ dưỡng khoáng nóng thư giãn'),
+('Tỉnh Bắc Ninh', 'Miền Bắc', 'vùng đất quan họ thanh bình nhưng không kém phần nhộn nhịp với các làng nghề truyền thống lâu đời'),
+('Tỉnh Quảng Ninh', 'Miền Bắc', 'hiện đại, sầm uất với vịnh Hạ Long kỳ quan thiên nhiên thế giới và các tổ hợp giải trí đẳng cấp'),
+('Tỉnh Hưng Yên', 'Miền Bắc', 'mang vẻ đẹp trù phú của đồng bằng sông Hồng, nổi tiếng với nhãn lồng và các ngôi chùa cổ yên bình'),
+('Tỉnh Ninh Bình', 'Miền Bắc', 'sở hữu quần thể danh thắng Tràng An - Tam Cốc với hệ thống hang động núi đá vôi kỳ vĩ'),
+('Tỉnh Thanh Hóa', 'Miền Trung & Tây Nguyên', 'nổi tiếng với bãi biển Sầm Sơn sầm uất kết hợp các điểm du lịch sinh thái hang động hoang sơ'),
+('Tỉnh Nghệ An', 'Miền Trung & Tây Nguyên', 'xứ Nghệ với bãi biển Cửa Lò tấp nập và vùng lõi rừng quốc gia Pù Mát thiên nhiên hoang dã'),
+('Tỉnh Hà Tĩnh', 'Miền Trung & Tây Nguyên', 'mộc mạc, sở hữu hồ Kẻ Gỗ yên bình, trong lành cùng các bãi tắm hoang sơ chưa bị thương mại hóa'),
+('Tỉnh Quảng Trị', 'Miền Trung & Tây Nguyên', 'yên tĩnh, trầm mặc với các dòng sông lịch sử và vùng biển Cửa Việt trong lành, lộng gió'),
+('Tỉnh Quảng Ngãi', 'Miền Trung & Tây Nguyên', 'sở hữu đảo Lý Sơn núi lửa độc đáo và những bãi biển miền Trung trong xanh, lộng gió hoang sơ'),
+('Tỉnh Gia Lai', 'Miền Trung & Tây Nguyên', 'cao nguyên đất đỏ lộng gió, sở hữu Biển Hồ trong vắt, các thác nước đại ngàn kỳ vĩ và nhịp sống chậm rãi'),
+('Tỉnh Khánh Hoà', 'Miền Trung & Tây Nguyên', 'thiên đường biển đảo tấp nập, sở hữu vịnh Nha Trang sầm uất cùng các resort vịnh biển biệt lập, cao cấp'),
+('Tỉnh Lâm Đồng', 'Miền Trung & Tây Nguyên', 'thơ mộng với thành phố Đà Lạt ngàn hoa ẩn trong sương mù và những đồi thông quanh năm mát mẻ, trong lành'),
+('Tỉnh Đắk Lắk', 'Miền Trung & Tây Nguyên', 'thủ phủ cà phê Tây Nguyên, đậm đà bản sắc văn hóa cồng chiêng và thiên nhiên vườn quốc gia kỳ vĩ'),
+('Tỉnh Đồng Nai', 'Miền Nam', 'cửa ngõ miền Đông nhộn nhịp công nghiệp, sở hữu vùng lõi Nam Cát Tiên hoang sơ, trong lành'),
+('Tỉnh Tây Ninh', 'Miền Nam', 'vùng đất thánh linh thiêng với núi Bà Đen hùng vĩ giữa đồng bằng và hồ Dầu Tiếng yên bình'),
+('Tỉnh Đồng Tháp', 'Miền Nam', 'mang đậm nét trù phú của vùng đồng tháp mười, nổi tiếng với các khu sinh thái rừng tràm và đồng sen bát ngát'),
+('Tỉnh An Giang', 'Miền Nam', 'biên thùy miền Tây sông nước nhộn nhịp văn hóa đa sắc tộc, sở hữu rừng tràm Trà Sư xanh mướt hoang sơ'),
+('Tỉnh Vĩnh Long', 'Miền Nam', 'thanh bình giữa ba dải cù lao sông nước, lý tưởng cho những chuyến du lịch miệt vườn và nghỉ dưỡng chậm rãi'),
+('Tỉnh Cà Mau', 'Miền Nam', 'vùng đất mũi linh thiêng ngập mặn hoang sơ, yên bình với hệ sinh thái rừng đước và bãi bồi ven biển')
+ON CONFLICT ("provinceName") DO UPDATE SET
+  "regionName" = EXCLUDED."regionName",
+  "description" = EXCLUDED."description",
+  "updatedAt" = CURRENT_TIMESTAMP;
