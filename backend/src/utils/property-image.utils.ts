@@ -18,12 +18,12 @@ export function getFallbackPropertyImage(type: string | null | undefined): strin
 export function normalizePropertyImageUrl(
   url: string | null | undefined,
   type: string | null | undefined
-): string {
+): string | null {
   const trimmed = typeof url === "string" ? url.trim() : "";
 
   if (/^(https?:\/\/|data:image\/)/i.test(trimmed)) {
     return trimmed;
   }
 
-  return getFallbackPropertyImage(type);
+  return null;
 }

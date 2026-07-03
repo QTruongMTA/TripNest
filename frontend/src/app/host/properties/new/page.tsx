@@ -422,8 +422,13 @@ export default function Page() {
     setPublishSuccess(false);
 
     try {
-      const mainPhoto = photos.find((photo) => photo.isMain) ?? photos[0];
-      const thumbnailUrl = mainPhoto ? await uploadPropertyImage(mainPhoto.file, token) : undefined;
+      const orderedPhotos = [
+        ...photos.filter((photo) => photo.isMain),
+        ...photos.filter((photo) => !photo.isMain),
+      ];
+      const imageUrls = await Promise.all(
+        orderedPhotos.map((photo) => uploadPropertyImage(photo.file, token))
+      );
 
       await api.post(
         "/host/properties",
@@ -435,12 +440,15 @@ export default function Page() {
           city: address.city.trim(),
           postalCode: address.postalCode.trim() || undefined,
           country: address.country.trim() || "Việt Nam",
+          latitude: address.latitude,
+          longitude: address.longitude,
           pricePerNight: Number(nightlyPrice),
           maxGuests: details.guests,
           bedroomCount: details.bedrooms.length,
           bathrooms: details.bathrooms,
           type: propertyType,
-          thumbnailUrl,
+          thumbnailUrl: imageUrls[0],
+          imageUrls,
           legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
           ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
         },

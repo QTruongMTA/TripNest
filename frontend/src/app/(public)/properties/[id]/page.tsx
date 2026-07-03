@@ -74,8 +74,10 @@ function formatHouseRules(property: PropertyDetail) {
 
 export default async function PropertyDetailPage({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { checkIn?: string; checkOut?: string; guests?: string };
 }) {
   const property = await getProperty(params.id);
 
@@ -302,6 +304,9 @@ export default async function PropertyDetailPage({
             pricePerNight={property.pricePerNight}
             cleaningFee={property.cleaningFee}
             maxGuests={property.capacity.maxGuests}
+            initialCheckIn={searchParams.checkIn}
+            initialCheckOut={searchParams.checkOut}
+            initialGuests={searchParams.guests}
           />
         </div>
       </div>

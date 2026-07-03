@@ -1,0 +1,2 @@
+ALTER TABLE "PropertyRatePlan"
+  ADD COLUMN IF NOT EXISTS "enabled" BOOLEAN NOT NULL DEFAULT true;

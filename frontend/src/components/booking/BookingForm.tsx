@@ -10,6 +10,9 @@ type BookingFormProps = {
   pricePerNight?: number;
   cleaningFee?: number | null;
   maxGuests?: number;
+  initialCheckIn?: string;
+  initialCheckOut?: string;
+  initialGuests?: string;
 };
 
 export function BookingForm({
@@ -17,12 +20,16 @@ export function BookingForm({
   pricePerNight,
   cleaningFee,
   maxGuests,
+  initialCheckIn,
+  initialCheckOut,
+  initialGuests,
 }: BookingFormProps) {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(1);
+  const initialGuestCount = Number(initialGuests);
+  const [checkIn, setCheckIn] = useState(initialCheckIn ?? "");
+  const [checkOut, setCheckOut] = useState(initialCheckOut ?? "");
+  const [guests, setGuests] = useState(Number.isInteger(initialGuestCount) && initialGuestCount > 0 ? initialGuestCount : 1);
   const [message, setMessage] = useState<string | null>(null);
   const [availabilityOk, setAvailabilityOk] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -132,16 +139,28 @@ export function BookingForm({
 
   return (
     <aside className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_24px_70px_rgba(15,118,110,0.12)]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-slate-500">Giá từ</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {pricePerNight ? pricePerNight.toLocaleString("vi-VN") : "—"} ₫
-            <span className="text-base font-normal text-slate-500"> / đêm</span>
-          </p>
+      <div className="grid gap-4">
+        <div className="rounded-2xl bg-teal-950 px-4 py-3 text-white">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm text-teal-50/75">Tổng tạm tính</p>
+              <p className="mt-1 text-3xl font-semibold">
+                {totalPreview !== null ? totalPreview.toLocaleString("vi-VN") : "—"} ₫
+              </p>
+              <p className="mt-1 text-sm text-teal-50/75">
+                {nights > 0 ? `${nights} đêm · ${guests} khách` : "Chọn ngày để xem tổng tiền"}
+              </p>
+            </div>
+            <div className="shrink-0 rounded-xl bg-white/10 px-3 py-2 text-right">
+              <p className="text-xs text-teal-50/70">Giá 1 đêm</p>
+              <p className="mt-1 font-semibold">
+                {pricePerNight ? pricePerNight.toLocaleString("vi-VN") : "—"} ₫
+              </p>
+            </div>
+          </div>
         </div>
         {cleaningFee ? (
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+          <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
             Phí dọn dẹp {cleaningFee.toLocaleString("vi-VN")} ₫
           </span>
         ) : null}

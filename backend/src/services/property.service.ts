@@ -287,11 +287,13 @@ export const propertyService = {
             childPrice: toNumber(property.childPricing.childPrice),
           }
         : null,
-      images: property.images.map((image) => ({
-        id: image.id,
-        url: normalizePropertyImageUrl(image.url, property.type),
-        isPrimary: image.isPrimary,
-      })),
+      images: property.images
+        .map((image) => ({
+          id: image.id,
+          url: normalizePropertyImageUrl(image.url, property.type),
+          isPrimary: image.isPrimary,
+        }))
+        .filter((image): image is { id: string; url: string; isPrimary: boolean } => Boolean(image.url)),
       amenities: property.amenities.map((amenity) => ({
         id: amenity.id,
         name: amenity.name,

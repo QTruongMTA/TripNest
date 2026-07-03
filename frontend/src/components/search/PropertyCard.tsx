@@ -3,11 +3,31 @@ import type { PropertyListItem } from "@/types/property";
 import Image from "next/image";
 import Link from "next/link";
 
-export function PropertyCard({ property, nights }: { property: PropertyListItem; nights?: number | null }) {
+type PropertyCardProps = {
+  property: PropertyListItem;
+  nights?: number | null;
+  bookingQuery?: {
+    checkIn?: string;
+    checkOut?: string;
+    guests?: string;
+  };
+};
+
+function buildPropertyHref(propertyId: string, bookingQuery?: PropertyCardProps["bookingQuery"]) {
+  const params = new URLSearchParams();
+  if (bookingQuery?.checkIn) params.set("checkIn", bookingQuery.checkIn);
+  if (bookingQuery?.checkOut) params.set("checkOut", bookingQuery.checkOut);
+  if (bookingQuery?.guests) params.set("guests", bookingQuery.guests);
+
+  const query = params.toString();
+  return `/properties/${propertyId}${query ? `?${query}` : ""}`;
+}
+
+export function PropertyCard({ property, nights, bookingQuery }: PropertyCardProps) {
   const total = nights ? property.pricePerNight * nights + (property.cleaningFee ?? 0) : null;
 
   return (
-    <Link href={`/properties/${property.id}`} className="block">
+    <Link href={buildPropertyHref(property.id, bookingQuery)} className="block">
       <Card>
         {property.thumbnailUrl ? (
           <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-2xl">

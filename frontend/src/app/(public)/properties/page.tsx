@@ -66,7 +66,18 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
           {nights ? <p className="mb-4 text-sm text-slate-600">Giá hiển thị cho <span className="font-semibold text-slate-950">{nights} đêm</span>.</p> : null}
           <div className="grid gap-5 md:grid-cols-2">
             {properties.data.length > 0 ? (
-              properties.data.map((property) => <PropertyCard key={property.id} property={property} nights={nights} />)
+              properties.data.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  nights={nights}
+                  bookingQuery={{
+                    checkIn: searchParams.checkIn,
+                    checkOut: searchParams.checkOut,
+                    guests: searchParams.guests,
+                  }}
+                />
+              ))
             ) : (
               <div className="rounded-3xl border border-dashed border-slate-300 p-8 text-slate-500 md:col-span-2">Không tìm thấy chỗ ở phù hợp với bộ lọc hiện tại.</div>
             )}

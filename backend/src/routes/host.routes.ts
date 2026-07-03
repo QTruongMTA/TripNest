@@ -9,6 +9,7 @@ router.post("/property-images", authMiddleware, hostController.uploadPropertyIma
 router.post("/properties", authMiddleware, hostController.createProperty);
 router.get("/properties", authMiddleware, hostController.listProperties);
 router.use(authMiddleware, requireRole("HOST", "ADMIN"));
+router.patch("/properties/:id/images", hostController.updatePropertyImages);
 router.get("/bookings", hostController.listBookings);
 router.patch("/bookings/:id/confirm", hostController.confirmBooking);
 router.patch("/bookings/:id/cancel", hostController.cancelBooking);

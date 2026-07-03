@@ -307,7 +307,7 @@ Chay frontend:
 npm run dev:frontend
 ```
 
-Frontend mac dinh chay tai:
+Frontend duoc co dinh chay tai cong `3000`:
 
 ```text
 http://localhost:3000
@@ -326,6 +326,88 @@ http://localhost:4000
 ```
 
 Can chay backend dong thoi voi frontend va admin portal de cac man hinh goi API hoat dong dung.
+
+## Xu ly loi chunk cua Next.js khi phat trien
+
+Neu trinh duyet bao loi dang `ChunkLoadError`, `Loading chunk ... failed`, trang trang trang hoac console bao khong tai duoc file trong `/_next/static/chunks`, thuong la do cache build cu cua Next.js hoac cache trinh duyet van giu bundle JavaScript cu sau khi code da thay doi.
+
+### Cach xu ly nhanh
+
+1. Dung dev server dang chay bang `Ctrl + C`.
+2. Xoa cache build cua ung dung bi loi:
+
+```powershell
+cd frontend
+Remove-Item -LiteralPath .next -Recurse -Force
+```
+
+Neu loi xay ra o admin portal:
+
+```powershell
+cd admin-portal
+Remove-Item -LiteralPath .next -Recurse -Force
+```
+
+3. Chay lai dev server:
+
+```bash
+npm run dev
+```
+
+Hoac chay tu root theo script cua du an:
+
+```bash
+npm run dev:frontend
+npm run dev:admin
+```
+
+4. Chay lai frontend tai dung cong `3000`. Script `frontend` da co dinh cong nay bang `next dev -p 3000`, vi vay neu `3000` dang ban thi can dung process cu truoc khi chay lai.
+5. Tren trinh duyet bam `Ctrl + F5` de hard refresh, hoac mo tab an danh neu van thay loi chunk cu.
+
+### Dua frontend ve dung cong 3000
+
+Neu dang thay trang loi o `localhost:3000` trong khi terminal bao Next.js chay o `3001`, nghia la cong `3000` van bi server cu giu. Hay giai phong cong `3000` roi chay lai:
+
+```powershell
+Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue |
+  Select-Object LocalAddress,LocalPort,State,OwningProcess
+```
+
+Lay gia tri `OwningProcess`, kiem tra do co phai process Next.js cua `frontend` khong:
+
+```powershell
+Get-CimInstance Win32_Process |
+  Where-Object { $_.ProcessId -eq <PID> } |
+  Select-Object ProcessId,Name,CommandLine
+```
+
+Neu `CommandLine` tro toi `D:\TripNest\frontend` va Next.js, dung process do:
+
+```powershell
+Stop-Process -Id <PID> -Force
+```
+
+Sau do xoa cache va chay lai:
+
+```powershell
+cd D:\TripNest\frontend
+Remove-Item -LiteralPath .next -Recurse -Force
+npm run dev
+```
+
+Frontend phai mo tai:
+
+```text
+http://localhost:3000
+```
+
+### Cach han che loi lap lai
+
+- Khong mo nhieu dev server Next.js cho cung mot ung dung tren nhieu terminal neu khong can thiet.
+- Sau khi build production bang `npm run build`, neu quay lai dev va gap loi chunk thi xoa `.next` roi chay lai.
+- Neu Next.js bao cong `3000` dang ban, khong dung tam `3001` cho frontend; hay dung process cu va chay lai tren `3000`.
+- Khong commit thu muc `.next`, `node_modules` hoac cac file cache build len Git.
+- Neu vua merge code, pull branch moi, hoac doi cau hinh Next.js/env, nen restart dev server thay vi chi refresh trang.
 
 ## Build production
 

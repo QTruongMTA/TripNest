@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 
@@ -26,6 +27,31 @@ type HostProperty = {
   occupancy: number;
 };
 
+type HostBooking = {
+  id: string;
+  status: string;
+  paymentStatus: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  numGuests: number;
+  totalPrice: number;
+  notes: string | null;
+  createdAt: string;
+  guest: {
+    id: string;
+    name: string | null;
+    email: string;
+    phone: string | null;
+  };
+  property: {
+    id: string;
+    title: string;
+    city: string;
+    country: string;
+    thumbnailUrl: string | null;
+  } | null;
+};
+
 const metricCards = [
   { key: "bookings", label: "Đặt phòng", icon: ListIcon },
   { key: "arrivals", label: "Khách đến", icon: LoginIcon },
@@ -35,6 +61,8 @@ const metricCards = [
 ] as const;
 
 type MetricKey = (typeof metricCards)[number]["key"];
+
+const bookingDetailMetrics = new Set<MetricKey>(["bookings", "arrivals", "departures", "cancellations"]);
 
 const statusOptions = [
   { value: "all", label: "Tất cả trạng thái" },
@@ -58,6 +86,20 @@ const statusDot: Record<HostProperty["status"], string> = {
   SUSPENDED: "bg-rose-500",
 };
 
+const bookingStatusLabel: Record<string, string> = {
+  PENDING: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  CANCELLED: "Đã hủy",
+  COMPLETED: "Hoàn thành",
+};
+
+const bookingStatusClass: Record<string, string> = {
+  PENDING: "bg-amber-50 text-amber-700 ring-amber-200",
+  CONFIRMED: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  CANCELLED: "bg-rose-50 text-rose-700 ring-rose-200",
+  COMPLETED: "bg-slate-100 text-slate-700 ring-slate-200",
+};
+
 const typeLabel: Record<string, string> = {
   HOUSE: "Nhà riêng",
   APARTMENT: "Căn hộ",
@@ -70,9 +112,11 @@ const typeLabel: Record<string, string> = {
 
 export function HostManagementHome() {
   const [properties, setProperties] = useState<HostProperty[]>([]);
+  const [bookings, setBookings] = useState<HostBooking[]>([]);
   const [location, setLocation] = useState("all");
   const [status, setStatus] = useState("all");
   const [query, setQuery] = useState("");
+  const [selectedMetric, setSelectedMetric] = useState<MetricKey>("bookings");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -84,8 +128,14 @@ export function HostManagementHome() {
       return;
     }
 
-    api.get("/host/properties", { headers: { Authorization: `Bearer ${token}` } })
-      .then((response) => setProperties(response.data.data ?? []))
+    Promise.all([
+      api.get("/host/properties", { headers: { Authorization: `Bearer ${token}` } }),
+      api.get("/host/bookings", { headers: { Authorization: `Bearer ${token}` } }),
+    ])
+      .then(([propertiesResponse, bookingsResponse]) => {
+        setProperties(propertiesResponse.data.data ?? []);
+        setBookings(bookingsResponse.data.data ?? []);
+      })
       .catch((err) => setError(err.response?.data?.error?.message ?? "Không thể tải danh sách chỗ nghỉ."))
       .finally(() => setLoading(false));
   }, []);
@@ -118,6 +168,15 @@ export function HostManagementHome() {
 
   const cities = useMemo(() => Array.from(new Set(properties.map((property) => property.city))), [properties]);
   const averageOccupancy = filteredProperties.length ? Math.round(totals.occupancy / filteredProperties.length) : 0;
+  const visiblePropertyIds = useMemo(
+    () => new Set(filteredProperties.map((property) => property.id)),
+    [filteredProperties]
+  );
+  const metricBookings = useMemo(
+    () => filterBookingsByMetric(bookings, selectedMetric, visiblePropertyIds),
+    [bookings, selectedMetric, visiblePropertyIds]
+  );
+  const selectedMetricLabel = metricCards.find((metric) => metric.key === selectedMetric)?.label ?? "Đặt phòng";
 
   return (
     <section>
@@ -170,15 +229,56 @@ export function HostManagementHome() {
         <div className="mt-4 grid overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-teal-950/5 sm:grid-cols-2 lg:grid-cols-5">
           {metricCards.map((metric) => {
             const Icon = metric.icon;
+            const active = metric.key === selectedMetric;
+            const hasBookingDetails = bookingDetailMetrics.has(metric.key);
             return (
-              <article key={metric.key} className="border-b border-slate-200 p-5 last:border-b-0 sm:border-r sm:last:border-r-0 lg:border-b-0">
+              <button
+                key={metric.key}
+                type="button"
+                onClick={() => setSelectedMetric(metric.key)}
+                className={`border-b border-slate-200 p-5 text-left transition last:border-b-0 sm:border-r sm:last:border-r-0 lg:border-b-0 ${
+                  active
+                    ? "bg-teal-50 ring-2 ring-inset ring-teal-600"
+                    : "bg-white hover:bg-slate-50"
+                } ${hasBookingDetails ? "cursor-pointer" : "cursor-default"}`}
+              >
                 <Icon />
                 <p className="mt-5 text-2xl font-semibold text-slate-950">{totals[metric.key as MetricKey]}</p>
                 <p className="mt-2 text-sm font-medium text-teal-700">{metric.label}</p>
-              </article>
+              </button>
             );
           })}
         </div>
+      </section>
+
+      <section className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-teal-950/5">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-950">Chi tiết {selectedMetricLabel.toLowerCase()}</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Hiển thị chỗ ở đã được đặt, thông tin khách, ngày lưu trú và số người.
+            </p>
+          </div>
+          <a href="/host/bookings" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-teal-600 hover:text-teal-700">
+            Xem tất cả đơn
+          </a>
+        </div>
+
+        {!bookingDetailMetrics.has(selectedMetric) ? (
+          <div className="px-5 py-8 text-sm text-slate-500">
+            Card này chưa có danh sách đơn đặt phòng tương ứng.
+          </div>
+        ) : metricBookings.length > 0 ? (
+          <div className="divide-y divide-slate-100">
+            {metricBookings.map((booking) => (
+              <BookingDetailRow key={booking.id} booking={booking} />
+            ))}
+          </div>
+        ) : (
+          <div className="px-5 py-8 text-sm text-slate-500">
+            Chưa có đơn nào khớp với card đang chọn.
+          </div>
+        )}
       </section>
 
       <section className="mt-7 grid gap-4 md:grid-cols-3">
@@ -239,13 +339,107 @@ export function HostManagementHome() {
   );
 }
 
+function filterBookingsByMetric(bookings: HostBooking[], metric: MetricKey, visiblePropertyIds: Set<string>) {
+  const now = new Date();
+  const upcomingWindowEnd = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+  return bookings.filter((booking) => {
+    if (booking.property?.id && !visiblePropertyIds.has(booking.property.id)) return false;
+    if (metric === "bookings") return true;
+    if (metric === "cancellations") return booking.status === "CANCELLED";
+    if (metric === "arrivals") return isWithinWindow(booking.checkIn, now, upcomingWindowEnd);
+    if (metric === "departures") return isWithinWindow(booking.checkOut, now, upcomingWindowEnd);
+    return false;
+  });
+}
+
+function isWithinWindow(value: string | null, start: Date, end: Date) {
+  if (!value) return false;
+  const date = new Date(value);
+  return date >= start && date <= end;
+}
+
+function formatDate(value: string | null) {
+  if (!value) return "Chưa có";
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function BookingDetailRow({ booking }: { booking: HostBooking }) {
+  return (
+    <article className="grid gap-4 px-5 py-4 md:grid-cols-[minmax(220px,1.4fr)_minmax(180px,1fr)_1fr_auto] md:items-center">
+      <div className="flex min-w-0 gap-3">
+        <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
+          {booking.property?.thumbnailUrl ? (
+            <Image
+              src={booking.property.thumbnailUrl}
+              alt={booking.property.title}
+              fill
+              unoptimized
+              sizes="80px"
+              className="object-cover"
+            />
+          ) : null}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-slate-950">{booking.property?.title ?? "Chỗ nghỉ không còn tồn tại"}</p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-teal-700">{booking.property?.city ?? "Không rõ vị trí"}</p>
+          <p className="mt-1 text-xs text-slate-400">Mã đơn: {booking.id.slice(-8).toUpperCase()}</p>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold text-slate-900">{booking.guest.name || "Khách TripNest"}</p>
+        <p className="mt-1 break-all text-xs text-slate-500">{booking.guest.email}</p>
+        {booking.guest.phone ? <p className="mt-1 text-xs text-slate-500">{booking.guest.phone}</p> : null}
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-slate-400">Nhận</p>
+          <p className="mt-1 font-medium text-slate-800">{formatDate(booking.checkIn)}</p>
+        </div>
+        <div>
+          <p className="text-xs text-slate-400">Trả</p>
+          <p className="mt-1 font-medium text-slate-800">{formatDate(booking.checkOut)}</p>
+        </div>
+        <div>
+          <p className="text-xs text-slate-400">Số khách</p>
+          <p className="mt-1 font-medium text-slate-800">{booking.numGuests}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 md:justify-end">
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${bookingStatusClass[booking.status] ?? "bg-slate-100 text-slate-700 ring-slate-200"}`}>
+          {bookingStatusLabel[booking.status] ?? booking.status}
+        </span>
+        <span className="text-sm font-semibold text-slate-950">
+          {booking.totalPrice.toLocaleString("vi-VN")} ₫
+        </span>
+      </div>
+    </article>
+  );
+}
+
 function PropertyRow({ property }: { property: HostProperty }) {
   return (
     <tr className="align-top hover:bg-teal-50/40">
       <td className="px-4 py-4">
         <div className="flex gap-3">
-          <div className="h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
-            {property.thumbnailUrl ? <img src={property.thumbnailUrl} alt={property.title} className="h-full w-full object-cover" /> : null}
+          <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
+            {property.thumbnailUrl ? (
+              <Image
+                src={property.thumbnailUrl}
+                alt={property.title}
+                fill
+                unoptimized
+                sizes="80px"
+                className="object-cover"
+              />
+            ) : null}
           </div>
           <div>
             <p className="font-semibold text-slate-950">{property.title}</p>

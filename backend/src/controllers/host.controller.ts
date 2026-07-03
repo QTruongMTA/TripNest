@@ -81,7 +81,14 @@ export const hostController = {
       });
     }
 
-    const thumbnailUrl = normalizePropertyImageUrl(body.thumbnailUrl, body.type);
+    const imageUrls: string[] = Array.isArray(body.imageUrls)
+      ? body.imageUrls.filter((url: unknown): url is string => typeof url === "string" && url.trim().length > 0)
+      : [];
+    const normalizedImageUrls: string[] = (
+      imageUrls.length
+        ? imageUrls.map((url: string) => normalizePropertyImageUrl(url, body.type))
+        : [normalizePropertyImageUrl(body.thumbnailUrl, body.type)]
+    ).filter((url): url is string => typeof url === "string" && url.length > 0);
 
     const property = await prisma.$transaction(async (tx) => {
       const created = await tx.property.create({
@@ -93,6 +100,8 @@ export const hostController = {
           city: body.city.trim(),
           postalCode: typeof body.postalCode === "string" ? body.postalCode.trim() : null,
           country: typeof body.country === "string" ? body.country.trim() : "Việt Nam",
+          ...(typeof body.latitude === "number" ? { latitude: body.latitude } : {}),
+          ...(typeof body.longitude === "number" ? { longitude: body.longitude } : {}),
           pricePerNight: body.pricePerNight,
           ...(typeof body.cleaningFee === "number" ? { cleaningFee: body.cleaningFee } : {}),
           maxGuests: body.maxGuests,
@@ -102,10 +111,10 @@ export const hostController = {
           hostId: req.user!.id,
           status: "PENDING",
           images: {
-            create: {
-              url: thumbnailUrl,
-              isPrimary: true,
-            },
+            create: normalizedImageUrls.map((url: string, index: number) => ({
+              url,
+              isPrimary: index === 0,
+            })),
           },
         },
       });
@@ -145,6 +154,73 @@ export const hostController = {
     });
 
     return res.status(201).json({ data: property });
+  },
+
+  async updatePropertyImages(req: Request, res: Response) {
+    const { id } = req.params;
+    const body = req.body ?? {};
+
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_PROPERTY_ID",
+          message: "Property id is required",
+        },
+      });
+    }
+
+    const imageUrls: string[] = Array.isArray(body.imageUrls)
+      ? body.imageUrls.filter((url: unknown): url is string => typeof url === "string" && url.trim().length > 0)
+      : [];
+
+    if (imageUrls.length === 0) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_PROPERTY_IMAGES",
+          message: "At least one image url is required",
+        },
+      });
+    }
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id,
+        ...(req.user!.role === "ADMIN" ? {} : { hostId: req.user!.id }),
+      },
+      select: { id: true, type: true },
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        error: {
+          code: "PROPERTY_NOT_FOUND",
+          message: "Property not found",
+        },
+      });
+    }
+
+    const normalizedImageUrls = imageUrls
+      .map((url) => normalizePropertyImageUrl(url, property.type))
+      .filter((url): url is string => typeof url === "string" && url.length > 0);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.propertyImage.deleteMany({ where: { propertyId: property.id } });
+      await tx.propertyImage.createMany({
+        data: normalizedImageUrls.map((url, index) => ({
+          propertyId: property.id,
+          url,
+          isPrimary: index === 0,
+        })),
+      });
+    });
+
+    return res.json({
+      data: {
+        propertyId: property.id,
+        imageUrls: normalizedImageUrls,
+        thumbnailUrl: normalizedImageUrls[0],
+      },
+    });
   },
 
   async listProperties(req: Request, res: Response) {
