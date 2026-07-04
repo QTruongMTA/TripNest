@@ -67,7 +67,7 @@ export function BookingForm({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/availability/properties/${propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/availability/properties/${propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
       );
       const payload = await response.json();
 
@@ -108,7 +108,7 @@ export function BookingForm({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/bookings/property`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/bookings/property`,
         {
           method: "POST",
           headers: {

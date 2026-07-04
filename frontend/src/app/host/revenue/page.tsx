@@ -26,7 +26,7 @@ export default function Page() {
     const accessToken = getAccessToken();
     if (!accessToken) return;
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/finance`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/finance`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then((res) => res.json().then((payload) => ({ ok: res.ok, payload })))

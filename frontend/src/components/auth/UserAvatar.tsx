@@ -68,7 +68,7 @@ export function UserAvatar({
     try {
       const avatar = await compressImage(file);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/auth/me/avatar`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/auth/me/avatar`,
         {
           method: "PATCH",
           headers: {

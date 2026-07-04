@@ -21,16 +21,30 @@ export function normalizePropertyImageUrl(
 ): string {
   const trimmed = typeof url === "string" ? url.trim() : "";
 
+  const publicApiUrl = (
+    process.env.PUBLIC_API_URL ??
+    process.env.BACKEND_PUBLIC_URL ??
+    `http://localhost:${process.env.PORT ?? 5001}`
+  ).replace(/\/+$/, "");
+
+  try {
+    const parsedUrl = new URL(trimmed);
+
+    if (
+      ["localhost", "127.0.0.1"].includes(parsedUrl.hostname) &&
+      parsedUrl.pathname.startsWith("/uploads/")
+    ) {
+      return `${publicApiUrl}${parsedUrl.pathname}${parsedUrl.search}`;
+    }
+  } catch {
+    // Non-absolute paths are handled below.
+  }
+
   if (/^(https?:\/\/|data:image\/)/i.test(trimmed)) {
     return trimmed;
   }
 
   if (trimmed) {
-    const publicApiUrl = (
-      process.env.PUBLIC_API_URL ??
-      process.env.BACKEND_PUBLIC_URL ??
-      `http://localhost:${process.env.PORT ?? 5000}`
-    ).replace(/\/+$/, "");
     const uploadPath = trimmed.replace(/\\/g, "/");
 
     if (uploadPath.startsWith("/uploads/")) {

@@ -11,8 +11,11 @@ type RubyTravelTipsResponse = {
 };
 
 async function fetchRubyTravelTips(): Promise<RubyTravelTipsResponse | null> {
+  const fallbackRubyApiUrl =
+    process.env.NEXT_PUBLIC_RUBY_API_URL ?? "http://localhost:4567/api/v1/ruby";
+
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1";
     const res = await fetch(`${apiUrl}/ruby-demo/travel-tips?province=Da%20Nang`, {
       cache: "no-store",
     });
@@ -21,14 +24,24 @@ async function fetchRubyTravelTips(): Promise<RubyTravelTipsResponse | null> {
 
     return (await res.json()) as RubyTravelTipsResponse;
   } catch {
-    return null;
+    try {
+      const fallbackRes = await fetch(`${fallbackRubyApiUrl}/travel_tips?province=Da%20Nang`, {
+        cache: "no-store",
+      });
+
+      if (!fallbackRes.ok) return null;
+
+      return (await fallbackRes.json()) as RubyTravelTipsResponse;
+    } catch {
+      return null;
+    }
   }
 }
 
 export async function RubyTravelTipsSection() {
   const rubyTips = await fetchRubyTravelTips();
   const tips = rubyTips?.data?.tips ?? [
-    "Ruby API service chưa chạy. Hãy bật ruby-api ở port 4567 để xem dữ liệu thật.",
+    "Ruby API service chưa chạy. Luồng chính TripNest vẫn dùng backend Node ở port 5001.",
     "Chức năng này dùng để demo TripNest tích hợp thêm API viết bằng Ruby on Rails.",
   ];
 

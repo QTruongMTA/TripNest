@@ -12,7 +12,7 @@ type CalendarProperty = {
   bookings: Array<{ id: string; checkIn: string | null; checkOut: string | null; status: string }>;
 };
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1";
 
 export default function Page() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));

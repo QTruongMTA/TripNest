@@ -32,7 +32,7 @@ async function getProperties(searchParams: PropertiesSearchParams) {
   }
   const query = params.toString();
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/properties${query ? `?${query}` : ""}`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/properties${query ? `?${query}` : ""}`,
     { cache: "no-store" }
   );
   if (!response.ok) throw new Error("Không thể tải danh sách chỗ ở");

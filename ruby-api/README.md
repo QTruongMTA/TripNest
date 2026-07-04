@@ -20,7 +20,7 @@ bundle install
 ## Chạy service
 
 ```bash
-bundle exec rails server -p 4567
+bundle exec puma -p 4567
 ```
 
 ## Kiểm tra

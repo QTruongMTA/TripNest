@@ -38,7 +38,7 @@ export default function Page() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token) return;
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/reviews`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/reviews`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => response.json().then((payload) => ({ ok: response.ok, payload })))
@@ -60,7 +60,7 @@ export default function Page() {
     setError(null);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/reviews/${reviewId}/response`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/reviews/${reviewId}/response`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },

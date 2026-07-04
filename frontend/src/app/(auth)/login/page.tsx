@@ -22,7 +22,7 @@ function LoginForm() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -81,7 +81,7 @@ export default function HostBookingsPage() {
   async function loadBookings(accessToken: string) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/bookings`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/bookings`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -112,7 +112,7 @@ export default function HostBookingsPage() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/bookings/${id}/${action}`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/bookings/${id}/${action}`,
         {
           method: "PATCH",
           headers: {
@@ -148,7 +148,7 @@ export default function HostBookingsPage() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/bookings/${id}/${action}`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/bookings/${id}/${action}`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -186,7 +186,7 @@ export default function HostBookingsPage() {
     setError(null);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/host/bookings/${id}/payment`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/host/bookings/${id}/payment`,
         {
           method: "POST",
           headers: {

@@ -49,7 +49,7 @@ export function ReviewForm({
     setError(null);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/reviews`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/reviews`,
         {
           method: "POST",
           headers: {

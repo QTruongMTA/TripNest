@@ -72,7 +72,7 @@ app.use("/api/v1/provinces", provinceRouter);
 app.use("/api/v1/promotions", promotionRouter);
 app.use("/api/v1/ruby-demo", rubyDemoRouter);
 app.use(errorMiddleware);
-const port = Number(process.env.PORT ?? 5000);
+const port = Number(process.env.PORT ?? 5001);
 const server = app.listen(port, () =>
   console.log(`TripNest API listening on port ${port}`)
 );

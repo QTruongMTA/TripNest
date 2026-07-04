@@ -42,7 +42,7 @@ function NotificationBell() {
     let cancelled = false;
     async function loadNotifications() {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/notifications/mine`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/notifications/mine`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!response.ok || cancelled) return;
@@ -73,7 +73,7 @@ function NotificationBell() {
     setItems((current) => current.map((item) => ({ ...item, isRead: true })));
     setUnreadCount(0);
     if (!token) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/notifications/mine/read-all`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/notifications/mine/read-all`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` },
     }).catch(() => undefined);

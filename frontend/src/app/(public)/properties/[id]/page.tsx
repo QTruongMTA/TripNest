@@ -16,7 +16,7 @@ const cancellationLabels: Record<string, string> = {
 
 async function getProperty(id: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/properties/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/properties/${id}`,
     { cache: "no-store" }
   );
 

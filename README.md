@@ -243,13 +243,13 @@ CORS_ORIGINS="http://localhost:3000,http://localhost:3001"
 Tao file `frontend/.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1
 ```
 
 Tao file `admin-portal/.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:5001/api/v1
 ```
 
 Khong commit cac file `.env` hoac `.env.local` len Git.
@@ -311,13 +311,13 @@ npm run dev:backend
 Backend mac dinh chay tai:
 
 ```text
-http://localhost:5000
+http://localhost:5001
 ```
 
 Health check:
 
 ```text
-http://localhost:5000/health
+http://localhost:5001/health
 ```
 
 Chay frontend:

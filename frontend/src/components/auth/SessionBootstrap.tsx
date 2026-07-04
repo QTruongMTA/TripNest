@@ -16,7 +16,7 @@ export function SessionBootstrap() {
 
     setSession(storedUser, accessToken);
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/auth/refresh`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/auth/refresh`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
       .then(async (response) => {

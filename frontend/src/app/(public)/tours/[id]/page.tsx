@@ -18,7 +18,7 @@ type TourDetailResponse = {
 
 async function getTour(id: string) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/tours/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api/v1"}/tours/${id}`,
     { cache: "no-store" }
   );
 
