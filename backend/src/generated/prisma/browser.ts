@@ -162,3 +162,13 @@ export type AuditLog = Prisma.AuditLogModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model ConversationMessage
+ * 
+ */
+export type ConversationMessage = Prisma.ConversationMessageModel

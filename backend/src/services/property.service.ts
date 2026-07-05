@@ -4,8 +4,31 @@ import {
   ListingStatus,
   PropertyType,
 } from "../generated/prisma/enums";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { normalizePropertyImageUrl } from "../utils/property-image.utils";
+import { hasPropertyGuestCapacity } from "./availability.service";
+
+type PropertyFaq = {
+  id: string;
+  question: string;
+  answer: string;
+};
+
+type PublicPropertyListRow = Prisma.PropertyGetPayload<{
+  include: {
+    images: true;
+    bookings: {
+      select: {
+        checkIn: true;
+        checkOut: true;
+        numGuests: true;
+        review: { select: { rating: true } };
+      };
+    };
+    amenities: { select: { name: true } };
+  };
+}>;
 
 export type PublicPropertyQuery = {
   page: number;
@@ -44,6 +67,21 @@ function buildRating(
     average: Number((total / ratings.length).toFixed(1)),
     count: ratings.length,
   };
+}
+
+function normalizeFaqs(value: unknown): PropertyFaq[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item, index) => {
+      const faq = typeof item === "object" && item !== null ? item as Record<string, unknown> : {};
+      return {
+        id: typeof faq.id === "string" && faq.id.trim() ? faq.id.trim() : `faq-${index + 1}`,
+        question: typeof faq.question === "string" ? faq.question.trim() : "",
+        answer: typeof faq.answer === "string" ? faq.answer.trim() : "",
+      };
+    })
+    .filter((faq) => faq.question || faq.answer);
 }
 
 type ProvinceTravelHighlightRow = {
@@ -147,6 +185,7 @@ async function getAreaPriceInsight(
 
 export const propertyService = {
   async listPublicProperties(query: PublicPropertyQuery) {
+    const hasDateCapacityFilter = Boolean(query.checkIn && query.checkOut && query.guests);
     const where = {
       status: ListingStatus.ACTIVE,
       ...(query.city
@@ -188,15 +227,6 @@ export const propertyService = {
                   },
                 },
               },
-              {
-                bookings: {
-                  some: {
-                    status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
-                    checkIn: { lt: query.checkOut },
-                    checkOut: { gt: query.checkIn },
-                  },
-                },
-              },
             ],
           }
         : {}),
@@ -210,35 +240,68 @@ export const propertyService = {
         : {}),
     };
 
-    const [total, properties] = await prisma.$transaction([
-      prisma.property.count({ where }),
-      prisma.property.findMany({
-        where,
-        skip: (query.page - 1) * query.limit,
-        take: query.limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          images: {
-            where: { isPrimary: true },
-            take: 1,
-          },
-          bookings: {
-            where: { review: { isNot: null } },
-            select: {
-              review: {
-                select: { rating: true },
-              },
+    const bookingWhere = hasDateCapacityFilter && query.checkIn && query.checkOut
+      ? {
+          status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
+          checkIn: { lt: query.checkOut },
+          checkOut: { gt: query.checkIn },
+        }
+      : { review: { isNot: null } };
+
+    const findManyArgs: Prisma.PropertyFindManyArgs = {
+      where,
+      ...(hasDateCapacityFilter ? {} : { skip: (query.page - 1) * query.limit, take: query.limit }),
+      orderBy: { createdAt: "desc" },
+      include: {
+        images: {
+          where: { isPrimary: true },
+          take: 1,
+        },
+        bookings: {
+          where: bookingWhere,
+          select: {
+            checkIn: true,
+            checkOut: true,
+            numGuests: true,
+            review: {
+              select: { rating: true },
             },
           },
-          amenities: {
-            select: { name: true },
-          },
         },
-      }),
+        amenities: {
+          select: { name: true },
+        },
+      },
+    };
+
+    const [baseTotal, properties] = await prisma.$transaction([
+      prisma.property.count({ where }),
+      prisma.property.findMany(findManyArgs),
     ]);
+    const propertyRows = properties as PublicPropertyListRow[];
+
+    const capacityFilteredProperties = hasDateCapacityFilter && query.checkIn && query.checkOut && query.guests
+      ? propertyRows.filter((property) =>
+          hasPropertyGuestCapacity({
+            maxGuests: property.maxGuests,
+            requestedGuests: query.guests!,
+            checkIn: query.checkIn!,
+            checkOut: query.checkOut!,
+            bookings: property.bookings.map((booking) => ({
+              checkIn: booking.checkIn,
+              checkOut: booking.checkOut,
+              numGuests: booking.numGuests,
+            })),
+          })
+        )
+      : propertyRows;
+    const total = hasDateCapacityFilter ? capacityFilteredProperties.length : baseTotal;
+    const pageItems = hasDateCapacityFilter
+      ? capacityFilteredProperties.slice((query.page - 1) * query.limit, query.page * query.limit)
+      : capacityFilteredProperties;
 
     return {
-      data: properties.map((property) => ({
+      data: pageItems.map((property) => ({
         id: property.id,
         title: property.title,
         city: property.city,
@@ -334,6 +397,8 @@ export const propertyService = {
       ),
       rating: buildRating(property.bookings),
       description: property.description,
+      notes: property.notes,
+      faqs: normalizeFaqs(property.faqs),
       address: {
         line1: property.addressLine1,
         line2: property.addressLine2,

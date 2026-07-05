@@ -412,7 +412,9 @@ export const ModelName = {
   PromotionRedemption: 'PromotionRedemption',
   CommissionRule: 'CommissionRule',
   AuditLog: 'AuditLog',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  Conversation: 'Conversation',
+  ConversationMessage: 'ConversationMessage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -428,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification"
+    modelProps: "user" | "province" | "operatorProvinceAssignment" | "operatorTask" | "hostApprovalRequest" | "dispute" | "verificationToken" | "property" | "propertyBedroom" | "propertyLanguage" | "propertyRatePlan" | "propertyChildPricing" | "propertyOwner" | "propertyImage" | "amenity" | "propertyAvailability" | "tour" | "tourImage" | "tourItineraryDay" | "tourInclusion" | "tourAvailability" | "booking" | "payment" | "review" | "promotion" | "promotionRedemption" | "commissionRule" | "auditLog" | "notification" | "conversation" | "conversationMessage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2578,6 +2580,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Conversation: {
+      payload: Prisma.$ConversationPayload<ExtArgs>
+      fields: Prisma.ConversationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConversationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConversationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        findFirst: {
+          args: Prisma.ConversationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConversationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        findMany: {
+          args: Prisma.ConversationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>[]
+        }
+        create: {
+          args: Prisma.ConversationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        createMany: {
+          args: Prisma.ConversationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConversationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>[]
+        }
+        delete: {
+          args: Prisma.ConversationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        update: {
+          args: Prisma.ConversationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConversationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConversationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConversationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConversationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationPayload>
+        }
+        aggregate: {
+          args: Prisma.ConversationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConversation>
+        }
+        groupBy: {
+          args: Prisma.ConversationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConversationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConversationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConversationCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConversationMessage: {
+      payload: Prisma.$ConversationMessagePayload<ExtArgs>
+      fields: Prisma.ConversationMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConversationMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConversationMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.ConversationMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConversationMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        findMany: {
+          args: Prisma.ConversationMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>[]
+        }
+        create: {
+          args: Prisma.ConversationMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        createMany: {
+          args: Prisma.ConversationMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConversationMessageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>[]
+        }
+        delete: {
+          args: Prisma.ConversationMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        update: {
+          args: Prisma.ConversationMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ConversationMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConversationMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConversationMessageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ConversationMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConversationMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.ConversationMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConversationMessage>
+        }
+        groupBy: {
+          args: Prisma.ConversationMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConversationMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConversationMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConversationMessageCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2735,6 +2885,8 @@ export const PropertyScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  notes: 'notes',
+  faqs: 'faqs',
   addressLine1: 'addressLine1',
   addressLine2: 'addressLine2',
   city: 'city',
@@ -3066,6 +3218,36 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  guestId: 'guestId',
+  hostId: 'hostId',
+  lastMessageAt: 'lastMessageAt',
+  lastMessagePreview: 'lastMessagePreview',
+  guestUnreadCount: 'guestUnreadCount',
+  hostUnreadCount: 'hostUnreadCount',
+  hiddenForGuestAt: 'hiddenForGuestAt',
+  hiddenForHostAt: 'hiddenForHostAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  body: 'body',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3666,6 +3848,8 @@ export type GlobalOmitConfig = {
   commissionRule?: Prisma.CommissionRuleOmit
   auditLog?: Prisma.AuditLogOmit
   notification?: Prisma.NotificationOmit
+  conversation?: Prisma.ConversationOmit
+  conversationMessage?: Prisma.ConversationMessageOmit
 }
 
 /* Types for Logging */

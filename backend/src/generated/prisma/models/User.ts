@@ -286,6 +286,9 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   promotionRedemptions?: Prisma.PromotionRedemptionListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  guestConversations?: Prisma.ConversationListRelationFilter
+  hostConversations?: Prisma.ConversationListRelationFilter
+  sentMessages?: Prisma.ConversationMessageListRelationFilter
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedByMe?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedTasks?: Prisma.OperatorTaskListRelationFilter
@@ -325,6 +328,9 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   promotionRedemptions?: Prisma.PromotionRedemptionOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  guestConversations?: Prisma.ConversationOrderByRelationAggregateInput
+  hostConversations?: Prisma.ConversationOrderByRelationAggregateInput
+  sentMessages?: Prisma.ConversationMessageOrderByRelationAggregateInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentOrderByRelationAggregateInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentOrderByRelationAggregateInput
   assignedTasks?: Prisma.OperatorTaskOrderByRelationAggregateInput
@@ -367,6 +373,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   promotionRedemptions?: Prisma.PromotionRedemptionListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  guestConversations?: Prisma.ConversationListRelationFilter
+  hostConversations?: Prisma.ConversationListRelationFilter
+  sentMessages?: Prisma.ConversationMessageListRelationFilter
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedByMe?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedTasks?: Prisma.OperatorTaskListRelationFilter
@@ -451,6 +460,9 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -490,6 +502,9 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -527,6 +542,9 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -566,6 +584,9 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1043,6 +1064,48 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutGuestConversationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGuestConversationsInput, Prisma.UserUncheckedCreateWithoutGuestConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGuestConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutHostConversationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHostConversationsInput, Prisma.UserUncheckedCreateWithoutHostConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHostConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutGuestConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGuestConversationsInput, Prisma.UserUncheckedCreateWithoutGuestConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGuestConversationsInput
+  upsert?: Prisma.UserUpsertWithoutGuestConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGuestConversationsInput, Prisma.UserUpdateWithoutGuestConversationsInput>, Prisma.UserUncheckedUpdateWithoutGuestConversationsInput>
+}
+
+export type UserUpdateOneRequiredWithoutHostConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHostConversationsInput, Prisma.UserUncheckedCreateWithoutHostConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHostConversationsInput
+  upsert?: Prisma.UserUpsertWithoutHostConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHostConversationsInput, Prisma.UserUpdateWithoutHostConversationsInput>, Prisma.UserUncheckedUpdateWithoutHostConversationsInput>
+}
+
+export type UserCreateNestedOneWithoutSentMessagesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentMessagesInput, Prisma.UserUncheckedCreateWithoutSentMessagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentMessagesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSentMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentMessagesInput, Prisma.UserUncheckedCreateWithoutSentMessagesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentMessagesInput
+  upsert?: Prisma.UserUpsertWithoutSentMessagesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentMessagesInput, Prisma.UserUpdateWithoutSentMessagesInput>, Prisma.UserUncheckedUpdateWithoutSentMessagesInput>
+}
+
 export type UserCreateWithoutCreatedOperatorsInput = {
   id?: string
   email: string
@@ -1068,6 +1131,9 @@ export type UserCreateWithoutCreatedOperatorsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1106,6 +1172,9 @@ export type UserUncheckedCreateWithoutCreatedOperatorsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1147,6 +1216,9 @@ export type UserCreateWithoutCreatedByAdminInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1184,6 +1256,9 @@ export type UserUncheckedCreateWithoutCreatedByAdminInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1242,6 +1317,9 @@ export type UserUpdateWithoutCreatedOperatorsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -1280,6 +1358,9 @@ export type UserUncheckedUpdateWithoutCreatedOperatorsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1355,6 +1436,9 @@ export type UserCreateWithoutOperatorAssignmentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1393,6 +1477,9 @@ export type UserUncheckedCreateWithoutOperatorAssignmentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1434,6 +1521,9 @@ export type UserCreateWithoutAssignedByMeInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1472,6 +1562,9 @@ export type UserUncheckedCreateWithoutAssignedByMeInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1524,6 +1617,9 @@ export type UserUpdateWithoutOperatorAssignmentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1562,6 +1658,9 @@ export type UserUncheckedUpdateWithoutOperatorAssignmentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -1609,6 +1708,9 @@ export type UserUpdateWithoutAssignedByMeInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1647,6 +1749,9 @@ export type UserUncheckedUpdateWithoutAssignedByMeInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -1683,6 +1788,9 @@ export type UserCreateWithoutAssignedTasksInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1721,6 +1829,9 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1762,6 +1873,9 @@ export type UserCreateWithoutCreatedTasksInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1800,6 +1914,9 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1852,6 +1969,9 @@ export type UserUpdateWithoutAssignedTasksInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1890,6 +2010,9 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -1937,6 +2060,9 @@ export type UserUpdateWithoutCreatedTasksInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -1975,6 +2101,9 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2011,6 +2140,9 @@ export type UserCreateWithoutHostApprovalRequestsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2049,6 +2181,9 @@ export type UserUncheckedCreateWithoutHostApprovalRequestsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2090,6 +2225,9 @@ export type UserCreateWithoutReviewedApprovalsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2128,6 +2266,9 @@ export type UserUncheckedCreateWithoutReviewedApprovalsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2180,6 +2321,9 @@ export type UserUpdateWithoutHostApprovalRequestsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2218,6 +2362,9 @@ export type UserUncheckedUpdateWithoutHostApprovalRequestsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2265,6 +2412,9 @@ export type UserUpdateWithoutReviewedApprovalsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2303,6 +2453,9 @@ export type UserUncheckedUpdateWithoutReviewedApprovalsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2339,6 +2492,9 @@ export type UserCreateWithoutDisputesAsHostInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2377,6 +2533,9 @@ export type UserUncheckedCreateWithoutDisputesAsHostInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2418,6 +2577,9 @@ export type UserCreateWithoutDisputesAsGuestInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2456,6 +2618,9 @@ export type UserUncheckedCreateWithoutDisputesAsGuestInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2497,6 +2662,9 @@ export type UserCreateWithoutResolvedDisputesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2535,6 +2703,9 @@ export type UserUncheckedCreateWithoutResolvedDisputesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2587,6 +2758,9 @@ export type UserUpdateWithoutDisputesAsHostInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2625,6 +2799,9 @@ export type UserUncheckedUpdateWithoutDisputesAsHostInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2672,6 +2849,9 @@ export type UserUpdateWithoutDisputesAsGuestInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2710,6 +2890,9 @@ export type UserUncheckedUpdateWithoutDisputesAsGuestInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2757,6 +2940,9 @@ export type UserUpdateWithoutResolvedDisputesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2795,6 +2981,9 @@ export type UserUncheckedUpdateWithoutResolvedDisputesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2830,6 +3019,9 @@ export type UserCreateWithoutVerificationTokensInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2868,6 +3060,9 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2920,6 +3115,9 @@ export type UserUpdateWithoutVerificationTokensInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2958,6 +3156,9 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2994,6 +3195,9 @@ export type UserCreateWithoutPropertiesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3032,6 +3236,9 @@ export type UserUncheckedCreateWithoutPropertiesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3084,6 +3291,9 @@ export type UserUpdateWithoutPropertiesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3122,6 +3332,9 @@ export type UserUncheckedUpdateWithoutPropertiesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3158,6 +3371,9 @@ export type UserCreateWithoutToursInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3196,6 +3412,9 @@ export type UserUncheckedCreateWithoutToursInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3248,6 +3467,9 @@ export type UserUpdateWithoutToursInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3286,6 +3508,9 @@ export type UserUncheckedUpdateWithoutToursInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3322,6 +3547,9 @@ export type UserCreateWithoutBookingsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3360,6 +3588,9 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3412,6 +3643,9 @@ export type UserUpdateWithoutBookingsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3450,6 +3684,9 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3486,6 +3723,9 @@ export type UserCreateWithoutReviewsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3524,6 +3764,9 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3576,6 +3819,9 @@ export type UserUpdateWithoutReviewsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3614,6 +3860,9 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3650,6 +3899,9 @@ export type UserCreateWithoutPromotionRedemptionsInput = {
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3688,6 +3940,9 @@ export type UserUncheckedCreateWithoutPromotionRedemptionsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3740,6 +3995,9 @@ export type UserUpdateWithoutPromotionRedemptionsInput = {
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3778,6 +4036,9 @@ export type UserUncheckedUpdateWithoutPromotionRedemptionsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3814,6 +4075,9 @@ export type UserCreateWithoutAuditLogsInput = {
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3852,6 +4116,9 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3904,6 +4171,9 @@ export type UserUpdateWithoutAuditLogsInput = {
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3942,6 +4212,9 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3978,6 +4251,9 @@ export type UserCreateWithoutNotificationsInput = {
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4016,6 +4292,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4068,6 +4347,9 @@ export type UserUpdateWithoutNotificationsInput = {
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4106,6 +4388,537 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
+  createdOperators?: Prisma.UserUncheckedUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserCreateWithoutGuestConversationsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeCreateNestedManyWithoutResolverInput
+  createdByAdmin?: Prisma.UserCreateNestedOneWithoutCreatedOperatorsInput
+  createdOperators?: Prisma.UserCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserUncheckedCreateWithoutGuestConversationsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeUncheckedCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeUncheckedCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutResolverInput
+  createdOperators?: Prisma.UserUncheckedCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserCreateOrConnectWithoutGuestConversationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutGuestConversationsInput, Prisma.UserUncheckedCreateWithoutGuestConversationsInput>
+}
+
+export type UserCreateWithoutHostConversationsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeCreateNestedManyWithoutResolverInput
+  createdByAdmin?: Prisma.UserCreateNestedOneWithoutCreatedOperatorsInput
+  createdOperators?: Prisma.UserCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserUncheckedCreateWithoutHostConversationsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeUncheckedCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeUncheckedCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutResolverInput
+  createdOperators?: Prisma.UserUncheckedCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserCreateOrConnectWithoutHostConversationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutHostConversationsInput, Prisma.UserUncheckedCreateWithoutHostConversationsInput>
+}
+
+export type UserUpsertWithoutGuestConversationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGuestConversationsInput, Prisma.UserUncheckedUpdateWithoutGuestConversationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGuestConversationsInput, Prisma.UserUncheckedCreateWithoutGuestConversationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutGuestConversationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGuestConversationsInput, Prisma.UserUncheckedUpdateWithoutGuestConversationsInput>
+}
+
+export type UserUpdateWithoutGuestConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUpdateManyWithoutResolverNestedInput
+  createdByAdmin?: Prisma.UserUpdateOneWithoutCreatedOperatorsNestedInput
+  createdOperators?: Prisma.UserUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutGuestConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUncheckedUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
+  createdOperators?: Prisma.UserUncheckedUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUpsertWithoutHostConversationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutHostConversationsInput, Prisma.UserUncheckedUpdateWithoutHostConversationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutHostConversationsInput, Prisma.UserUncheckedCreateWithoutHostConversationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutHostConversationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutHostConversationsInput, Prisma.UserUncheckedUpdateWithoutHostConversationsInput>
+}
+
+export type UserUpdateWithoutHostConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUpdateManyWithoutResolverNestedInput
+  createdByAdmin?: Prisma.UserUpdateOneWithoutCreatedOperatorsNestedInput
+  createdOperators?: Prisma.UserUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutHostConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUncheckedUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
+  createdOperators?: Prisma.UserUncheckedUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserCreateWithoutSentMessagesInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeCreateNestedManyWithoutResolverInput
+  createdByAdmin?: Prisma.UserCreateNestedOneWithoutCreatedOperatorsInput
+  createdOperators?: Prisma.UserCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserUncheckedCreateWithoutSentMessagesInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeUncheckedCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeUncheckedCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutResolverInput
+  createdOperators?: Prisma.UserUncheckedCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserCreateOrConnectWithoutSentMessagesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentMessagesInput, Prisma.UserUncheckedCreateWithoutSentMessagesInput>
+}
+
+export type UserUpsertWithoutSentMessagesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentMessagesInput, Prisma.UserUncheckedUpdateWithoutSentMessagesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentMessagesInput, Prisma.UserUncheckedCreateWithoutSentMessagesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentMessagesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentMessagesInput, Prisma.UserUncheckedUpdateWithoutSentMessagesInput>
+}
+
+export type UserUpdateWithoutSentMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUpdateManyWithoutResolverNestedInput
+  createdByAdmin?: Prisma.UserUpdateOneWithoutCreatedOperatorsNestedInput
+  createdOperators?: Prisma.UserUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUncheckedUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4162,6 +4975,9 @@ export type UserUpdateWithoutCreatedByAdminInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4199,6 +5015,9 @@ export type UserUncheckedUpdateWithoutCreatedByAdminInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4244,6 +5063,9 @@ export type UserCountOutputType = {
   notifications: number
   promotionRedemptions: number
   auditLogs: number
+  guestConversations: number
+  hostConversations: number
+  sentMessages: number
   operatorAssignments: number
   assignedByMe: number
   assignedTasks: number
@@ -4265,6 +5087,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   promotionRedemptions?: boolean | UserCountOutputTypeCountPromotionRedemptionsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  guestConversations?: boolean | UserCountOutputTypeCountGuestConversationsArgs
+  hostConversations?: boolean | UserCountOutputTypeCountHostConversationsArgs
+  sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
   operatorAssignments?: boolean | UserCountOutputTypeCountOperatorAssignmentsArgs
   assignedByMe?: boolean | UserCountOutputTypeCountAssignedByMeArgs
   assignedTasks?: boolean | UserCountOutputTypeCountAssignedTasksArgs
@@ -4341,6 +5166,27 @@ export type UserCountOutputTypeCountPromotionRedemptionsArgs<ExtArgs extends run
  */
 export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AuditLogWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountGuestConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountHostConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationMessageWhereInput
 }
 
 /**
@@ -4440,6 +5286,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   promotionRedemptions?: boolean | Prisma.User$promotionRedemptionsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  guestConversations?: boolean | Prisma.User$guestConversationsArgs<ExtArgs>
+  hostConversations?: boolean | Prisma.User$hostConversationsArgs<ExtArgs>
+  sentMessages?: boolean | Prisma.User$sentMessagesArgs<ExtArgs>
   operatorAssignments?: boolean | Prisma.User$operatorAssignmentsArgs<ExtArgs>
   assignedByMe?: boolean | Prisma.User$assignedByMeArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
@@ -4526,6 +5375,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   promotionRedemptions?: boolean | Prisma.User$promotionRedemptionsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  guestConversations?: boolean | Prisma.User$guestConversationsArgs<ExtArgs>
+  hostConversations?: boolean | Prisma.User$hostConversationsArgs<ExtArgs>
+  sentMessages?: boolean | Prisma.User$sentMessagesArgs<ExtArgs>
   operatorAssignments?: boolean | Prisma.User$operatorAssignmentsArgs<ExtArgs>
   assignedByMe?: boolean | Prisma.User$assignedByMeArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
@@ -4557,6 +5409,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     promotionRedemptions: Prisma.$PromotionRedemptionPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    guestConversations: Prisma.$ConversationPayload<ExtArgs>[]
+    hostConversations: Prisma.$ConversationPayload<ExtArgs>[]
+    sentMessages: Prisma.$ConversationMessagePayload<ExtArgs>[]
     operatorAssignments: Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>[]
     assignedByMe: Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>[]
     assignedTasks: Prisma.$OperatorTaskPayload<ExtArgs>[]
@@ -4989,6 +5844,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   promotionRedemptions<T extends Prisma.User$promotionRedemptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$promotionRedemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PromotionRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  guestConversations<T extends Prisma.User$guestConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$guestConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  hostConversations<T extends Prisma.User$hostConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$hostConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentMessages<T extends Prisma.User$sentMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   operatorAssignments<T extends Prisma.User$operatorAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$operatorAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedByMe<T extends Prisma.User$assignedByMeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedByMeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedTasks<T extends Prisma.User$assignedTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5636,6 +6494,78 @@ export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.guestConversations
+ */
+export type User$guestConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
+  orderBy?: Prisma.ConversationOrderByWithRelationInput | Prisma.ConversationOrderByWithRelationInput[]
+  cursor?: Prisma.ConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
+}
+
+/**
+ * User.hostConversations
+ */
+export type User$hostConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
+  orderBy?: Prisma.ConversationOrderByWithRelationInput | Prisma.ConversationOrderByWithRelationInput[]
+  cursor?: Prisma.ConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
+}
+
+/**
+ * User.sentMessages
+ */
+export type User$sentMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConversationMessage
+   */
+  select?: Prisma.ConversationMessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConversationMessage
+   */
+  omit?: Prisma.ConversationMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationMessageInclude<ExtArgs> | null
+  where?: Prisma.ConversationMessageWhereInput
+  orderBy?: Prisma.ConversationMessageOrderByWithRelationInput | Prisma.ConversationMessageOrderByWithRelationInput[]
+  cursor?: Prisma.ConversationMessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConversationMessageScalarFieldEnum | Prisma.ConversationMessageScalarFieldEnum[]
 }
 
 /**

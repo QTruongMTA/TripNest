@@ -21,6 +21,12 @@ export type PropertyListItem = {
 
 export type PropertyDetail = PropertyListItem & {
   description: string;
+  notes: string | null;
+  faqs: Array<{
+    id: string;
+    question: string;
+    answer: string;
+  }>;
   livingRoomSofaBeds: number;
   childrenAllowed: boolean;
   cribsAvailable: boolean;

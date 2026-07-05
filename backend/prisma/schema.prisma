@@ -189,6 +189,11 @@ model User {
   notifications        Notification[]
   promotionRedemptions PromotionRedemption[]
   auditLogs            AuditLog[]
+  guestConversations   Conversation[]        @relation("GuestConversations")
+  hostConversations    Conversation[]        @relation("HostConversations")
+  sentMessages         ConversationMessage[] @relation("SentConversationMessages")
+  propertyChangeRequests PropertyChangeRequest[] @relation("PropertyChangeHost")
+  reviewedPropertyChanges PropertyChangeRequest[] @relation("PropertyChangeReviewer")
 
   // Operator relations
   operatorAssignments  OperatorProvinceAssignment[] @relation("OperatorAssignments")
@@ -218,6 +223,7 @@ model Province {
 
   operatorAssignments  OperatorProvinceAssignment[]
   hostApprovalRequests HostApprovalRequest[]
+  propertyChangeRequests PropertyChangeRequest[]
   tasks                OperatorTask[]
   disputes             Dispute[]
 
@@ -289,6 +295,33 @@ model HostApprovalRequest {
   @@index([provinceId])
 }
 
+model PropertyChangeRequest {
+  id              String         @id @default(cuid())
+  propertyId      String
+  hostId          String
+  provinceId      String?
+  status          ApprovalStatus @default(PENDING)
+  currentValues   Json
+  requestedValues Json
+  reason          String
+  documents       Json?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  property Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  host     User      @relation("PropertyChangeHost", fields: [hostId], references: [id], onDelete: Cascade)
+  province Province? @relation(fields: [provinceId], references: [id])
+  reviewer User?     @relation("PropertyChangeReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([propertyId])
+  @@index([hostId])
+  @@index([provinceId])
+  @@index([status])
+}
+
 model Dispute {
   id          String        @id @default(cuid())
   bookingId   String?
@@ -334,6 +367,8 @@ model Property {
   id          String        @id @default(cuid())
   title       String
   description String?
+  notes       String?
+  faqs        Json?
 
   // ── Address ──────────────────────────────────────────────────────────────
   addressLine1 String
@@ -418,6 +453,9 @@ model Property {
   owners       PropertyOwner[]
   bookings     Booking[]
   availability PropertyAvailability[]
+  dailyRates   PropertyDailyRate[]
+  changeRequests PropertyChangeRequest[]
+  conversations Conversation[]
 
   @@index([city])
   @@index([hostId])
@@ -539,6 +577,21 @@ model PropertyAvailability {
   status     AvailabilityStatus @default(BLOCKED)
   reason     String?
   createdAt  DateTime           @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+  @@index([date])
+}
+
+model PropertyDailyRate {
+  id            String   @id @default(cuid())
+  propertyId    String
+  date          DateTime @db.Date
+  pricePerNight Decimal  @db.Decimal(10, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
@@ -796,5 +849,47 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
+  @@index([createdAt])
+}
+
+model Conversation {
+  id                 String    @id @default(cuid())
+  propertyId         String
+  guestId            String
+  hostId             String
+  lastMessageAt      DateTime  @default(now())
+  lastMessagePreview String?
+  guestUnreadCount   Int       @default(0)
+  hostUnreadCount    Int       @default(0)
+  hiddenForGuestAt   DateTime?
+  hiddenForHostAt    DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  property Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  guest    User                  @relation("GuestConversations", fields: [guestId], references: [id], onDelete: Cascade)
+  host     User                  @relation("HostConversations", fields: [hostId], references: [id], onDelete: Cascade)
+  messages ConversationMessage[]
+
+  @@unique([propertyId, guestId])
+  @@index([guestId])
+  @@index([hostId])
+  @@index([propertyId])
+  @@index([lastMessageAt])
+}
+
+model ConversationMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String?
+  imageUrl       String?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentConversationMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
   @@index([createdAt])
 }

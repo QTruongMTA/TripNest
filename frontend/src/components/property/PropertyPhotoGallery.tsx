@@ -16,29 +16,6 @@ type PropertyPhotoGalleryProps = {
   ratingCount: number;
 };
 
-const recentReviews = [
-  {
-    name: "Nhiên",
-    country: "Việt Nam",
-    text: "Chỗ nghỉ sạch sẽ, tiện nghi và vị trí thuận tiện. Host hỗ trợ nhanh, sẽ quay lại lần sau.",
-  },
-  {
-    name: "Hannah",
-    country: "Vương Quốc Anh",
-    text: "Không gian yên tĩnh, ảnh thực tế rõ ràng và khu vực xung quanh dễ di chuyển.",
-  },
-  {
-    name: "Lê",
-    country: "Canada",
-    text: "Rất đáng tiền. Phòng rộng rãi, dịch vụ ổn và phù hợp cho chuyến đi ngắn ngày.",
-  },
-  {
-    name: "Minh",
-    country: "Việt Nam",
-    text: "Gần trung tâm, tiện ích cơ bản đầy đủ và thủ tục đặt phòng đơn giản.",
-  },
-];
-
 function getRatingLabel(score: number | null) {
   if (!score) return "Chỗ nghỉ mới";
   if (score >= 4.7) return "Tuyệt hảo";
@@ -64,10 +41,10 @@ export function PropertyPhotoGallery({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
       if (mode === "single" && event.key === "ArrowRight") {
-        setActiveIndex((index) => Math.min(images.length - 1, index + 1));
+        setActiveIndex((index) => (index + 1) % images.length);
       }
       if (mode === "single" && event.key === "ArrowLeft") {
-        setActiveIndex((index) => Math.max(0, index - 1));
+        setActiveIndex((index) => (index - 1 + images.length) % images.length);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -77,12 +54,6 @@ export function PropertyPhotoGallery({
   function openLibrary() {
     setMode("grid");
     setActiveIndex(0);
-    setOpen(true);
-  }
-
-  function openSingle(index: number) {
-    setMode("single");
-    setActiveIndex(index);
     setOpen(true);
   }
 
@@ -96,11 +67,12 @@ export function PropertyPhotoGallery({
 
   return (
     <>
-      <div className="grid gap-2 overflow-hidden rounded-xl md:grid-cols-[1.18fr_0.82fr]">
+      <div className="grid gap-2 overflow-hidden rounded-xl">
+        <div className="grid gap-2 lg:grid-cols-[2fr_1fr]">
         <button
           type="button"
-          onClick={() => openSingle(0)}
-          className="relative min-h-[320px] bg-slate-100 text-left md:min-h-[430px]"
+          onClick={openLibrary}
+          className="relative min-h-[320px] bg-slate-100 text-left lg:min-h-[430px]"
         >
           <Image
             src={visibleImages[0]?.url ?? images[0].url}
@@ -113,16 +85,15 @@ export function PropertyPhotoGallery({
           />
         </button>
 
-        <div className="grid grid-cols-2 gap-2">
-          {visibleImages.slice(1, 8).map((image, index) => {
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            {visibleImages.slice(1, 3).map((image, index) => {
             const realIndex = index + 1;
-            const isLastTile = realIndex === visibleImages.length - 1 && remainingCount > 0;
             return (
               <button
                 key={image.id}
                 type="button"
-                onClick={() => (isLastTile ? openLibrary() : openSingle(realIndex))}
-                className="relative min-h-[118px] overflow-hidden bg-slate-100 text-left md:min-h-0"
+                onClick={openLibrary}
+                className="relative min-h-[154px] overflow-hidden bg-slate-100 text-left lg:min-h-0"
               >
                 <Image
                   src={image.url}
@@ -130,10 +101,35 @@ export function PropertyPhotoGallery({
                   fill
                   unoptimized
                   sizes="(min-width: 1024px) 21vw, 50vw"
-                  className={`object-cover transition duration-300 hover:scale-[1.03] ${isLastTile ? "blur-[1.5px]" : ""}`}
+                  className="object-cover transition duration-300 hover:scale-[1.03]"
+                />
+              </button>
+            );
+          })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {visibleImages.slice(3, 8).map((image, index) => {
+            const realIndex = index + 3;
+            const isLastTile = realIndex === visibleImages.length - 1 && remainingCount > 0;
+            return (
+              <button
+                key={image.id}
+                type="button"
+                onClick={openLibrary}
+                className="relative aspect-[1.55] overflow-hidden bg-slate-100 text-left"
+              >
+                <Image
+                  src={image.url}
+                  alt={`${title} ${realIndex + 1}`}
+                  fill
+                  unoptimized
+                  sizes="(min-width: 1024px) 20vw, 50vw"
+                  className={`object-cover transition duration-300 hover:scale-[1.03] ${isLastTile ? "brightness-75" : ""}`}
                 />
                 {isLastTile ? (
-                  <span className="absolute inset-0 grid place-items-center bg-slate-950/45 text-lg font-semibold text-white underline decoration-2 underline-offset-4">
+                  <span className="absolute inset-0 grid place-items-center bg-slate-950/35 text-lg font-semibold text-white underline decoration-2 underline-offset-4">
                     +{remainingCount} ảnh
                   </span>
                 ) : null}
@@ -193,15 +189,12 @@ function GalleryModal({
                 className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800"
               >
                 <span className="text-3xl leading-none">‹</span>
-                Thư viện ảnh
+                Tất cả ảnh
               </button>
             ) : null}
           </div>
           <div className="flex items-center justify-center gap-4">
             <h2 className="truncate text-center text-lg font-semibold">{title}</h2>
-            <a href="#rooms" onClick={onClose} className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white">
-              Đặt ngay
-            </a>
           </div>
           <button
             type="button"
@@ -299,18 +292,16 @@ function SinglePhoto({
         </div>
         <button
           type="button"
-          onClick={() => onActiveIndexChange((index) => Math.max(0, index - 1))}
-          disabled={activeIndex === 0}
-          className="absolute left-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white text-3xl text-slate-950 shadow-lg disabled:opacity-30"
+          onClick={() => onActiveIndexChange((index) => (index - 1 + images.length) % images.length)}
+          className="absolute left-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white text-3xl text-slate-950 shadow-lg"
           aria-label="Ảnh trước"
         >
           ‹
         </button>
         <button
           type="button"
-          onClick={() => onActiveIndexChange((index) => Math.min(images.length - 1, index + 1))}
-          disabled={activeIndex === images.length - 1}
-          className="absolute right-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white text-3xl text-slate-950 shadow-lg disabled:opacity-30"
+          onClick={() => onActiveIndexChange((index) => (index + 1) % images.length)}
+          className="absolute right-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white text-3xl text-slate-950 shadow-lg"
           aria-label="Ảnh sau"
         >
           ›
@@ -346,8 +337,13 @@ function ReviewSidebar({
   ratingCount: number;
 }) {
   const score = ratingAverage ?? 0;
+
+  if (!ratingCount || !ratingAverage) {
+    return <aside className="hidden min-h-0 border-l border-slate-200 bg-white lg:block" />;
+  }
+
   return (
-    <aside className="hidden min-h-0 border-l border-slate-200 bg-white lg:grid lg:grid-rows-[auto_minmax(0,1fr)]">
+    <aside className="hidden min-h-0 border-l border-slate-200 bg-white lg:block">
       <div className="flex items-center gap-3 border-b border-slate-200 p-5 shadow-sm">
         <span className="rounded-md bg-blue-800 px-2.5 py-2 text-xl font-semibold text-white">
           {score ? score.toFixed(1) : "Mới"}
@@ -357,28 +353,6 @@ function ReviewSidebar({
           <p className="text-sm text-slate-500">
             {ratingCount ? `${ratingCount} đánh giá` : "Chưa có đánh giá"}
           </p>
-        </div>
-      </div>
-
-      <div className="min-h-0 overflow-y-auto p-5">
-        <p className="font-semibold leading-6 text-slate-950">
-          Đọc xem khách yêu thích điều gì nhất:
-        </p>
-        <div className="mt-6 divide-y divide-slate-200">
-          {recentReviews.map((review) => (
-            <article key={`${review.name}-${review.country}`} className="py-5 first:pt-0">
-              <p className="text-sm leading-6 text-slate-800">“{review.text}”</p>
-              <div className="mt-3 flex items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-slate-600 text-sm font-semibold text-white">
-                  {review.name[0]}
-                </span>
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{review.name}</p>
-                  <p className="text-xs text-slate-500">{review.country}</p>
-                </div>
-              </div>
-            </article>
-          ))}
         </div>
       </div>
     </aside>

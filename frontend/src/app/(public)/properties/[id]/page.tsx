@@ -1,4 +1,6 @@
 import { BookingForm } from "@/components/booking/BookingForm";
+import { QuickFaqList } from "@/components/chat/QuickFaqList";
+import { StartPropertyConversationButton } from "@/components/chat/StartPropertyConversationButton";
 import { PropertyPhotoGallery } from "@/components/property/PropertyPhotoGallery";
 import type { PropertyDetail } from "@/types/property";
 import { notFound } from "next/navigation";
@@ -13,18 +15,6 @@ const cancellationLabels: Record<string, string> = {
   MODERATE: "Trung bình",
   STRICT: "Nghiêm ngặt",
   NON_REFUNDABLE: "Không hoàn tiền",
-};
-
-const petPolicyLabels: Record<string, string> = {
-  ALLOWED: "Cho phép mang thú cưng",
-  ON_REQUEST: "Thú cưng cần được host xác nhận trước",
-  NOT_ALLOWED: "Không cho phép mang thú cưng",
-};
-
-const parkingLabels: Record<string, string> = {
-  FREE: "Có chỗ đỗ xe miễn phí",
-  PAID: "Có chỗ đỗ xe trả phí",
-  NOT_AVAILABLE: "Chưa có chỗ đỗ xe",
 };
 
 const bookingMethodLabels: Record<string, string> = {
@@ -108,28 +98,41 @@ function getTotalBeds(property: PropertyDetail) {
   return bedroomBeds + property.livingRoomSofaBeds;
 }
 
-function formatHouseRules(property: PropertyDetail) {
+function getPolicyRows(property: PropertyDetail) {
   return [
-    property.policies.smokingAllowed ? "Cho phép hút thuốc" : "Không hút thuốc trong chỗ nghỉ",
-    property.policies.partiesAllowed ? "Cho phép tổ chức tiệc hoặc sự kiện" : "Không tổ chức tiệc hoặc sự kiện",
-    property.policies.petsPolicy === "NOT_ALLOWED"
-      ? "Không mang thú cưng"
-      : petPolicyLabels[property.policies.petsPolicy] ?? `Chính sách thú cưng: ${property.policies.petsPolicy}`,
+    { label: "Hút thuốc", value: property.policies.smokingAllowed ? "Cho phép" : "Không cho phép" },
+    { label: "Tiệc/sự kiện", value: property.policies.partiesAllowed ? "Cho phép" : "Không cho phép" },
+    {
+      label: "Vật nuôi",
+      value:
+        property.policies.petsPolicy === "ALLOWED"
+          ? "Cho phép"
+          : property.policies.petsPolicy === "ON_REQUEST"
+            ? "Theo yêu cầu"
+            : "Không cho phép",
+    },
   ];
 }
 
-function formatBedSummary(bedroom: PropertyDetail["bedrooms"][number]) {
-  const bedItems = [
-    bedroom.singleBeds ? `${bedroom.singleBeds} giường đơn` : null,
-    bedroom.doubleBeds ? `${bedroom.doubleBeds} giường đôi` : null,
-    bedroom.kingBeds ? `${bedroom.kingBeds} giường King` : null,
-    bedroom.superKingBeds ? `${bedroom.superKingBeds} giường Super King` : null,
-    bedroom.bunkBeds ? `${bedroom.bunkBeds} giường tầng` : null,
-    bedroom.sofaBeds ? `${bedroom.sofaBeds} giường sofa` : null,
-    bedroom.futonBeds ? `${bedroom.futonBeds} nệm futon` : null,
-  ].filter(Boolean);
+function getServiceRows(property: PropertyDetail) {
+  return [
+    property.services.breakfastIncluded ? { label: "Bữa sáng", value: "Có phục vụ bữa sáng" } : null,
+    property.services.parkingType === "FREE" ? { label: "Chỗ đậu xe", value: "Có, miễn phí" } : null,
+    property.services.parkingType === "PAID" ? { label: "Chỗ đậu xe", value: "Có, tính phí" } : null,
+  ].filter((item): item is { label: string; value: string } => Boolean(item));
+}
 
-  return bedItems.length ? bedItems.join(", ") : "Chưa cấu hình loại giường";
+function getOverviewItems(property: PropertyDetail, totalBeds: number) {
+  return [
+    { label: "Khách tối đa", value: `${property.capacity.maxGuests} khách` },
+    { label: "Phòng ngủ", value: `${property.capacity.bedroomCount} phòng` },
+    { label: "Phòng tắm", value: `${property.capacity.bathrooms} phòng` },
+    totalBeds > 0 ? { label: "Tổng số giường", value: `${totalBeds} giường` } : null,
+    property.sizeM2 ? { label: "Diện tích", value: `${Math.round(property.sizeM2).toLocaleString("vi-VN")} m²` } : null,
+    property.livingRoomSofaBeds > 0 ? { label: "Phòng khách", value: `${property.livingRoomSofaBeds} giường sofa` } : null,
+    { label: "Trẻ em", value: property.childrenAllowed ? "Có tiếp đón" : "Không tiếp đón" },
+    property.cribsAvailable ? { label: "Nôi/cũi", value: "Có cung cấp" } : null,
+  ].filter((item): item is { label: string; value: string } => Boolean(item));
 }
 
 function getMapUrl(property: PropertyDetail) {
@@ -194,17 +197,16 @@ export default async function PropertyDetailPage({
 
   const addressText = formatAddress(property);
   const totalBeds = getTotalBeds(property);
-  const houseRules = formatHouseRules(property);
+  const policyRows = getPolicyRows(property);
+  const serviceRows = getServiceRows(property);
+  const overviewItems = getOverviewItems(property, totalBeds);
   const mapUrl = getMapUrl(property);
   const reviewScore = getReviewScore(property);
   const locationHighlight = getLocationHighlight(property);
-  const roomRows = property.bedrooms.length
-    ? property.bedrooms
-    : [{ roomNumber: 1, singleBeds: 0, doubleBeds: 0, kingBeds: 0, superKingBeds: 0, bunkBeds: 0, sofaBeds: 0, futonBeds: 0 }];
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
             {property.type} tại {property.city}
@@ -216,12 +218,6 @@ export default async function PropertyDetailPage({
             {addressText}, {property.country}
           </p>
         </div>
-        <a
-          href="#rooms"
-          className="rounded-md bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
-        >
-          Đặt ngay
-        </a>
       </div>
 
       <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_350px]">
@@ -235,24 +231,37 @@ export default async function PropertyDetailPage({
         </div>
 
         <aside className="grid gap-3 lg:h-full lg:grid-rows-[auto_minmax(0,1fr)]">
-          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-slate-950">
-                  {reviewScore ? "Được khách đánh giá tốt" : "Chỗ nghỉ mới"}
-                </p>
-                <p className="mt-1 text-sm text-slate-600">
-                  {property.rating.count ? `${property.rating.count} đánh giá đã ghi nhận` : "Chưa có đánh giá"}
-                </p>
-                <div className="mt-3">
-                  <StarRating score={reviewScore} />
+          {property.rating.count && property.rating.average ? (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-950">Được khách đánh giá tốt</p>
+                  <p className="mt-1 text-sm text-slate-600">{property.rating.count} đánh giá đã ghi nhận</p>
+                  <div className="mt-3">
+                    <StarRating score={reviewScore} />
+                  </div>
+                </div>
+                <div className="rounded-md bg-blue-700 px-4 py-3 text-2xl font-semibold text-white">
+                  {property.rating.average.toFixed(1)}
                 </div>
               </div>
-              <div className="rounded-md bg-blue-700 px-4 py-3 text-2xl font-semibold text-white">
-                {reviewScore ? reviewScore.toFixed(1) : "Mới"}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-950">Chỗ nghỉ mới</p>
+                  <p className="mt-1 text-sm text-slate-600">Chưa có đánh giá</p>
+                  <div className="mt-3">
+                    <StarRating score={0} />
+                  </div>
+                </div>
+                <div className="rounded-md bg-blue-700 px-4 py-3 text-2xl font-semibold text-white">
+                  Mới
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="min-h-[260px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100 lg:min-h-0">
             {mapUrl ? (
@@ -292,80 +301,31 @@ export default async function PropertyDetailPage({
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <p className="font-semibold text-slate-950">Phù hợp</p>
                 <p className="mt-2 text-sm leading-6 text-slate-700">
-                  Tối đa {property.capacity.maxGuests} khách, {property.capacity.bedroomCount} phòng ngủ, {totalBeds || "chưa cập nhật"} giường.
+                  Tối đa {property.capacity.maxGuests} khách, {property.capacity.bedroomCount} phòng ngủ, {property.capacity.bathrooms} phòng tắm
+                  {property.sizeM2 ? `, diện tích ${Math.round(property.sizeM2).toLocaleString("vi-VN")} m²` : ""}.
                 </p>
               </div>
             </div>
           </section>
 
           <Section title="Tận hưởng dịch vụ đẳng cấp tại chỗ nghỉ" eyebrow="Giới thiệu">
-            <p className="max-w-4xl text-base leading-8 text-slate-700">
+            <p className="max-w-4xl whitespace-pre-line text-base leading-8 text-slate-700">
               {getIntroText(property)}
             </p>
           </Section>
 
-          <Section title="Các tiện nghi được ưa chuộng nhất">
-            <div className="flex flex-wrap gap-x-8 gap-y-4">
-              {property.amenities.length ? (
-                property.amenities.map((amenity) => (
+          {property.amenities.length ? (
+            <Section title="Các tiện nghi được ưa chuộng nhất">
+              <div className="flex flex-wrap gap-x-8 gap-y-4">
+                {property.amenities.map((amenity) => (
                   <div key={amenity.id} className="flex min-w-[220px] items-center gap-3 text-sm font-medium text-slate-800">
                     <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-50 text-xs text-emerald-700">✓</span>
                     {amenity.name}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500">Host chưa cập nhật tiện nghi chi tiết.</p>
-              )}
-            </div>
-          </Section>
-
-          <Section title="Phòng trống" eyebrow="Đặt phòng">
-            <div id="rooms" className="overflow-hidden rounded-lg border border-blue-200 bg-white">
-              <div className="grid bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-950 md:grid-cols-[1.35fr_0.55fr_0.85fr_1.1fr_0.7fr]">
-                <span>Loại chỗ nghỉ</span>
-                <span>Số khách</span>
-                <span>Giá hôm nay</span>
-                <span>Các lựa chọn</span>
-                <span>Chọn phòng</span>
+                ))}
               </div>
-              {roomRows.map((room, index) => (
-                <div
-                  key={`${room.roomNumber}-${index}`}
-                  className="grid gap-4 border-t border-blue-100 px-4 py-4 text-sm md:grid-cols-[1.35fr_0.55fr_0.85fr_1.1fr_0.7fr]"
-                >
-                  <div>
-                    <p className="font-semibold text-blue-800 underline underline-offset-2">
-                      {property.capacity.bedroomCount > 1 ? `Phòng ngủ ${room.roomNumber}` : property.title}
-                    </p>
-                    <p className="mt-2 leading-6 text-slate-600">{formatBedSummary(room)}</p>
-                    <p className="mt-2 text-xs text-slate-500">{property.capacity.bathrooms} phòng tắm</p>
-                  </div>
-                  <div className="font-medium text-slate-800">
-                    {property.capacity.maxGuests} khách
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold text-slate-950">{formatCurrency(property.pricePerNight)}</p>
-                    <p className="mt-1 text-xs leading-5 text-slate-500">Giá cho 1 đêm</p>
-                  </div>
-                  <div className="space-y-2 text-sm leading-6 text-slate-700">
-                    <p className="font-medium text-emerald-700">
-                      {property.services.breakfastIncluded ? "Bao gồm bữa sáng" : "Có thể đặt không kèm bữa sáng"}
-                    </p>
-                    <p>{cancellationLabels[property.policies.cancellationPolicy] ?? property.policies.cancellationPolicy}</p>
-                    <p>{property.priceInsight.label}</p>
-                  </div>
-                  <div>
-                    <a
-                      href="#booking-form"
-                      className="inline-flex w-full justify-center rounded-md bg-blue-700 px-4 py-2.5 font-semibold text-white transition hover:bg-blue-800"
-                    >
-                      Chọn
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
+            </Section>
+          ) : null}
 
           <Section title="Đánh giá của khách" eyebrow="Thang điểm 5 sao">
             <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
@@ -406,18 +366,27 @@ export default async function PropertyDetailPage({
             </div>
           </Section>
 
-          <Section title="Thắc mắc của du khách">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <p className="font-semibold text-slate-950">Bạn có câu hỏi về chỗ nghỉ?</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Khung hỏi đáp sẽ được kết nối với hộp thư host ở bước xử lý tiếp theo.
+          <Section title="Câu hỏi thường gặp">
+            {property.faqs.length ? (
+              <QuickFaqList propertyId={property.id} faqs={property.faqs} />
+            ) : (
+              <p className="rounded-lg bg-slate-50 p-5 text-sm leading-7 text-slate-600">
+                Host chưa bổ sung câu hỏi thường gặp cho chỗ nghỉ này.
               </p>
-            </div>
+            )}
           </Section>
 
-          <Section title="Quy tắc chung">
+          <Section title="Thông tin chi tiết chỗ nghỉ">
             <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <div className="grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-2">
+              <div className="grid gap-3 border-b border-slate-200 pb-5 sm:grid-cols-2 lg:grid-cols-4">
+                {overviewItems.map((item) => (
+                  <div key={item.label} className="rounded-md bg-slate-50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{item.label}</p>
+                    <p className="mt-1 font-semibold text-slate-950">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 grid gap-4 border-b border-slate-200 pb-5 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-slate-500">Nhận phòng</p>
                   <p className="mt-1 font-semibold text-slate-950">{formatTimeRange(property.policies.checkIn)}</p>
@@ -428,20 +397,39 @@ export default async function PropertyDetailPage({
                 </div>
               </div>
               <div className="mt-5 grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
-                {houseRules.map((rule) => (
-                  <p key={rule}>{rule}</p>
+                {policyRows.map((rule) => (
+                  <div key={rule.label} className="rounded-md bg-slate-50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{rule.label}</p>
+                    <p className="mt-1 font-semibold text-slate-950">{rule.value}</p>
+                  </div>
                 ))}
-                <p>{bookingMethodLabels[property.policies.bookingMethod] ?? property.policies.bookingMethod}</p>
-                <p>{cancellationLabels[property.policies.cancellationPolicy] ?? property.policies.cancellationPolicy}</p>
-                <p>Đỗ xe: {parkingLabels[property.services.parkingType] ?? property.services.parkingType}</p>
-                <p>Ngôn ngữ host: {property.languages.length ? property.languages.join(", ") : "Chưa cập nhật"}</p>
+                {serviceRows.map((service) => (
+                  <div key={service.label} className="rounded-md bg-emerald-50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">{service.label}</p>
+                    <p className="mt-1 font-semibold text-emerald-950">{service.value}</p>
+                  </div>
+                ))}
+                <div className="rounded-md bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Cách đặt</p>
+                  <p className="mt-1 font-semibold text-slate-950">{bookingMethodLabels[property.policies.bookingMethod] ?? property.policies.bookingMethod}</p>
+                </div>
+                <div className="rounded-md bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Hủy phòng</p>
+                  <p className="mt-1 font-semibold text-slate-950">{cancellationLabels[property.policies.cancellationPolicy] ?? property.policies.cancellationPolicy}</p>
+                </div>
+                {property.languages.length ? (
+                  <div className="rounded-md bg-slate-50 px-4 py-3 sm:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Ngôn ngữ tại chỗ lưu trú</p>
+                    <p className="mt-1 font-semibold text-slate-950">{property.languages.join(", ")}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
           </Section>
 
           <Section title="Ghi chú">
-            <p className="rounded-lg bg-slate-50 p-5 text-sm leading-7 text-slate-600">
-              Host có thể bổ sung ghi chú riêng cho khách tại đây trong phần chỉnh sửa lưu trú.
+            <p className="whitespace-pre-line rounded-lg bg-slate-50 p-5 text-sm leading-7 text-slate-600">
+              {property.notes?.trim() || "Host chưa bổ sung ghi chú riêng cho khách tại chỗ nghỉ này."}
             </p>
           </Section>
         </div>
@@ -455,6 +443,7 @@ export default async function PropertyDetailPage({
             initialCheckIn={searchParams.checkIn}
             initialCheckOut={searchParams.checkOut}
             initialGuests={searchParams.guests}
+            messageAction={<StartPropertyConversationButton propertyId={property.id} />}
           />
         </aside>
       </div>

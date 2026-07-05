@@ -79,7 +79,9 @@ export const ModelName = {
   PromotionRedemption: 'PromotionRedemption',
   CommissionRule: 'CommissionRule',
   AuditLog: 'AuditLog',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  Conversation: 'Conversation',
+  ConversationMessage: 'ConversationMessage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -216,6 +218,8 @@ export const PropertyScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  notes: 'notes',
+  faqs: 'faqs',
   addressLine1: 'addressLine1',
   addressLine2: 'addressLine2',
   city: 'city',
@@ -547,6 +551,36 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  guestId: 'guestId',
+  hostId: 'hostId',
+  lastMessageAt: 'lastMessageAt',
+  lastMessagePreview: 'lastMessagePreview',
+  guestUnreadCount: 'guestUnreadCount',
+  hostUnreadCount: 'hostUnreadCount',
+  hiddenForGuestAt: 'hiddenForGuestAt',
+  hiddenForHostAt: 'hiddenForHostAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  body: 'body',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt'
+} as const
+
+export type ConversationMessageScalarFieldEnum = (typeof ConversationMessageScalarFieldEnum)[keyof typeof ConversationMessageScalarFieldEnum]
 
 
 export const SortOrder = {

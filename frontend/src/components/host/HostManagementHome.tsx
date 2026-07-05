@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { getAccessToken } from "@/lib/auth";
 
@@ -425,8 +426,26 @@ function BookingDetailRow({ booking }: { booking: HostBooking }) {
 }
 
 function PropertyRow({ property }: { property: HostProperty }) {
+  const router = useRouter();
+  const href = `/host/properties/${property.id}`;
+
+  function openProperty() {
+    router.push(href);
+  }
+
   return (
-    <tr className="align-top hover:bg-teal-50/40">
+    <tr
+      role="button"
+      tabIndex={0}
+      onClick={openProperty}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openProperty();
+        }
+      }}
+      className="group cursor-pointer align-top transition hover:bg-teal-50/60 focus-within:bg-teal-50/60"
+    >
       <td className="px-4 py-4">
         <div className="flex gap-3">
           <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
@@ -442,7 +461,7 @@ function PropertyRow({ property }: { property: HostProperty }) {
             ) : null}
           </div>
           <div>
-            <p className="font-semibold text-slate-950">{property.title}</p>
+            <p className="font-semibold text-blue-700 underline-offset-2 group-hover:underline">{property.title}</p>
             <p className="mt-1 text-xs text-slate-400">{property.code}</p>
             <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{property.address}</p>
           </div>

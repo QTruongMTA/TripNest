@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useAuthStore } from "@/store/authStore";
 import { usePathname } from "next/navigation";
 
@@ -15,6 +16,7 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
   const displayName = user?.displayName || user?.name || user?.email || "Host TripNest";
+  const isPropertyDetail = /^\/host\/properties\/[^/]+$/.test(pathname);
 
   return (
     <div className="min-h-screen bg-[#f3f8f6] text-slate-950">
@@ -36,29 +38,32 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
 
-        <nav className="border-t border-white/10">
-          <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 md:px-6">
-            {navItems.map((item) => {
-              const active = pathname === item.href || (item.href !== "/host/properties" && pathname.startsWith(item.href));
-              return (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition ${
-                    active
-                      ? "border-amber-300 bg-white/10 text-white"
-                      : "border-transparent text-teal-50/85 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              );
-            })}
-          </div>
-        </nav>
+        {!isPropertyDetail ? (
+          <nav className="border-t border-white/10">
+            <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 md:px-6">
+              {navItems.map((item) => {
+                const active = pathname === item.href || (item.href !== "/host/properties" && pathname.startsWith(item.href));
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition ${
+                      active
+                        ? "border-amber-300 bg-white/10 text-white"
+                        : "border-transparent text-teal-50/85 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </div>
+          </nav>
+        ) : null}
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-7 md:px-6 md:py-9">{children}</main>
+      <ChatWidget />
     </div>
   );
 }

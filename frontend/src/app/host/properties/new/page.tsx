@@ -247,6 +247,12 @@ const today = new Date();
 const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 const todayIso = toIsoDate(todayDateOnly);
 
+function getSizeM2(details: DetailsState) {
+  const numericSize = Number(details.size);
+  if (!Number.isFinite(numericSize) || numericSize <= 0) return undefined;
+  return details.sizeUnit === "ft2" ? numericSize * 0.092903 : numericSize;
+}
+
 export default function Page() {
   const sessionUser = useAuthStore((state) => state.user);
   const [step, setStep] = useState<Step>("type");
@@ -446,10 +452,16 @@ export default function Page() {
           maxGuests: details.guests,
           bedroomCount: details.bedrooms.length,
           bathrooms: details.bathrooms,
+          sizeM2: getSizeM2(details),
           type: propertyType,
           thumbnailUrl: imageUrls[0],
           imageUrls,
           amenities,
+          details,
+          services,
+          languages,
+          rules,
+          bookingMethod,
           legalEntityType: legalType === "business" ? "BUSINESS" : "INDIVIDUAL",
           ownerAlias: legalType === "business" ? businessLegal.legalName.trim() : `${review.firstName} ${review.lastName}`.trim(),
         },

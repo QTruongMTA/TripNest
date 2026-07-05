@@ -1,10 +1,59 @@
 import { BookingStatus, ListingStatus } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
+import { pricingService } from "./pricing.service";
 
 const blockingBookingStatuses = [
   BookingStatus.PENDING,
   BookingStatus.CONFIRMED,
 ] as const;
+
+function getIsoDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function getStayDateKeys(checkIn: Date, checkOut: Date) {
+  const keys: string[] = [];
+  for (let cursor = new Date(checkIn); cursor < checkOut; cursor = addDays(cursor, 1)) {
+    keys.push(getIsoDateKey(cursor));
+  }
+  return keys;
+}
+
+export function calculatePropertyGuestOccupancy(
+  bookings: Array<{ checkIn: Date | null; checkOut: Date | null; numGuests: number }>,
+  checkIn: Date,
+  checkOut: Date
+) {
+  const occupancy = new Map<string, number>();
+  for (const booking of bookings) {
+    if (!booking.checkIn || !booking.checkOut) continue;
+    const start = booking.checkIn > checkIn ? booking.checkIn : checkIn;
+    const end = booking.checkOut < checkOut ? booking.checkOut : checkOut;
+    for (const dateKey of getStayDateKeys(start, end)) {
+      occupancy.set(dateKey, (occupancy.get(dateKey) ?? 0) + booking.numGuests);
+    }
+  }
+  return occupancy;
+}
+
+export function hasPropertyGuestCapacity(input: {
+  maxGuests: number;
+  requestedGuests: number;
+  checkIn: Date;
+  checkOut: Date;
+  bookings: Array<{ checkIn: Date | null; checkOut: Date | null; numGuests: number }>;
+}) {
+  const occupancy = calculatePropertyGuestOccupancy(input.bookings, input.checkIn, input.checkOut);
+  return getStayDateKeys(input.checkIn, input.checkOut).every(
+    (dateKey) => (occupancy.get(dateKey) ?? 0) + input.requestedGuests <= input.maxGuests
+  );
+}
 
 export const availabilityService = {
   async checkPropertyAvailability(input: {
@@ -21,12 +70,14 @@ export const availabilityService = {
       select: {
         id: true,
         maxGuests: true,
+        pricePerNight: true,
+        cleaningFee: true,
       },
     });
 
     if (!property) return null;
 
-    const [blockedDates, conflictingBookings] = await prisma.$transaction([
+    const [blockedDates, conflictingBookings, dailyRates] = await prisma.$transaction([
       prisma.propertyAvailability.findMany({
         where: {
           propertyId: input.propertyId,
@@ -52,23 +103,56 @@ export const availabilityService = {
           id: true,
           checkIn: true,
           checkOut: true,
+          numGuests: true,
           status: true,
         },
         orderBy: { checkIn: "asc" },
       }),
+      prisma.$queryRaw<Array<{ date: Date; pricePerNight: string }>>`
+        SELECT "date", "price" AS "pricePerNight"
+        FROM "PropertyDailyRate"
+        WHERE "propertyId" = ${input.propertyId}
+          AND "date" >= ${input.checkIn}
+          AND "date" < ${input.checkOut}
+        ORDER BY "date" ASC
+      `,
     ]);
 
     const guestLimitExceeded = input.guests > property.maxGuests;
+    const capacityExceeded = !guestLimitExceeded && !hasPropertyGuestCapacity({
+      maxGuests: property.maxGuests,
+      requestedGuests: input.guests,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      bookings: conflictingBookings,
+    });
     const available =
       !guestLimitExceeded &&
-      blockedDates.length === 0 &&
-      conflictingBookings.length === 0;
+      !capacityExceeded &&
+      blockedDates.length === 0;
+    const pricing = pricingService.calculatePropertyTotal({
+      pricePerNight: property.pricePerNight,
+      cleaningFee: property.cleaningFee,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      dailyRates,
+    });
 
     return {
       propertyId: property.id,
       available,
       maxGuests: property.maxGuests,
       requestedGuests: input.guests,
+      pricing: {
+        nights: pricing.nights,
+        stayPrice: pricing.stayPrice,
+        cleaningFee: pricing.cleaningFee,
+        totalPrice: pricing.totalPrice,
+        dailyRates: dailyRates.map((rate) => ({
+          date: rate.date.toISOString().slice(0, 10),
+          pricePerNight: Number(rate.pricePerNight),
+        })),
+      },
       blockedDates: blockedDates.map((slot) => ({
         date: slot.date.toISOString().slice(0, 10),
         status: slot.status,
@@ -77,12 +161,13 @@ export const availabilityService = {
         id: booking.id,
         checkIn: booking.checkIn?.toISOString().slice(0, 10) ?? null,
         checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
+        numGuests: booking.numGuests,
         status: booking.status,
       })),
       reasons: [
         ...(guestLimitExceeded ? ["GUEST_LIMIT_EXCEEDED"] : []),
         ...(blockedDates.length > 0 ? ["BLOCKED_DATES"] : []),
-        ...(conflictingBookings.length > 0 ? ["BOOKING_CONFLICT"] : []),
+        ...(capacityExceeded ? ["CAPACITY_EXCEEDED"] : []),
       ],
     };
   },

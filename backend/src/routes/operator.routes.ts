@@ -20,6 +20,9 @@ router.patch("/bookings/:id/status", requireRole(...provinceOnly), operatorContr
 router.get("/host-approvals", operatorController.hostApprovals);
 router.post("/host-approvals/:id/approve", requireRole(...provinceOnly), operatorController.approveHost);
 router.post("/host-approvals/:id/reject", requireRole(...provinceOnly), operatorController.rejectHost);
+router.get("/property-change-requests", operatorController.propertyChangeRequests);
+router.post("/property-change-requests/:id/approve", requireRole(...provinceOnly), operatorController.approvePropertyChange);
+router.post("/property-change-requests/:id/reject", requireRole(...provinceOnly), operatorController.rejectPropertyChange);
 
 router.get("/sub-operators", requireRole(...provinceOnly), operatorController.subOperators);
 

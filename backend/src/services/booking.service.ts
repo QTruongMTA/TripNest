@@ -1,6 +1,33 @@
 import { BookingMethod, BookingStatus, BookingType, ListingStatus, PaymentMethod } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
+import { hasPropertyGuestCapacity } from "./availability.service";
 import { pricingService } from "./pricing.service";
+
+type PropertyPaymentOption = "PAY_AT_PROPERTY" | "DEPOSIT_30" | "PAY_FULL";
+
+function getPaymentDetails(option: PropertyPaymentOption | undefined, totalPrice: number) {
+  if (option === "DEPOSIT_30") {
+    return {
+      method: PaymentMethod.BANK_TRANSFER,
+      amount: Math.round(totalPrice * 0.3),
+      option: "DEPOSIT_30" as const,
+    };
+  }
+
+  if (option === "PAY_FULL") {
+    return {
+      method: PaymentMethod.BANK_TRANSFER,
+      amount: totalPrice,
+      option: "PAY_FULL" as const,
+    };
+  }
+
+  return {
+    method: PaymentMethod.CASH,
+    amount: totalPrice,
+    option: "PAY_AT_PROPERTY" as const,
+  };
+}
 
 export const bookingService = {
   async listHostBookings(hostId: string) {
@@ -99,15 +126,18 @@ export const bookingService = {
       });
 
       if (input.status === "CONFIRMED") {
-        await tx.payment.create({
-          data: {
-            bookingId: input.bookingId,
-            amount: booking.totalPrice,
-            currency: "VND",
-            method: PaymentMethod.BANK_TRANSFER,
-            status: "UNPAID",
-          },
-        });
+        const existingPayment = await tx.payment.findUnique({ where: { bookingId: input.bookingId }, select: { id: true } });
+        if (!existingPayment) {
+          await tx.payment.create({
+            data: {
+              bookingId: input.bookingId,
+              amount: booking.totalPrice,
+              currency: "VND",
+              method: PaymentMethod.BANK_TRANSFER,
+              status: "UNPAID",
+            },
+          });
+        }
       }
 
       await tx.notification.create({
@@ -210,6 +240,7 @@ export const bookingService = {
     checkOut: Date;
     guests: number;
     notes?: string | null;
+    paymentOption?: PropertyPaymentOption;
   }) {
     return prisma.$transaction(async (tx) => {
       const property = await tx.property.findFirst({
@@ -236,7 +267,7 @@ export const bookingService = {
         return { kind: "GUEST_LIMIT_EXCEEDED" as const };
       }
 
-      const [blockedDates, conflictingBookings] = await Promise.all([
+      const [blockedDates, conflictingBookings, dailyRates] = await Promise.all([
         tx.propertyAvailability.findMany({
           where: {
             propertyId: input.propertyId,
@@ -254,11 +285,27 @@ export const bookingService = {
             checkIn: { lt: input.checkOut },
             checkOut: { gt: input.checkIn },
           },
-          select: { id: true },
+          select: { id: true, checkIn: true, checkOut: true, numGuests: true },
         }),
+        tx.$queryRaw<Array<{ date: Date; pricePerNight: string }>>`
+          SELECT "date", "price" AS "pricePerNight"
+          FROM "PropertyDailyRate"
+          WHERE "propertyId" = ${input.propertyId}
+            AND "date" >= ${input.checkIn}
+            AND "date" < ${input.checkOut}
+          ORDER BY "date" ASC
+        `,
       ]);
 
-      if (blockedDates.length > 0 || conflictingBookings.length > 0) {
+      const hasCapacity = hasPropertyGuestCapacity({
+        maxGuests: property.maxGuests,
+        requestedGuests: input.guests,
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        bookings: conflictingBookings,
+      });
+
+      if (blockedDates.length > 0 || !hasCapacity) {
         return { kind: "PROPERTY_UNAVAILABLE" as const };
       }
 
@@ -267,7 +314,9 @@ export const bookingService = {
         cleaningFee: property.cleaningFee,
         checkIn: input.checkIn,
         checkOut: input.checkOut,
+        dailyRates,
       });
+      const paymentDetails = getPaymentDetails(input.paymentOption, pricing.totalPrice);
 
       const booking = await tx.booking.create({
         data: {
@@ -299,19 +348,15 @@ export const bookingService = {
 
       const isInstant = booking.status === BookingStatus.CONFIRMED;
 
-      // CONFIRMED means the slot is reserved; UNPAID reflects that payment has not yet been collected.
-      // Create the Payment record now so the payment flow has a row to update later.
-      if (isInstant) {
-        await tx.payment.create({
-          data: {
-            bookingId: booking.id,
-            amount: booking.totalPrice,
-            currency: "VND",
-            method: PaymentMethod.BANK_TRANSFER,
-            status: "UNPAID",
-          },
-        });
-      }
+      await tx.payment.create({
+        data: {
+          bookingId: booking.id,
+          amount: paymentDetails.amount,
+          currency: "VND",
+          method: paymentDetails.method,
+          status: "UNPAID",
+        },
+      });
 
       await tx.notification.createMany({
         data: [
@@ -353,6 +398,12 @@ export const bookingService = {
           checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
           createdAt: booking.createdAt.toISOString(),
           pricing,
+          payment: {
+            option: paymentDetails.option,
+            method: paymentDetails.method,
+            amount: paymentDetails.amount,
+            status: booking.paymentStatus,
+          },
         },
       };
     });
@@ -395,15 +446,18 @@ export const bookingService = {
       });
 
       if (input.status === "CONFIRMED") {
-        await tx.payment.create({
-          data: {
-            bookingId: input.bookingId,
-            amount: booking.totalPrice,
-            currency: "VND",
-            method: PaymentMethod.BANK_TRANSFER,
-            status: "UNPAID",
-          },
-        });
+        const existingPayment = await tx.payment.findUnique({ where: { bookingId: input.bookingId }, select: { id: true } });
+        if (!existingPayment) {
+          await tx.payment.create({
+            data: {
+              bookingId: input.bookingId,
+              amount: booking.totalPrice,
+              currency: "VND",
+              method: PaymentMethod.BANK_TRANSFER,
+              status: "UNPAID",
+            },
+          });
+        }
       }
 
       const itemTitle = booking.property?.title ?? booking.tour?.title ?? "đơn đặt phòng";

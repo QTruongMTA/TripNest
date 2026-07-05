@@ -1,6 +1,7 @@
 "use client";
 
 import { getAccessToken } from "@/lib/auth";
+import { openChatWidget } from "@/components/chat/ChatWidget";
 import { useEffect, useRef, useState } from "react";
 
 type NotificationItem = {
@@ -8,6 +9,11 @@ type NotificationItem = {
   title: string;
   message: string;
   isRead: boolean;
+  metadata?: {
+    kind?: string;
+    conversationId?: string;
+    propertyId?: string;
+  } | null;
   createdAt: string;
 };
 
@@ -61,6 +67,22 @@ export function TravelerNotificationBell() {
     }).catch(() => undefined);
   }
 
+  async function handleNotificationClick(item: NotificationItem) {
+    const token = getAccessToken();
+    setItems((current) => current.map((notification) => notification.id === item.id ? { ...notification, isRead: true } : notification));
+    setUnreadCount((current) => item.isRead ? current : Math.max(0, current - 1));
+    if (token) {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/notifications/mine/${item.id}/read`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => undefined);
+    }
+    if (item.metadata?.conversationId) {
+      setOpen(false);
+      openChatWidget({ conversationId: item.metadata.conversationId });
+    }
+  }
+
   return (
     <div ref={ref} className="relative">
       <button
@@ -95,9 +117,11 @@ export function TravelerNotificationBell() {
               <p className="px-4 py-8 text-center text-sm text-slate-400">Chưa có thông báo.</p>
             ) : (
               items.map((item) => (
-                <div
+                <button
                   key={item.id}
-                  className={`border-b border-slate-100 px-4 py-3 last:border-0 ${
+                  type="button"
+                  onClick={() => handleNotificationClick(item)}
+                  className={`block w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 ${
                     item.isRead ? "bg-white" : "bg-amber-50"
                   }`}
                 >
@@ -106,7 +130,7 @@ export function TravelerNotificationBell() {
                   <p className="mt-2 text-xs text-slate-400">
                     {new Date(item.createdAt).toLocaleString("vi-VN")}
                   </p>
-                </div>
+                </button>
               ))
             )}
           </div>

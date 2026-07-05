@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { operatorService } from "../services/operator.service";
+import { prisma } from "../lib/prisma";
 
 export const operatorController = {
   // ── Admin routes ─────────────────────────────────────────────────────────────
@@ -188,6 +189,142 @@ export const operatorController = {
     const { notes } = req.body ?? {};
     if (!notes) return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "notes (rejection reason) required" } });
     await operatorService.rejectHost(req.params.id as string, req.user!.id, notes);
+    return res.json({ data: { success: true } });
+  },
+
+  async propertyChangeRequests(req: Request, res: Response) {
+    const provinceIds = req.user!.role === "OPERATOR_SUB"
+      ? (await operatorService.getSubOperatorProvinces(req.user!.id)).map((p) => p.id)
+      : await operatorService.getOperatorProvinceIds(req.user!.id);
+    const status = typeof req.query.status === "string" ? req.query.status : undefined;
+    const requests = await prisma.$queryRaw<Array<{
+      id: string;
+      propertyId: string;
+      hostId: string;
+      provinceId: string | null;
+      status: string;
+      currentValues: unknown;
+      requestedValues: unknown;
+      reason: string;
+      documents: unknown;
+      createdAt: Date;
+      propertyTitle: string;
+      hostEmail: string;
+    }>>`
+      SELECT pcr.*, p."title" AS "propertyTitle", u."email" AS "hostEmail"
+      FROM "PropertyChangeRequest" pcr
+      JOIN "Property" p ON p."id" = pcr."propertyId"
+      JOIN "User" u ON u."id" = pcr."hostId"
+      WHERE pcr."provinceId" = ANY(${provinceIds})
+        AND (${status ?? null}::text IS NULL OR pcr."status"::text = ${status ?? null})
+      ORDER BY pcr."createdAt" DESC
+    `;
+
+    return res.json({
+      data: requests.map((request) => ({
+        ...request,
+        createdAt: request.createdAt.toISOString(),
+      })),
+    });
+  },
+
+  async approvePropertyChange(req: Request, res: Response) {
+    const requestId = req.params.id as string;
+    const provinceIds = await operatorService.getOperatorProvinceIds(req.user!.id);
+    const rows = await prisma.$queryRaw<Array<{
+      id: string;
+      propertyId: string;
+      hostId: string;
+      provinceId: string | null;
+      status: string;
+      requestedValues: { title?: string; location?: string; pricePerNight?: number };
+    }>>`
+      SELECT "id", "propertyId", "hostId", "provinceId", "status", "requestedValues"
+      FROM "PropertyChangeRequest"
+      WHERE "id" = ${requestId}
+      LIMIT 1
+    `;
+    const request = rows[0];
+
+    if (!request || !request.provinceId || !provinceIds.includes(request.provinceId)) {
+      return res.status(404).json({ error: { code: "REQUEST_NOT_FOUND", message: "Request not found" } });
+    }
+    if (request.status !== "PENDING" && request.status !== "UNDER_REVIEW") {
+      return res.status(400).json({ error: { code: "REQUEST_ALREADY_REVIEWED", message: "Request already reviewed" } });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.property.update({
+        where: { id: request.propertyId },
+        data: {
+          ...(request.requestedValues.title ? { title: request.requestedValues.title } : {}),
+          ...(request.requestedValues.location ? { addressLine1: request.requestedValues.location } : {}),
+          ...(request.requestedValues.pricePerNight ? { pricePerNight: request.requestedValues.pricePerNight } : {}),
+        },
+      });
+      await tx.$executeRaw`
+        UPDATE "PropertyChangeRequest"
+        SET "status" = 'APPROVED', "reviewedBy" = ${req.user!.id}, "reviewedAt" = NOW(), "updatedAt" = NOW()
+        WHERE "id" = ${request.id}
+      `;
+      await tx.notification.create({
+        data: {
+          userId: request.hostId,
+          type: "SYSTEM",
+          title: "Thay đổi chỗ nghỉ đã được duyệt",
+          message: "Tên, vị trí hoặc mức giá gốc của chỗ nghỉ đã được cập nhật.",
+          metadata: {
+            action: "PROPERTY_CHANGE_APPROVED",
+            propertyId: request.propertyId,
+            requestId: request.id,
+          },
+        },
+      });
+    });
+
+    return res.json({ data: { success: true } });
+  },
+
+  async rejectPropertyChange(req: Request, res: Response) {
+    const requestId = req.params.id as string;
+    const { notes } = req.body ?? {};
+    const provinceIds = await operatorService.getOperatorProvinceIds(req.user!.id);
+    const rows = await prisma.$queryRaw<Array<{ id: string; propertyId: string; hostId: string; provinceId: string | null; status: string }>>`
+      SELECT "id", "propertyId", "hostId", "provinceId", "status"
+      FROM "PropertyChangeRequest"
+      WHERE "id" = ${requestId}
+      LIMIT 1
+    `;
+    const request = rows[0];
+
+    if (!request || !request.provinceId || !provinceIds.includes(request.provinceId)) {
+      return res.status(404).json({ error: { code: "REQUEST_NOT_FOUND", message: "Request not found" } });
+    }
+    if (request.status !== "PENDING" && request.status !== "UNDER_REVIEW") {
+      return res.status(400).json({ error: { code: "REQUEST_ALREADY_REVIEWED", message: "Request already reviewed" } });
+    }
+
+    await prisma.$transaction([
+      prisma.$executeRaw`
+        UPDATE "PropertyChangeRequest"
+        SET "status" = 'REJECTED', "reviewedBy" = ${req.user!.id}, "reviewedAt" = NOW(), "notes" = ${typeof notes === "string" ? notes : null}, "updatedAt" = NOW()
+        WHERE "id" = ${request.id}
+      `,
+      prisma.notification.create({
+        data: {
+          userId: request.hostId,
+          type: "SYSTEM",
+          title: "Thay đổi chỗ nghỉ chưa được duyệt",
+          message: typeof notes === "string" && notes.trim() ? notes.trim() : "Yêu cầu thay đổi tên, vị trí hoặc mức giá gốc chưa được duyệt.",
+          metadata: {
+            action: "PROPERTY_CHANGE_REJECTED",
+            propertyId: request.propertyId,
+            requestId: request.id,
+          },
+        },
+      }),
+    ]);
+
     return res.json({ data: { success: true } });
   },
 

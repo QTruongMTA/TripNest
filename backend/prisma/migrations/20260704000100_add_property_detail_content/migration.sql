@@ -1,0 +1,3 @@
+ALTER TABLE "Property"
+ADD COLUMN "notes" TEXT,
+ADD COLUMN "faqs" JSONB;

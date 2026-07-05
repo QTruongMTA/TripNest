@@ -6,4 +6,5 @@ export const createPropertyBookingSchema = Joi.object({
   checkOut: Joi.date().iso().greater(Joi.ref("checkIn")).required(),
   guests: Joi.number().integer().min(1).required(),
   notes: Joi.string().allow("", null).optional(),
+  paymentOption: Joi.string().valid("PAY_AT_PROPERTY", "DEPOSIT_30", "PAY_FULL").optional(),
 });
