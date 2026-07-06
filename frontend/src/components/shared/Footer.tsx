@@ -20,7 +20,7 @@ export function Footer() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/50">Hỗ trợ</p>
           <div className="mt-4 space-y-3 text-sm text-white/80">
             <p>Trung tâm trợ giúp</p>
-            <p>Chính sách hủy</p>
+            <a href="/policies" className="block transition hover:text-white">Chính sách sử dụng</a>
             <p>Liên hệ TripNest</p>
           </div>
         </div>

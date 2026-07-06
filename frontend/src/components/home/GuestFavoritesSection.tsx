@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FavoritePropertyButton } from "@/components/property/FavoritePropertyButton";
 import { SectionHeading } from "./SectionHeading";
 
 type PropertyItem = {
@@ -41,9 +42,7 @@ export function GuestFavoritesSection({ properties }: { properties: PropertyItem
                   <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
                     Khách chọn nhiều
                   </span>
-                  <button className="text-lg text-slate-300 transition hover:text-rose-500" aria-label={`Lưu ${property.title}`}>
-                    ♥
-                  </button>
+                  <FavoritePropertyButton property={{ ...property, country: "Việt Nam", maxGuests: 0, bedroomCount: 0, bathrooms: 0 }} className="h-9 w-9 p-0 shadow-none" />
                 </div>
                 <h3 className="font-semibold text-slate-950">{property.title}</h3>
                 <p className="mt-1 text-sm text-slate-600">{property.city}</p>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FavoritePropertyButton } from "@/components/property/FavoritePropertyButton";
 import { SectionHeading } from "./SectionHeading";
 
 type PropertyItem = {
@@ -44,6 +45,7 @@ export function WeekendDealsSection({ properties }: { properties: PropertyItem[]
                     ★ {property.rating.average.toFixed(1)}
                   </div>
                 )}
+                <FavoritePropertyButton property={{ ...property, country: "Việt Nam", maxGuests: 0, bedroomCount: 0, bathrooms: 0 }} className="absolute left-3 top-3 h-9 w-9 p-0" />
               </div>
               <div className="p-4">
                 <p className="text-sm text-teal-700">{property.city}</p>

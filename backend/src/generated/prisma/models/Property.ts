@@ -618,6 +618,8 @@ export type PropertyWhereInput = {
   owners?: Prisma.PropertyOwnerListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   availability?: Prisma.PropertyAvailabilityListRelationFilter
+  dailyRates?: Prisma.PropertyDailyRateListRelationFilter
+  changeRequests?: Prisma.PropertyChangeRequestListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
 }
 
@@ -680,6 +682,8 @@ export type PropertyOrderByWithRelationInput = {
   owners?: Prisma.PropertyOwnerOrderByRelationAggregateInput
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   availability?: Prisma.PropertyAvailabilityOrderByRelationAggregateInput
+  dailyRates?: Prisma.PropertyDailyRateOrderByRelationAggregateInput
+  changeRequests?: Prisma.PropertyChangeRequestOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
 }
 
@@ -745,6 +749,8 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   owners?: Prisma.PropertyOwnerListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   availability?: Prisma.PropertyAvailabilityListRelationFilter
+  dailyRates?: Prisma.PropertyDailyRateListRelationFilter
+  changeRequests?: Prisma.PropertyChangeRequestListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
 }, "id">
 
@@ -916,6 +922,8 @@ export type PropertyCreateInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -977,6 +985,8 @@ export type PropertyUncheckedCreateInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -1038,6 +1048,8 @@ export type PropertyUpdateInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -1099,6 +1111,8 @@ export type PropertyUncheckedUpdateInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -1262,6 +1276,11 @@ export type PropertyListRelationFilter = {
 
 export type PropertyOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type PropertyScalarRelationFilter = {
+  is?: Prisma.PropertyWhereInput
+  isNot?: Prisma.PropertyWhereInput
 }
 
 export type PropertyCountOrderByAggregateInput = {
@@ -1449,11 +1468,6 @@ export type PropertySumOrderByAggregateInput = {
   maxStayNights?: Prisma.SortOrder
 }
 
-export type PropertyScalarRelationFilter = {
-  is?: Prisma.PropertyWhereInput
-  isNot?: Prisma.PropertyWhereInput
-}
-
 export type PropertyNullableScalarRelationFilter = {
   is?: Prisma.PropertyWhereInput | null
   isNot?: Prisma.PropertyWhereInput | null
@@ -1501,6 +1515,20 @@ export type PropertyUncheckedUpdateManyWithoutHostNestedInput = {
   deleteMany?: Prisma.PropertyScalarWhereInput | Prisma.PropertyScalarWhereInput[]
 }
 
+export type PropertyCreateNestedOneWithoutChangeRequestsInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutChangeRequestsInput, Prisma.PropertyUncheckedCreateWithoutChangeRequestsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutChangeRequestsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutChangeRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutChangeRequestsInput, Prisma.PropertyUncheckedCreateWithoutChangeRequestsInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutChangeRequestsInput
+  upsert?: Prisma.PropertyUpsertWithoutChangeRequestsInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutChangeRequestsInput, Prisma.PropertyUpdateWithoutChangeRequestsInput>, Prisma.PropertyUncheckedUpdateWithoutChangeRequestsInput>
+}
+
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -1523,14 +1551,6 @@ export type IntFieldUpdateOperationsInput = {
 
 export type DecimalFieldUpdateOperationsInput = {
   set?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1705,6 +1725,20 @@ export type PropertyUpdateOneRequiredWithoutAvailabilityNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutAvailabilityInput, Prisma.PropertyUpdateWithoutAvailabilityInput>, Prisma.PropertyUncheckedUpdateWithoutAvailabilityInput>
 }
 
+export type PropertyCreateNestedOneWithoutDailyRatesInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutDailyRatesInput, Prisma.PropertyUncheckedCreateWithoutDailyRatesInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutDailyRatesInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutDailyRatesNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutDailyRatesInput, Prisma.PropertyUncheckedCreateWithoutDailyRatesInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutDailyRatesInput
+  upsert?: Prisma.PropertyUpsertWithoutDailyRatesInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutDailyRatesInput, Prisma.PropertyUpdateWithoutDailyRatesInput>, Prisma.PropertyUncheckedUpdateWithoutDailyRatesInput>
+}
+
 export type PropertyCreateNestedOneWithoutBookingsInput = {
   create?: Prisma.XOR<Prisma.PropertyCreateWithoutBookingsInput, Prisma.PropertyUncheckedCreateWithoutBookingsInput>
   connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutBookingsInput
@@ -1792,6 +1826,8 @@ export type PropertyCreateWithoutHostInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -1852,6 +1888,8 @@ export type PropertyUncheckedCreateWithoutHostInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -1935,6 +1973,270 @@ export type PropertyScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Property"> | Date | string
 }
 
+export type PropertyCreateWithoutChangeRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  notes?: string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1: string
+  addressLine2?: string | null
+  city: string
+  postalCode?: string | null
+  country?: string
+  latitude?: number | null
+  longitude?: number | null
+  type: $Enums.PropertyType
+  maxGuests?: number
+  bedroomCount?: number
+  bathrooms?: number
+  livingRoomSofaBeds?: number
+  childrenAllowed?: boolean
+  cribsAvailable?: boolean
+  sizeM2?: number | null
+  pricePerNight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: boolean
+  commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: $Enums.BookingMethod
+  cancellationFreeDays?: number
+  mistakeProtection?: boolean
+  cancellationPolicy?: $Enums.CancellationPolicy
+  breakfastIncluded?: boolean
+  parkingType?: $Enums.ParkingType
+  smokingAllowed?: boolean
+  partiesAllowed?: boolean
+  petsPolicy?: $Enums.PetPolicy
+  checkInFrom?: string | null
+  checkInTo?: string | null
+  checkOutFrom?: string | null
+  checkOutTo?: string | null
+  groupPricingEnabled?: boolean
+  oneGuestDiscountPct?: number
+  availabilityWindow?: number
+  longStayAllowed?: boolean
+  maxStayNights?: number | null
+  legalEntityType?: $Enums.LegalEntityType
+  ownerAlias?: string | null
+  status?: $Enums.ListingStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  host: Prisma.UserCreateNestedOneWithoutPropertiesInput
+  images?: Prisma.PropertyImageCreateNestedManyWithoutPropertyInput
+  amenities?: Prisma.AmenityCreateNestedManyWithoutPropertiesInput
+  languages?: Prisma.PropertyLanguageCreateNestedManyWithoutPropertyInput
+  bedrooms?: Prisma.PropertyBedroomCreateNestedManyWithoutPropertyInput
+  ratePlans?: Prisma.PropertyRatePlanCreateNestedManyWithoutPropertyInput
+  childPricing?: Prisma.PropertyChildPricingCreateNestedOneWithoutPropertyInput
+  owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
+  availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutChangeRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  notes?: string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1: string
+  addressLine2?: string | null
+  city: string
+  postalCode?: string | null
+  country?: string
+  latitude?: number | null
+  longitude?: number | null
+  type: $Enums.PropertyType
+  maxGuests?: number
+  bedroomCount?: number
+  bathrooms?: number
+  livingRoomSofaBeds?: number
+  childrenAllowed?: boolean
+  cribsAvailable?: boolean
+  sizeM2?: number | null
+  pricePerNight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: boolean
+  commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: $Enums.BookingMethod
+  cancellationFreeDays?: number
+  mistakeProtection?: boolean
+  cancellationPolicy?: $Enums.CancellationPolicy
+  breakfastIncluded?: boolean
+  parkingType?: $Enums.ParkingType
+  smokingAllowed?: boolean
+  partiesAllowed?: boolean
+  petsPolicy?: $Enums.PetPolicy
+  checkInFrom?: string | null
+  checkInTo?: string | null
+  checkOutFrom?: string | null
+  checkOutTo?: string | null
+  groupPricingEnabled?: boolean
+  oneGuestDiscountPct?: number
+  availabilityWindow?: number
+  longStayAllowed?: boolean
+  maxStayNights?: number | null
+  legalEntityType?: $Enums.LegalEntityType
+  ownerAlias?: string | null
+  status?: $Enums.ListingStatus
+  hostId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  images?: Prisma.PropertyImageUncheckedCreateNestedManyWithoutPropertyInput
+  amenities?: Prisma.AmenityUncheckedCreateNestedManyWithoutPropertiesInput
+  languages?: Prisma.PropertyLanguageUncheckedCreateNestedManyWithoutPropertyInput
+  bedrooms?: Prisma.PropertyBedroomUncheckedCreateNestedManyWithoutPropertyInput
+  ratePlans?: Prisma.PropertyRatePlanUncheckedCreateNestedManyWithoutPropertyInput
+  childPricing?: Prisma.PropertyChildPricingUncheckedCreateNestedOneWithoutPropertyInput
+  owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
+  availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutChangeRequestsInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutChangeRequestsInput, Prisma.PropertyUncheckedCreateWithoutChangeRequestsInput>
+}
+
+export type PropertyUpsertWithoutChangeRequestsInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutChangeRequestsInput, Prisma.PropertyUncheckedUpdateWithoutChangeRequestsInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutChangeRequestsInput, Prisma.PropertyUncheckedCreateWithoutChangeRequestsInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutChangeRequestsInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutChangeRequestsInput, Prisma.PropertyUncheckedUpdateWithoutChangeRequestsInput>
+}
+
+export type PropertyUpdateWithoutChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  type?: Prisma.EnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType
+  maxGuests?: Prisma.IntFieldUpdateOperationsInput | number
+  bedroomCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  livingRoomSofaBeds?: Prisma.IntFieldUpdateOperationsInput | number
+  childrenAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cribsAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sizeM2?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pricePerNight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: Prisma.EnumBookingMethodFieldUpdateOperationsInput | $Enums.BookingMethod
+  cancellationFreeDays?: Prisma.IntFieldUpdateOperationsInput | number
+  mistakeProtection?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancellationPolicy?: Prisma.EnumCancellationPolicyFieldUpdateOperationsInput | $Enums.CancellationPolicy
+  breakfastIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  parkingType?: Prisma.EnumParkingTypeFieldUpdateOperationsInput | $Enums.ParkingType
+  smokingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  partiesAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  petsPolicy?: Prisma.EnumPetPolicyFieldUpdateOperationsInput | $Enums.PetPolicy
+  checkInFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkInTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupPricingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  oneGuestDiscountPct?: Prisma.IntFieldUpdateOperationsInput | number
+  availabilityWindow?: Prisma.IntFieldUpdateOperationsInput | number
+  longStayAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxStayNights?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  legalEntityType?: Prisma.EnumLegalEntityTypeFieldUpdateOperationsInput | $Enums.LegalEntityType
+  ownerAlias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumListingStatusFieldUpdateOperationsInput | $Enums.ListingStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.UserUpdateOneRequiredWithoutPropertiesNestedInput
+  images?: Prisma.PropertyImageUpdateManyWithoutPropertyNestedInput
+  amenities?: Prisma.AmenityUpdateManyWithoutPropertiesNestedInput
+  languages?: Prisma.PropertyLanguageUpdateManyWithoutPropertyNestedInput
+  bedrooms?: Prisma.PropertyBedroomUpdateManyWithoutPropertyNestedInput
+  ratePlans?: Prisma.PropertyRatePlanUpdateManyWithoutPropertyNestedInput
+  childPricing?: Prisma.PropertyChildPricingUpdateOneWithoutPropertyNestedInput
+  owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
+  availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  type?: Prisma.EnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType
+  maxGuests?: Prisma.IntFieldUpdateOperationsInput | number
+  bedroomCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  livingRoomSofaBeds?: Prisma.IntFieldUpdateOperationsInput | number
+  childrenAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cribsAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sizeM2?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pricePerNight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: Prisma.EnumBookingMethodFieldUpdateOperationsInput | $Enums.BookingMethod
+  cancellationFreeDays?: Prisma.IntFieldUpdateOperationsInput | number
+  mistakeProtection?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancellationPolicy?: Prisma.EnumCancellationPolicyFieldUpdateOperationsInput | $Enums.CancellationPolicy
+  breakfastIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  parkingType?: Prisma.EnumParkingTypeFieldUpdateOperationsInput | $Enums.ParkingType
+  smokingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  partiesAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  petsPolicy?: Prisma.EnumPetPolicyFieldUpdateOperationsInput | $Enums.PetPolicy
+  checkInFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkInTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupPricingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  oneGuestDiscountPct?: Prisma.IntFieldUpdateOperationsInput | number
+  availabilityWindow?: Prisma.IntFieldUpdateOperationsInput | number
+  longStayAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxStayNights?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  legalEntityType?: Prisma.EnumLegalEntityTypeFieldUpdateOperationsInput | $Enums.LegalEntityType
+  ownerAlias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumListingStatusFieldUpdateOperationsInput | $Enums.ListingStatus
+  hostId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.PropertyImageUncheckedUpdateManyWithoutPropertyNestedInput
+  amenities?: Prisma.AmenityUncheckedUpdateManyWithoutPropertiesNestedInput
+  languages?: Prisma.PropertyLanguageUncheckedUpdateManyWithoutPropertyNestedInput
+  bedrooms?: Prisma.PropertyBedroomUncheckedUpdateManyWithoutPropertyNestedInput
+  ratePlans?: Prisma.PropertyRatePlanUncheckedUpdateManyWithoutPropertyNestedInput
+  childPricing?: Prisma.PropertyChildPricingUncheckedUpdateOneWithoutPropertyNestedInput
+  owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
+  availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
 export type PropertyCreateWithoutBedroomsInput = {
   id?: string
   title: string
@@ -1992,6 +2294,8 @@ export type PropertyCreateWithoutBedroomsInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -2052,6 +2356,8 @@ export type PropertyUncheckedCreateWithoutBedroomsInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -2128,6 +2434,8 @@ export type PropertyUpdateWithoutBedroomsInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2188,6 +2496,8 @@ export type PropertyUncheckedUpdateWithoutBedroomsInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2248,6 +2558,8 @@ export type PropertyCreateWithoutLanguagesInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -2308,6 +2620,8 @@ export type PropertyUncheckedCreateWithoutLanguagesInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -2384,6 +2698,8 @@ export type PropertyUpdateWithoutLanguagesInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2444,6 +2760,8 @@ export type PropertyUncheckedUpdateWithoutLanguagesInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2504,6 +2822,8 @@ export type PropertyCreateWithoutRatePlansInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -2564,6 +2884,8 @@ export type PropertyUncheckedCreateWithoutRatePlansInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -2640,6 +2962,8 @@ export type PropertyUpdateWithoutRatePlansInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2700,6 +3024,8 @@ export type PropertyUncheckedUpdateWithoutRatePlansInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2760,6 +3086,8 @@ export type PropertyCreateWithoutChildPricingInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -2820,6 +3148,8 @@ export type PropertyUncheckedCreateWithoutChildPricingInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -2896,6 +3226,8 @@ export type PropertyUpdateWithoutChildPricingInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -2956,6 +3288,8 @@ export type PropertyUncheckedUpdateWithoutChildPricingInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3016,6 +3350,8 @@ export type PropertyCreateWithoutOwnersInput = {
   childPricing?: Prisma.PropertyChildPricingCreateNestedOneWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -3076,6 +3412,8 @@ export type PropertyUncheckedCreateWithoutOwnersInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedCreateNestedOneWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -3152,6 +3490,8 @@ export type PropertyUpdateWithoutOwnersInput = {
   childPricing?: Prisma.PropertyChildPricingUpdateOneWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3212,6 +3552,8 @@ export type PropertyUncheckedUpdateWithoutOwnersInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedUpdateOneWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3272,6 +3614,8 @@ export type PropertyCreateWithoutImagesInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -3332,6 +3676,8 @@ export type PropertyUncheckedCreateWithoutImagesInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -3408,6 +3754,8 @@ export type PropertyUpdateWithoutImagesInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3468,6 +3816,8 @@ export type PropertyUncheckedUpdateWithoutImagesInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3528,6 +3878,8 @@ export type PropertyCreateWithoutAmenitiesInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -3588,6 +3940,8 @@ export type PropertyUncheckedCreateWithoutAmenitiesInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -3669,6 +4023,8 @@ export type PropertyCreateWithoutAvailabilityInput = {
   childPricing?: Prisma.PropertyChildPricingCreateNestedOneWithoutPropertyInput
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -3729,6 +4085,8 @@ export type PropertyUncheckedCreateWithoutAvailabilityInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedCreateNestedOneWithoutPropertyInput
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -3805,6 +4163,8 @@ export type PropertyUpdateWithoutAvailabilityInput = {
   childPricing?: Prisma.PropertyChildPricingUpdateOneWithoutPropertyNestedInput
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3865,6 +4225,272 @@ export type PropertyUncheckedUpdateWithoutAvailabilityInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedUpdateOneWithoutPropertyNestedInput
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyCreateWithoutDailyRatesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  notes?: string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1: string
+  addressLine2?: string | null
+  city: string
+  postalCode?: string | null
+  country?: string
+  latitude?: number | null
+  longitude?: number | null
+  type: $Enums.PropertyType
+  maxGuests?: number
+  bedroomCount?: number
+  bathrooms?: number
+  livingRoomSofaBeds?: number
+  childrenAllowed?: boolean
+  cribsAvailable?: boolean
+  sizeM2?: number | null
+  pricePerNight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: boolean
+  commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: $Enums.BookingMethod
+  cancellationFreeDays?: number
+  mistakeProtection?: boolean
+  cancellationPolicy?: $Enums.CancellationPolicy
+  breakfastIncluded?: boolean
+  parkingType?: $Enums.ParkingType
+  smokingAllowed?: boolean
+  partiesAllowed?: boolean
+  petsPolicy?: $Enums.PetPolicy
+  checkInFrom?: string | null
+  checkInTo?: string | null
+  checkOutFrom?: string | null
+  checkOutTo?: string | null
+  groupPricingEnabled?: boolean
+  oneGuestDiscountPct?: number
+  availabilityWindow?: number
+  longStayAllowed?: boolean
+  maxStayNights?: number | null
+  legalEntityType?: $Enums.LegalEntityType
+  ownerAlias?: string | null
+  status?: $Enums.ListingStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  host: Prisma.UserCreateNestedOneWithoutPropertiesInput
+  images?: Prisma.PropertyImageCreateNestedManyWithoutPropertyInput
+  amenities?: Prisma.AmenityCreateNestedManyWithoutPropertiesInput
+  languages?: Prisma.PropertyLanguageCreateNestedManyWithoutPropertyInput
+  bedrooms?: Prisma.PropertyBedroomCreateNestedManyWithoutPropertyInput
+  ratePlans?: Prisma.PropertyRatePlanCreateNestedManyWithoutPropertyInput
+  childPricing?: Prisma.PropertyChildPricingCreateNestedOneWithoutPropertyInput
+  owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
+  availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyUncheckedCreateWithoutDailyRatesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  notes?: string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1: string
+  addressLine2?: string | null
+  city: string
+  postalCode?: string | null
+  country?: string
+  latitude?: number | null
+  longitude?: number | null
+  type: $Enums.PropertyType
+  maxGuests?: number
+  bedroomCount?: number
+  bathrooms?: number
+  livingRoomSofaBeds?: number
+  childrenAllowed?: boolean
+  cribsAvailable?: boolean
+  sizeM2?: number | null
+  pricePerNight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: boolean
+  commission?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: $Enums.BookingMethod
+  cancellationFreeDays?: number
+  mistakeProtection?: boolean
+  cancellationPolicy?: $Enums.CancellationPolicy
+  breakfastIncluded?: boolean
+  parkingType?: $Enums.ParkingType
+  smokingAllowed?: boolean
+  partiesAllowed?: boolean
+  petsPolicy?: $Enums.PetPolicy
+  checkInFrom?: string | null
+  checkInTo?: string | null
+  checkOutFrom?: string | null
+  checkOutTo?: string | null
+  groupPricingEnabled?: boolean
+  oneGuestDiscountPct?: number
+  availabilityWindow?: number
+  longStayAllowed?: boolean
+  maxStayNights?: number | null
+  legalEntityType?: $Enums.LegalEntityType
+  ownerAlias?: string | null
+  status?: $Enums.ListingStatus
+  hostId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  images?: Prisma.PropertyImageUncheckedCreateNestedManyWithoutPropertyInput
+  amenities?: Prisma.AmenityUncheckedCreateNestedManyWithoutPropertiesInput
+  languages?: Prisma.PropertyLanguageUncheckedCreateNestedManyWithoutPropertyInput
+  bedrooms?: Prisma.PropertyBedroomUncheckedCreateNestedManyWithoutPropertyInput
+  ratePlans?: Prisma.PropertyRatePlanUncheckedCreateNestedManyWithoutPropertyInput
+  childPricing?: Prisma.PropertyChildPricingUncheckedCreateNestedOneWithoutPropertyInput
+  owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
+  availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutDailyRatesInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutDailyRatesInput, Prisma.PropertyUncheckedCreateWithoutDailyRatesInput>
+}
+
+export type PropertyUpsertWithoutDailyRatesInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutDailyRatesInput, Prisma.PropertyUncheckedUpdateWithoutDailyRatesInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutDailyRatesInput, Prisma.PropertyUncheckedCreateWithoutDailyRatesInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutDailyRatesInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutDailyRatesInput, Prisma.PropertyUncheckedUpdateWithoutDailyRatesInput>
+}
+
+export type PropertyUpdateWithoutDailyRatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  type?: Prisma.EnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType
+  maxGuests?: Prisma.IntFieldUpdateOperationsInput | number
+  bedroomCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  livingRoomSofaBeds?: Prisma.IntFieldUpdateOperationsInput | number
+  childrenAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cribsAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sizeM2?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pricePerNight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: Prisma.EnumBookingMethodFieldUpdateOperationsInput | $Enums.BookingMethod
+  cancellationFreeDays?: Prisma.IntFieldUpdateOperationsInput | number
+  mistakeProtection?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancellationPolicy?: Prisma.EnumCancellationPolicyFieldUpdateOperationsInput | $Enums.CancellationPolicy
+  breakfastIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  parkingType?: Prisma.EnumParkingTypeFieldUpdateOperationsInput | $Enums.ParkingType
+  smokingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  partiesAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  petsPolicy?: Prisma.EnumPetPolicyFieldUpdateOperationsInput | $Enums.PetPolicy
+  checkInFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkInTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupPricingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  oneGuestDiscountPct?: Prisma.IntFieldUpdateOperationsInput | number
+  availabilityWindow?: Prisma.IntFieldUpdateOperationsInput | number
+  longStayAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxStayNights?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  legalEntityType?: Prisma.EnumLegalEntityTypeFieldUpdateOperationsInput | $Enums.LegalEntityType
+  ownerAlias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumListingStatusFieldUpdateOperationsInput | $Enums.ListingStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  host?: Prisma.UserUpdateOneRequiredWithoutPropertiesNestedInput
+  images?: Prisma.PropertyImageUpdateManyWithoutPropertyNestedInput
+  amenities?: Prisma.AmenityUpdateManyWithoutPropertiesNestedInput
+  languages?: Prisma.PropertyLanguageUpdateManyWithoutPropertyNestedInput
+  bedrooms?: Prisma.PropertyBedroomUpdateManyWithoutPropertyNestedInput
+  ratePlans?: Prisma.PropertyRatePlanUpdateManyWithoutPropertyNestedInput
+  childPricing?: Prisma.PropertyChildPricingUpdateOneWithoutPropertyNestedInput
+  owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
+  availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutDailyRatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  faqs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  addressLine1?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  postalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  type?: Prisma.EnumPropertyTypeFieldUpdateOperationsInput | $Enums.PropertyType
+  maxGuests?: Prisma.IntFieldUpdateOperationsInput | number
+  bedroomCount?: Prisma.IntFieldUpdateOperationsInput | number
+  bathrooms?: Prisma.IntFieldUpdateOperationsInput | number
+  livingRoomSofaBeds?: Prisma.IntFieldUpdateOperationsInput | number
+  childrenAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cribsAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sizeM2?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pricePerNight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  cleaningFee?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  launchDiscountEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  commission?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  bookingMethod?: Prisma.EnumBookingMethodFieldUpdateOperationsInput | $Enums.BookingMethod
+  cancellationFreeDays?: Prisma.IntFieldUpdateOperationsInput | number
+  mistakeProtection?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancellationPolicy?: Prisma.EnumCancellationPolicyFieldUpdateOperationsInput | $Enums.CancellationPolicy
+  breakfastIncluded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  parkingType?: Prisma.EnumParkingTypeFieldUpdateOperationsInput | $Enums.ParkingType
+  smokingAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  partiesAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  petsPolicy?: Prisma.EnumPetPolicyFieldUpdateOperationsInput | $Enums.PetPolicy
+  checkInFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkInTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkOutTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupPricingEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  oneGuestDiscountPct?: Prisma.IntFieldUpdateOperationsInput | number
+  availabilityWindow?: Prisma.IntFieldUpdateOperationsInput | number
+  longStayAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  maxStayNights?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  legalEntityType?: Prisma.EnumLegalEntityTypeFieldUpdateOperationsInput | $Enums.LegalEntityType
+  ownerAlias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumListingStatusFieldUpdateOperationsInput | $Enums.ListingStatus
+  hostId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.PropertyImageUncheckedUpdateManyWithoutPropertyNestedInput
+  amenities?: Prisma.AmenityUncheckedUpdateManyWithoutPropertiesNestedInput
+  languages?: Prisma.PropertyLanguageUncheckedUpdateManyWithoutPropertyNestedInput
+  bedrooms?: Prisma.PropertyBedroomUncheckedUpdateManyWithoutPropertyNestedInput
+  ratePlans?: Prisma.PropertyRatePlanUncheckedUpdateManyWithoutPropertyNestedInput
+  childPricing?: Prisma.PropertyChildPricingUncheckedUpdateOneWithoutPropertyNestedInput
+  owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
+  availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -3925,6 +4551,8 @@ export type PropertyCreateWithoutBookingsInput = {
   childPricing?: Prisma.PropertyChildPricingCreateNestedOneWithoutPropertyInput
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutPropertyInput
 }
 
@@ -3985,6 +4613,8 @@ export type PropertyUncheckedCreateWithoutBookingsInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedCreateNestedOneWithoutPropertyInput
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutPropertyInput
 }
 
@@ -4061,6 +4691,8 @@ export type PropertyUpdateWithoutBookingsInput = {
   childPricing?: Prisma.PropertyChildPricingUpdateOneWithoutPropertyNestedInput
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4121,6 +4753,8 @@ export type PropertyUncheckedUpdateWithoutBookingsInput = {
   childPricing?: Prisma.PropertyChildPricingUncheckedUpdateOneWithoutPropertyNestedInput
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4182,6 +4816,8 @@ export type PropertyCreateWithoutConversationsInput = {
   owners?: Prisma.PropertyOwnerCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutConversationsInput = {
@@ -4242,6 +4878,8 @@ export type PropertyUncheckedCreateWithoutConversationsInput = {
   owners?: Prisma.PropertyOwnerUncheckedCreateNestedManyWithoutPropertyInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutPropertyInput
   availability?: Prisma.PropertyAvailabilityUncheckedCreateNestedManyWithoutPropertyInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedCreateNestedManyWithoutPropertyInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutConversationsInput = {
@@ -4318,6 +4956,8 @@ export type PropertyUpdateWithoutConversationsInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutConversationsInput = {
@@ -4378,6 +5018,8 @@ export type PropertyUncheckedUpdateWithoutConversationsInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyHostInput = {
@@ -4487,6 +5129,8 @@ export type PropertyUpdateWithoutHostInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4547,6 +5191,8 @@ export type PropertyUncheckedUpdateWithoutHostInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4657,6 +5303,8 @@ export type PropertyUpdateWithoutAmenitiesInput = {
   owners?: Prisma.PropertyOwnerUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4717,6 +5365,8 @@ export type PropertyUncheckedUpdateWithoutAmenitiesInput = {
   owners?: Prisma.PropertyOwnerUncheckedUpdateManyWithoutPropertyNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutPropertyNestedInput
   availability?: Prisma.PropertyAvailabilityUncheckedUpdateManyWithoutPropertyNestedInput
+  dailyRates?: Prisma.PropertyDailyRateUncheckedUpdateManyWithoutPropertyNestedInput
+  changeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutPropertyNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutPropertyNestedInput
 }
 
@@ -4785,6 +5435,8 @@ export type PropertyCountOutputType = {
   owners: number
   bookings: number
   availability: number
+  dailyRates: number
+  changeRequests: number
   conversations: number
 }
 
@@ -4797,6 +5449,8 @@ export type PropertyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   owners?: boolean | PropertyCountOutputTypeCountOwnersArgs
   bookings?: boolean | PropertyCountOutputTypeCountBookingsArgs
   availability?: boolean | PropertyCountOutputTypeCountAvailabilityArgs
+  dailyRates?: boolean | PropertyCountOutputTypeCountDailyRatesArgs
+  changeRequests?: boolean | PropertyCountOutputTypeCountChangeRequestsArgs
   conversations?: boolean | PropertyCountOutputTypeCountConversationsArgs
 }
 
@@ -4869,6 +5523,20 @@ export type PropertyCountOutputTypeCountAvailabilityArgs<ExtArgs extends runtime
 /**
  * PropertyCountOutputType without action
  */
+export type PropertyCountOutputTypeCountDailyRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyDailyRateWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
+export type PropertyCountOutputTypeCountChangeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyChangeRequestWhereInput
+}
+
+/**
+ * PropertyCountOutputType without action
+ */
 export type PropertyCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ConversationWhereInput
 }
@@ -4933,6 +5601,8 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   owners?: boolean | Prisma.Property$ownersArgs<ExtArgs>
   bookings?: boolean | Prisma.Property$bookingsArgs<ExtArgs>
   availability?: boolean | Prisma.Property$availabilityArgs<ExtArgs>
+  dailyRates?: boolean | Prisma.Property$dailyRatesArgs<ExtArgs>
+  changeRequests?: boolean | Prisma.Property$changeRequestsArgs<ExtArgs>
   conversations?: boolean | Prisma.Property$conversationsArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
@@ -5104,6 +5774,8 @@ export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   owners?: boolean | Prisma.Property$ownersArgs<ExtArgs>
   bookings?: boolean | Prisma.Property$bookingsArgs<ExtArgs>
   availability?: boolean | Prisma.Property$availabilityArgs<ExtArgs>
+  dailyRates?: boolean | Prisma.Property$dailyRatesArgs<ExtArgs>
+  changeRequests?: boolean | Prisma.Property$changeRequestsArgs<ExtArgs>
   conversations?: boolean | Prisma.Property$conversationsArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -5127,6 +5799,8 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     owners: Prisma.$PropertyOwnerPayload<ExtArgs>[]
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     availability: Prisma.$PropertyAvailabilityPayload<ExtArgs>[]
+    dailyRates: Prisma.$PropertyDailyRatePayload<ExtArgs>[]
+    changeRequests: Prisma.$PropertyChangeRequestPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -5582,6 +6256,8 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   owners<T extends Prisma.Property$ownersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$ownersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyOwnerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bookings<T extends Prisma.Property$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   availability<T extends Prisma.Property$availabilityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$availabilityArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyAvailabilityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dailyRates<T extends Prisma.Property$dailyRatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$dailyRatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyDailyRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  changeRequests<T extends Prisma.Property$changeRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$changeRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Property$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -6269,6 +6945,54 @@ export type Property$availabilityArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.PropertyAvailabilityScalarFieldEnum | Prisma.PropertyAvailabilityScalarFieldEnum[]
+}
+
+/**
+ * Property.dailyRates
+ */
+export type Property$dailyRatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyDailyRate
+   */
+  select?: Prisma.PropertyDailyRateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyDailyRate
+   */
+  omit?: Prisma.PropertyDailyRateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyDailyRateInclude<ExtArgs> | null
+  where?: Prisma.PropertyDailyRateWhereInput
+  orderBy?: Prisma.PropertyDailyRateOrderByWithRelationInput | Prisma.PropertyDailyRateOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyDailyRateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyDailyRateScalarFieldEnum | Prisma.PropertyDailyRateScalarFieldEnum[]
+}
+
+/**
+ * Property.changeRequests
+ */
+export type Property$changeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyChangeRequest
+   */
+  select?: Prisma.PropertyChangeRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyChangeRequest
+   */
+  omit?: Prisma.PropertyChangeRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyChangeRequestInclude<ExtArgs> | null
+  where?: Prisma.PropertyChangeRequestWhereInput
+  orderBy?: Prisma.PropertyChangeRequestOrderByWithRelationInput | Prisma.PropertyChangeRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyChangeRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyChangeRequestScalarFieldEnum | Prisma.PropertyChangeRequestScalarFieldEnum[]
 }
 
 /**

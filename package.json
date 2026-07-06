@@ -4,6 +4,7 @@
   "scripts": {
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+    "dev:failover-php": "php -S localhost:8000 -t backend-php/public backend-php/router.php",
     "dev:admin": "npm --prefix admin-portal run dev",
     "dev:admin:clean": "npm --prefix admin-portal run dev:clean",
     "build:frontend": "npm --prefix frontend run build",

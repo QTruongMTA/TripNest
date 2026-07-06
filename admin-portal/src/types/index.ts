@@ -67,13 +67,51 @@ export interface OperatorTask {
 
 export interface Dispute {
   id: string;
+  bookingId?: string | null;
+  bookingCode?: string;
   subject: string;
   description: string;
   status: "OPEN" | "INVESTIGATING" | "RESOLVED" | "ESCALATED";
+  reporter?: string;
+  category?: string;
+  severity?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | string;
+  requestedOutcome?: string | null;
+  decision?: string | null;
   resolution?: string;
+  refundAdjustment?: number;
+  payoutAdjustment?: number;
   createdAt: string;
-  host: { email: string };
-  guest: { email: string };
-  resolver?: { email: string };
-  province?: { name: string };
+  updatedAt?: string;
+  resolvedAt?: string | null;
+  escalatedAt?: string | null;
+  host: { id?: string; email: string; name?: string | null; displayName?: string | null; phone?: string | null };
+  guest: { id?: string; email: string; name?: string | null; displayName?: string | null; phone?: string | null };
+  resolver?: { id?: string; email: string; name?: string | null } | null;
+  province?: { id?: string; name: string } | null;
+  operatorNotes?: Array<Record<string, unknown>>;
+  sla?: { ageHours: number; dueAt: string; overdue: boolean; label: string };
+  booking?: {
+    id: string;
+    code: string;
+    status: string;
+    statusLabel: string;
+    checkIn: string | null;
+    checkOut: string | null;
+    guests: number;
+    totalPrice: number;
+    paymentStatus: string;
+    paymentStatusLabel: string;
+    paymentMethod: string | null;
+    paymentMethodLabel: string;
+    paidAmount: number;
+    property: { id: string; title: string; city: string; pricePerNight: number } | null;
+  } | null;
+  financialImpact?: {
+    grossAmount: number;
+    settlementHold: boolean;
+    refundAdjustment: number;
+    payoutAdjustment: number;
+    operatorDecisionRequired: boolean;
+    suggestion: string;
+  };
 }

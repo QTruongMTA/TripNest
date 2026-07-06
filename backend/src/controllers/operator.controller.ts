@@ -398,15 +398,61 @@ export const operatorController = {
     } else {
       provinceIds = await operatorService.getOperatorProvinceIds(req.user!.id);
     }
-    const status = req.query.status as string | undefined;
-    const disputes = await operatorService.listDisputes(provinceIds, status);
+    const status = typeof req.query.status === "string" ? req.query.status : undefined;
+    const category = typeof req.query.category === "string" ? req.query.category : undefined;
+    const severity = typeof req.query.severity === "string" ? req.query.severity : undefined;
+    const sort = typeof req.query.sort === "string" ? req.query.sort : undefined;
+    const filters = {
+      ...(status ? { status } : {}),
+      ...(category ? { category } : {}),
+      ...(severity ? { severity } : {}),
+      ...(sort ? { sort } : {}),
+    };
+    const disputes = await operatorService.listDisputes(provinceIds, filters);
     return res.json({ data: disputes });
   },
 
+  async triageDispute(req: Request, res: Response) {
+    const { status, note } = req.body ?? {};
+    if (status !== "OPEN" && status !== "INVESTIGATING" && status !== "ESCALATED") {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "valid status is required" } });
+    }
+    try {
+      const dispute = await operatorService.triageDispute(
+        req.params.id as string,
+        req.user!.id,
+        status,
+        typeof note === "string" ? note : undefined
+      );
+      return res.json({ data: dispute });
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message === "DISPUTE_NOT_FOUND") {
+        return res.status(404).json({ error: { code: "DISPUTE_NOT_FOUND", message: "Dispute not found" } });
+      }
+      throw e;
+    }
+  },
+
   async resolveDispute(req: Request, res: Response) {
-    const { resolution, escalate } = req.body ?? {};
-    if (!resolution) return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "resolution required" } });
-    const dispute = await operatorService.resolveDispute(req.params.id as string, req.user!.id, resolution, escalate);
-    return res.json({ data: dispute });
+    const { resolution, decision, refundAdjustment, payoutAdjustment, escalate, note } = req.body ?? {};
+    if (typeof resolution !== "string" || resolution.trim().length < 5) {
+      return res.status(400).json({ error: { code: "INVALID_PAYLOAD", message: "resolution required" } });
+    }
+    try {
+      const dispute = await operatorService.resolveDispute(req.params.id as string, req.user!.id, {
+        resolution,
+        ...(typeof decision === "string" && decision ? { decision } : {}),
+        ...(refundAdjustment !== undefined ? { refundAdjustment: Number(refundAdjustment) } : {}),
+        ...(payoutAdjustment !== undefined ? { payoutAdjustment: Number(payoutAdjustment) } : {}),
+        escalate: Boolean(escalate),
+        ...(typeof note === "string" ? { note } : {}),
+      });
+      return res.json({ data: dispute });
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message === "DISPUTE_NOT_FOUND") {
+        return res.status(404).json({ error: { code: "DISPUTE_NOT_FOUND", message: "Dispute not found" } });
+      }
+      throw e;
+    }
   },
 };

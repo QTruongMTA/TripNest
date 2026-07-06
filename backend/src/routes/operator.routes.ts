@@ -31,6 +31,7 @@ router.post("/tasks", requireRole(...provinceOnly), operatorController.createTas
 router.patch("/tasks/:id", operatorController.updateTask);
 
 router.get("/disputes", operatorController.disputes);
+router.patch("/disputes/:id/triage", requireRole(...provinceOnly), operatorController.triageDispute);
 router.patch("/disputes/:id/resolve", requireRole(...provinceOnly), operatorController.resolveDispute);
 
 export { router as operatorRouter };

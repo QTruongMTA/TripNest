@@ -46,9 +46,10 @@ function getNights(checkIn?: string, checkOut?: string) {
 export default async function PropertiesPage({ searchParams }: { searchParams: PropertiesSearchParams }) {
   const properties = await getProperties(searchParams);
   const nights = getNights(searchParams.checkIn, searchParams.checkOut);
+  const hasNoProperties = properties.data.length === 0;
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-10">
+    <section className={`mx-auto max-w-6xl px-6 pt-10 ${hasNoProperties ? "pb-0" : "pb-10"}`}>
       <div className="mb-6 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-emerald-700">TripNest</p>

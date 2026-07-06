@@ -23,7 +23,10 @@ export default function OperatorReportsPage() {
     setLoading(true);
     const disputeStatus = status === "OPEN" ? "OPEN" : "RESOLVED";
     api.get(`/operator/disputes?status=${disputeStatus}`)
-      .then((response) => setItems(response.data.data ?? []))
+      .then((response) => {
+        const payload = response.data.data ?? [];
+        setItems(Array.isArray(payload) ? payload : payload.cases ?? []);
+      })
       .finally(() => setLoading(false));
   }, [status]);
 

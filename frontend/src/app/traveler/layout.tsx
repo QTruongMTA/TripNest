@@ -1,12 +1,14 @@
-import { TravelerNotificationBell } from "@/components/shared/TravelerNotificationBell";
+import { Footer } from "@/components/shared/Footer";
+import { Header } from "@/components/shared/Header";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-5 flex justify-end">
-        <TravelerNotificationBell />
+    <div className="min-h-screen bg-slate-50">
+      <div className="bg-emerald-950">
+        <Header overlay={false} />
       </div>
-      {children}
-    </section>
+      <main>{children}</main>
+      <Footer />
+    </div>
   );
 }

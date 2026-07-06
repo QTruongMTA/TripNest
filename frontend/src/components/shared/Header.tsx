@@ -10,7 +10,7 @@ const navItems = [
   { label: "Trang chủ", href: "/" },
   { label: "Nơi ở gần đây", href: "/properties" },
   { label: "Tiết kiệm", href: "#uu-dai" },
-  { label: "Chính sách", href: "/about" },
+  { label: "Chính sách", href: "/policies" },
 ];
 
 type NotificationItem = {

@@ -112,6 +112,16 @@ function formatCurrency(value: number) {
   return `${value.toLocaleString("vi-VN")} ₫`;
 }
 
+function parseMoneyInput(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function formatMoneyInput(value: string) {
+  const digits = parseMoneyInput(value);
+  if (!digits) return "";
+  return Number(digits).toLocaleString("vi-VN");
+}
+
 function compressImageToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const imageUrl = URL.createObjectURL(file);
@@ -1400,7 +1410,7 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
 
   function submitSetup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("Đã lưu thiết lập chỗ nghỉ.");
+    setStatus("Đã lưu thay đổi");
   }
 
   async function submitSensitiveChange() {
@@ -1431,7 +1441,7 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
       setApprovalOpen(false);
       setApprovalReason("");
       setApprovalFiles([]);
-      setStatus("Đã gửi yêu cầu duyệt. Dữ liệu sẽ được cập nhật sau khi operator xác nhận.");
+      setStatus("Đã lưu thay đổi");
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
       setStatus(message ?? "Không thể gửi yêu cầu duyệt.");
@@ -1457,6 +1467,15 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
           services: {
             breakfastIncluded: csvToList(draft.services).includes("Bữa sáng"),
             parkingType: serviceParkingType(draft.services),
+          },
+          details: {
+            livingRoomSofaBeds: Number(draft.livingRooms) || 0,
+            bedroomCount: Number(draft.bedroomCount) || 0,
+            bathrooms: Number(draft.bathrooms) || 1,
+            maxGuests: Number(draft.maxGuests) || 1,
+            childrenAllowed: draft.childrenAllowed,
+            cribsAvailable: draft.cribsAvailable,
+            sizeM2: draft.sizeM2 ? Number(draft.sizeM2) : null,
           },
           rules: {
             smokingAllowed: draft.smokingAllowed,
@@ -1504,7 +1523,7 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
             <div className="grid gap-4">
               <Field label="Tên chỗ nghỉ" value={draft.title} onChange={(value) => updateDraft("title", value)} />
               <Field label="Vị trí" value={draft.location} onChange={(value) => updateDraft("location", value)} />
-              <Field label="Mức giá gốc" value={draft.basePrice} onChange={(value) => updateDraft("basePrice", value.replace(/\D/g, ""))} suffix="VND" />
+              <Field label="Mức giá gốc" value={formatMoneyInput(draft.basePrice)} onChange={(value) => updateDraft("basePrice", parseMoneyInput(value))} suffix="VND" />
             </div>
 
             {approvalOpen ? (
@@ -1569,14 +1588,24 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
       </section>
 
       <section className="rounded-lg border border-emerald-900/15 bg-white p-5 shadow-sm">
-        <h3 className="font-semibold text-emerald-950">Chi tiết chỗ nghỉ</h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="font-semibold text-emerald-950">Chi tiết chỗ nghỉ</h3>
+          <button
+            type="button"
+            onClick={() => saveOperationalSettings("Đã cập nhật chi tiết chỗ nghỉ.")}
+            disabled={settingsSaving}
+            className="rounded-md bg-emerald-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-950 disabled:cursor-not-allowed disabled:bg-emerald-900/60"
+          >
+            {settingsSaving ? "Đang lưu..." : "Lưu thay đổi"}
+          </button>
+        </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Stepper label="Phòng khách" value={Number(draft.livingRooms) || 0} min={0} onChange={(value) => updateDraft("livingRooms", String(value))} />
           <Stepper label="Phòng ngủ" value={Number(draft.bedroomCount) || 0} min={0} onChange={(value) => updateDraft("bedroomCount", String(value))} />
           <Stepper label="Phòng tắm" value={Number(draft.bathrooms) || 0} min={1} onChange={(value) => updateDraft("bathrooms", String(value))} />
           <Stepper label="Số khách" value={Number(draft.maxGuests) || 1} min={1} onChange={(value) => updateDraft("maxGuests", String(value))} />
           <div className="xl:col-span-2">
-            <Field label="Diện tích" value={draft.sizeM2} onChange={(value) => updateDraft("sizeM2", value.replace(/\D/g, ""))} suffix="m²" />
+            <InlineField label="Diện tích" value={draft.sizeM2} onChange={(value) => updateDraft("sizeM2", value.replace(/\D/g, ""))} suffix="m²" />
           </div>
           <Toggle label="Đón tiếp trẻ em" checked={draft.childrenAllowed} onChange={(value) => updateDraft("childrenAllowed", value)} />
           <Toggle label="Có nôi/cũi" checked={draft.cribsAvailable} onChange={(value) => updateDraft("cribsAvailable", value)} />
@@ -1626,7 +1655,7 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <Toggle label="Cho phép hút thuốc" checked={draft.smokingAllowed} onChange={(value) => updateDraft("smokingAllowed", value)} />
           <Toggle label="Cho phép tiệc/sự kiện" checked={draft.partiesAllowed} onChange={(value) => updateDraft("partiesAllowed", value)} />
-          <SelectField label="Vật nuôi" value={draft.petsPolicy} options={["Cho phép", "Theo yêu cầu", "Không cho phép"]} onChange={(value) => updateDraft("petsPolicy", value)} />
+          <InlineSelectField label="Vật nuôi" value={draft.petsPolicy} options={["Cho phép", "Theo yêu cầu", "Không cho phép"]} onChange={(value) => updateDraft("petsPolicy", value)} />
         </div>
         <div className="mt-6 rounded-lg border border-emerald-900/15 p-5">
           <TimeRangeSelect title="Nhận phòng" from={draft.checkInFrom} to={draft.checkInTo} onFrom={(value) => updateDraft("checkInFrom", value)} onTo={(value) => updateDraft("checkInTo", value)} />
@@ -1636,7 +1665,7 @@ function PropertySetupPanel({ property }: { property: HostProperty }) {
         </div>
       </section>
 
-      {status ? <p className="rounded-md bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{status}</p> : null}
+      {status ? <p role="status" className="rounded-md bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{status}</p> : null}
     </form>
   );
 }
@@ -1650,7 +1679,8 @@ function PricingCalendarPanel({ property }: { property: HostProperty }) {
   const [rateStatus, setRateStatus] = useState("");
   const minPrice = Math.round(property.pricePerNight * 0.7);
   const maxPrice = Math.round(property.pricePerNight * 1.3);
-  const selectedPrice = customPrices[selectedDate] ?? property.pricePerNight;
+  const previewPrice = Number(priceInput);
+  const selectedPrice = Number.isFinite(previewPrice) && previewPrice > 0 ? previewPrice : customPrices[selectedDate] ?? property.pricePerNight;
   const commission = Math.round(selectedPrice * 0.15);
   const hostRevenue = selectedPrice - commission;
   const calendarDays = useMemo(() => buildCalendarDays(monthDate), [monthDate]);
@@ -1673,13 +1703,16 @@ function PricingCalendarPanel({ property }: { property: HostProperty }) {
           ...Object.fromEntries(rates.map((rate) => [rate.date, rate.pricePerNight])),
         }));
       })
-      .catch(() => setRateStatus("Không thể tải giá theo ngày."));
+      .catch(() => undefined);
   }, [property.id, rangeEnd, rangeStart]);
 
   function saveDailyPrice() {
     const nextPrice = Number(priceInput);
-    if (!Number.isFinite(nextPrice)) return;
-    const boundedPrice = Math.min(maxPrice, Math.max(minPrice, nextPrice));
+    if (!Number.isFinite(nextPrice) || nextPrice < minPrice || nextPrice > maxPrice) {
+      setRateStatus(`Thay đổi mức giá không thành công. Vui lòng nhập trong khoảng ${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}.`);
+      return;
+    }
+
     const token = getAccessToken();
     if (!token) {
       setRateStatus("Vui lòng đăng nhập lại để lưu giá.");
@@ -1688,16 +1721,21 @@ function PricingCalendarPanel({ property }: { property: HostProperty }) {
 
     api.patch(
       `/host/properties/${property.id}/daily-rates`,
-      { rates: [{ date: selectedDate, pricePerNight: boundedPrice }] },
+      { rates: [{ date: selectedDate, pricePerNight: nextPrice }] },
       { headers: { Authorization: `Bearer ${token}` } }
     )
       .then(() => {
-        setCustomPrices((current) => ({ ...current, [selectedDate]: boundedPrice }));
-        setPriceInput(String(boundedPrice));
-        setRateStatus("Đã lưu giá. Giá mới chỉ áp dụng cho đơn đặt phòng tạo sau thời điểm này.");
+        setCustomPrices((current) => ({ ...current, [selectedDate]: nextPrice }));
+        setPriceInput(String(nextPrice));
+        setRateStatus("Thay đổi mức giá thành công. Mức giá chỉ áp dụng cho đơn đặt phòng được tạo sau khi lưu giá.");
       })
       .catch((error) => {
-        setRateStatus(error.response?.data?.error?.message ?? "Không thể lưu giá theo ngày.");
+        const code = error.response?.data?.error?.code;
+        setRateStatus(
+          code === "DAILY_RATE_OUT_OF_RANGE"
+            ? `Thay đổi mức giá không thành công. Vui lòng nhập trong khoảng ${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}.`
+            : "Thay đổi mức giá không thành công."
+        );
       });
   }
 
@@ -1770,16 +1808,13 @@ function PricingCalendarPanel({ property }: { property: HostProperty }) {
             <div className="mt-2 flex overflow-hidden rounded-md border border-slate-300 bg-white focus-within:border-emerald-800">
               <span className="border-r border-slate-200 px-3 py-2 text-sm font-semibold text-slate-500">VND</span>
               <input
-                value={priceInput}
-                onChange={(event) => setPriceInput(event.target.value.replace(/\D/g, ""))}
+                value={formatMoneyInput(priceInput)}
+                onChange={(event) => setPriceInput(parseMoneyInput(event.target.value))}
                 inputMode="numeric"
                 className="min-w-0 flex-1 px-3 py-2 text-sm outline-none"
               />
             </div>
           </label>
-          <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-            Giá từng ngày chỉ được tăng hoặc giảm tối đa 30% so với mức giá gốc.
-          </p>
           <div className="mt-4 grid gap-2 text-sm">
             <SummaryLine label="TripNest 15%" value={commission} tone="fee" />
             <SummaryLine label="Doanh thu sau hoa hồng" value={hostRevenue} tone="revenue" />
@@ -1809,11 +1844,36 @@ function Field({ label, value, onChange, suffix }: { label: string; value: strin
   );
 }
 
+function InlineField({ label, value, onChange, suffix }: { label: string; value: string; onChange: (value: string) => void; suffix?: string }) {
+  return (
+    <label className="flex min-h-[86px] overflow-hidden rounded-md border border-emerald-900/15 bg-white focus-within:border-emerald-800">
+      <span className="flex w-40 shrink-0 items-center border-r border-emerald-900/15 px-4 text-sm font-semibold text-slate-700">{label}</span>
+      <div className="flex min-w-0 flex-1 items-center">
+        <input value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 px-4 py-3 text-sm outline-none" />
+        {suffix ? <span className="border-l border-slate-200 px-4 py-3 text-sm font-semibold text-slate-500">{suffix}</span> : null}
+      </div>
+    </label>
+  );
+}
+
 function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
   return (
     <label className="block">
       <span className="text-sm font-semibold text-slate-700">{label}</span>
       <select value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-md border border-emerald-900/20 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-800">
+        {options.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function InlineSelectField({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  return (
+    <label className="flex min-h-[66px] overflow-hidden rounded-md border border-emerald-900/15 bg-white focus-within:border-emerald-800">
+      <span className="flex w-32 shrink-0 items-center border-r border-emerald-900/15 px-4 text-sm font-semibold text-slate-700">{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="min-w-0 flex-1 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none">
         {options.map((option) => (
           <option key={option} value={option}>{option}</option>
         ))}
@@ -2004,7 +2064,7 @@ function serviceParkingType(value: string) {
 
 function getPropertyMapUrl(address: string) {
   const query = encodeURIComponent(address || "Việt Nam");
-  return `https://www.openstreetmap.org/export/embed.html?bbox=102.14441,8.17907,109.46917,23.39339&layer=mapnik&marker=&q=${query}`;
+  return `https://www.google.com/maps?q=${query}&output=embed`;
 }
 
 function toDateKey(date: Date) {
@@ -2028,18 +2088,289 @@ function buildCalendarDays(anchor: Date) {
   });
 }
 
+type HostVoucher = {
+  id: string;
+  code: string;
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+  discountValue: number;
+  quantity: number;
+  usedCount: number;
+  expiresAt: string;
+  voucherType: string;
+  conditions: Array<"MIN_ORDER_500K" | "MIN_GUESTS_5">;
+  status: "ACTIVE" | "FULL" | "EXPIRED" | "INACTIVE";
+};
+
+type VoucherDraft = {
+  code: string;
+  expiresAt: string;
+  quantity: string;
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+  discountValue: string;
+  voucherType: string;
+  customType: string;
+  conditions: Array<"MIN_ORDER_500K" | "MIN_GUESTS_5">;
+};
+
+const voucherTypeOptions = ["Giảm giá Ngày lễ", "Khai trương", "Khách hàng thân thiết", "Khác"];
+const voucherConditionOptions: Array<{ value: "MIN_ORDER_500K" | "MIN_GUESTS_5"; label: string }> = [
+  { value: "MIN_ORDER_500K", label: "Giá trị hoá đơn từ 500.000đ trở lên" },
+  { value: "MIN_GUESTS_5", label: "Đặt phòng từ 5 người trở lên" },
+];
+
+function generateVoucherCode() {
+  const letters = Array.from({ length: 4 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join("");
+  const digits = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join("");
+  return `${letters}${digits}`;
+}
+
+function defaultVoucherDraft(): VoucherDraft {
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+  return {
+    code: generateVoucherCode(),
+    expiresAt: expiresAt.toISOString().slice(0, 10),
+    quantity: "100",
+    discountType: "PERCENTAGE",
+    discountValue: "10",
+    voucherType: "Giảm giá Ngày lễ",
+    customType: "",
+    conditions: [],
+  };
+}
+
+function voucherConditionLabel(value: "MIN_ORDER_500K" | "MIN_GUESTS_5") {
+  return voucherConditionOptions.find((item) => item.value === value)?.label ?? value;
+}
+
+function voucherDiscountLabel(voucher: Pick<HostVoucher, "discountType" | "discountValue">) {
+  return voucher.discountType === "PERCENTAGE" ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue);
+}
+
 function PromotionsTab({ property }: { property: HostProperty }) {
+  const [vouchers, setVouchers] = useState<HostVoucher[]>([]);
+  const [draft, setDraft] = useState<VoucherDraft>(() => defaultVoucherDraft());
+  const [boxOpen, setBoxOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<HostVoucher | null>(null);
+  const [toast, setToast] = useState("");
+
+  function showToast(message: string) {
+    setToast(message);
+    window.setTimeout(() => {
+      setToast((current) => current === message ? "" : current);
+    }, 3200);
+  }
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (!token) return;
+    api.get(`/host/properties/${property.id}/vouchers`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((response) => setVouchers(response.data.data ?? []))
+      .catch(() => showToast("Không thể tải danh sách voucher."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [property.id]);
+
+  function updateDraft(field: keyof VoucherDraft, value: string | VoucherDraft["conditions"]) {
+    setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function toggleCondition(condition: "MIN_ORDER_500K" | "MIN_GUESTS_5") {
+    setDraft((current) => ({
+      ...current,
+      conditions: current.conditions.includes(condition)
+        ? current.conditions.filter((item) => item !== condition)
+        : [...current.conditions, condition],
+    }));
+  }
+
+  async function createVoucher() {
+    const token = getAccessToken();
+    if (!token) {
+      showToast("Vui lòng đăng nhập lại để tạo voucher.");
+      return;
+    }
+
+    const voucherType = draft.voucherType === "Khác" ? draft.customType.trim() || "Khác" : draft.voucherType;
+    try {
+      const response = await api.post(
+        `/host/properties/${property.id}/vouchers`,
+        {
+          code: draft.code,
+          expiresAt: draft.expiresAt,
+          quantity: Number(draft.quantity),
+          discountType: draft.discountType,
+          discountValue: Number(draft.discountValue),
+          voucherType,
+          conditions: draft.conditions,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setVouchers((current) => [response.data.data, ...current]);
+      setDraft(defaultVoucherDraft());
+      setBoxOpen(false);
+      showToast("Đã tạo voucher khuyến mãi.");
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      showToast(message ?? "Không thể tạo voucher.");
+    }
+  }
+
+  async function deleteVoucher(voucher: HostVoucher) {
+    const token = getAccessToken();
+    if (!token) return;
+    await api.delete(`/host/properties/${property.id}/vouchers/${voucher.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setVouchers((current) => current.filter((item) => item.id !== voucher.id));
+    setDeleteTarget(null);
+    showToast("Đã xoá voucher.");
+  }
+
+  async function copyCode(code: string) {
+    await navigator.clipboard.writeText(code);
+    showToast(`Đã sao chép mã ${code}.`);
+  }
+
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5">
-      <h2 className="text-xl font-semibold text-slate-950">Chương trình khuyến mãi</h2>
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
-        {["Ưu đãi đặt sớm", "Ưu đãi phút chót", "Giảm giá theo tuần"].map((item) => (
-          <div key={item} className="rounded-lg border border-slate-200 p-4">
-            <p className="font-semibold text-slate-950">{item}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Khung thiết lập cho {property.title}, phần xử lý chi tiết sẽ nối sau.</p>
-          </div>
-        ))}
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-slate-950">Voucher khuyến mãi</h2>
+          <p className="mt-1 text-sm text-slate-500">{property.title}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setDraft(defaultVoucherDraft());
+            setBoxOpen(true);
+          }}
+          className="rounded-md bg-emerald-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-950"
+        >
+          Thêm voucher
+        </button>
       </div>
+
+      {boxOpen ? (
+        <div className="mt-5 rounded-lg border border-emerald-900/15 bg-emerald-50/40 p-5">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Mã voucher</span>
+              <input
+                value={draft.code}
+                onChange={(event) => updateDraft("code", event.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase())}
+                className="mt-2 w-full rounded-md border border-emerald-900/20 bg-white px-3 py-2 text-sm font-semibold tracking-[0.16em] outline-none focus:border-emerald-800"
+              />
+            </label>
+            <button type="button" onClick={() => updateDraft("code", generateVoucherCode())} className="self-end rounded-md border border-emerald-900/25 px-4 py-2 text-sm font-semibold text-emerald-950 hover:bg-white">
+              Xuất mã tự động
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Hết hạn voucher</span>
+              <input type="date" value={draft.expiresAt} onChange={(event) => updateDraft("expiresAt", event.target.value)} className="mt-2 w-full rounded-md border border-emerald-900/20 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-800" />
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Số lượng</span>
+              <div className="mt-2 grid grid-cols-[42px_1fr_42px] overflow-hidden rounded-md border border-emerald-900/20 bg-white">
+                <button type="button" onClick={() => updateDraft("quantity", String(Math.max(1, Number(draft.quantity) - 10)))} className="border-r border-slate-200 font-semibold text-emerald-900">-</button>
+                <input value={draft.quantity} onChange={(event) => updateDraft("quantity", event.target.value.replace(/\D/g, ""))} className="min-w-0 px-3 py-2 text-center text-sm outline-none" inputMode="numeric" />
+                <button type="button" onClick={() => updateDraft("quantity", String((Number(draft.quantity) || 0) + 10))} className="border-l border-slate-200 font-semibold text-emerald-900">+</button>
+              </div>
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Giá trị giảm</span>
+              <div className="mt-2 grid grid-cols-[1fr_110px] overflow-hidden rounded-md border border-emerald-900/20 bg-white">
+                <input value={draft.discountType === "FIXED_AMOUNT" ? formatMoneyInput(draft.discountValue) : draft.discountValue} onChange={(event) => updateDraft("discountValue", draft.discountType === "FIXED_AMOUNT" ? parseMoneyInput(event.target.value) : event.target.value.replace(/\D/g, ""))} className="min-w-0 px-3 py-2 text-sm outline-none" inputMode="numeric" />
+                <select value={draft.discountType} onChange={(event) => updateDraft("discountType", event.target.value as VoucherDraft["discountType"])} className="border-l border-slate-200 bg-white px-2 py-2 text-sm outline-none">
+                  <option value="PERCENTAGE">%</option>
+                  <option value="FIXED_AMOUNT">VND</option>
+                </select>
+              </div>
+            </label>
+            <label className="block">
+              <span className="text-sm font-semibold text-slate-700">Loại voucher</span>
+              <select value={draft.voucherType} onChange={(event) => updateDraft("voucherType", event.target.value)} className="mt-2 w-full rounded-md border border-emerald-900/20 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-800">
+                {voucherTypeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+          </div>
+
+          {draft.voucherType === "Khác" ? (
+            <input value={draft.customType} onChange={(event) => updateDraft("customType", event.target.value)} placeholder="Nhập loại voucher" className="mt-4 w-full rounded-md border border-emerald-900/20 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-800" />
+          ) : null}
+
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-slate-700">Điều kiện</p>
+            <div className="mt-2 grid gap-2 md:grid-cols-2">
+              {voucherConditionOptions.map((condition) => (
+                <label key={condition.value} className="flex items-center gap-3 rounded-md border border-emerald-900/15 bg-white px-3 py-2 text-sm text-slate-800">
+                  <input type="checkbox" checked={draft.conditions.includes(condition.value)} onChange={() => toggleCondition(condition.value)} className="h-4 w-4 accent-emerald-900" />
+                  {condition.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button type="button" onClick={createVoucher} className="rounded-md bg-emerald-900 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-950">Lưu voucher</button>
+            <button type="button" onClick={() => setBoxOpen(false)} className="rounded-md border border-emerald-900/20 px-4 py-2 text-sm font-semibold text-emerald-950 hover:bg-white">Huỷ</button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mt-5 grid gap-3">
+        {vouchers.length ? vouchers.map((voucher) => {
+          const danger = voucher.status === "EXPIRED" || voucher.status === "FULL";
+          return (
+            <div key={voucher.id} className={`rounded-lg border p-4 ${danger ? "border-rose-200 bg-rose-50" : "border-slate-200 bg-white"}`}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-md px-3 py-1 font-semibold tracking-[0.12em] ${danger ? "bg-rose-700 text-white" : "bg-emerald-900 text-white"}`}>{voucher.code}</span>
+                    <button type="button" onClick={() => copyCode(voucher.code)} className="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Sao chép</button>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-slate-950">{voucher.voucherType} - giảm {voucherDiscountLabel(voucher)}</p>
+                  <p className="mt-1 text-sm text-slate-600">Hết hạn: {voucher.expiresAt} · Số lượng: {voucher.usedCount}/{voucher.quantity}</p>
+                  <p className="mt-1 text-sm text-slate-600">Điều kiện: {voucher.conditions.length ? voucher.conditions.map(voucherConditionLabel).join(", ") : "Không có"}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => danger ? void deleteVoucher(voucher) : setDeleteTarget(voucher)}
+                  className={`grid h-9 w-9 place-items-center rounded-md text-lg font-semibold ${danger ? "bg-rose-700 text-white hover:bg-rose-800" : "border border-slate-300 text-slate-600 hover:bg-slate-50"}`}
+                  aria-label={`Xoá voucher ${voucher.code}`}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          );
+        }) : (
+          <p className="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">Chưa có voucher khuyến mãi.</p>
+        )}
+      </div>
+
+      {deleteTarget ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 px-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl">
+            <h3 className="text-lg font-semibold text-slate-950">Bạn có chắc xoá không?</h3>
+            <p className="mt-2 text-sm text-slate-600">Voucher {deleteTarget.code} vẫn còn hiệu lực.</p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => setDeleteTarget(null)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Huỷ</button>
+              <button type="button" onClick={() => void deleteVoucher(deleteTarget)} className="rounded-md bg-rose-700 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-800">Có</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? (
+        <p role="status" className="fixed right-4 top-4 z-[70] max-w-sm rounded-lg border border-emerald-900/15 bg-white px-4 py-3 text-sm font-semibold text-emerald-900 shadow-xl shadow-slate-900/15">
+          {toast}
+        </p>
+      ) : null}
     </section>
   );
 }

@@ -1,6 +1,13 @@
 export type PropertyRating = {
   average: number | null;
   count: number;
+  criteria?: {
+    cleanliness: number;
+    comfort: number;
+    location: number;
+    amenities: number;
+    value: number;
+  };
 };
 
 export type PropertyListItem = {
@@ -102,6 +109,30 @@ export type PropertyDetail = PropertyListItem & {
     id: string;
     url: string;
     isPrimary: boolean;
+  }>;
+  reviews: Array<{
+    id: string;
+    rating: number;
+    criteria: {
+      cleanliness: number;
+      comfort: number;
+      location: number;
+      amenities: number;
+      value: number;
+    };
+    comment: string;
+    images: string[];
+    revisionCount: number;
+    createdAt: string;
+    lastEditedAt: string | null;
+    guest: {
+      name: string;
+      avatar: string | null;
+    };
+    stay: {
+      checkIn: string | null;
+      checkOut: string | null;
+    };
   }>;
   amenities: Array<{
     id: string;

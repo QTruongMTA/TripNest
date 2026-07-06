@@ -56,6 +56,7 @@ export const ModelName = {
   OperatorProvinceAssignment: 'OperatorProvinceAssignment',
   OperatorTask: 'OperatorTask',
   HostApprovalRequest: 'HostApprovalRequest',
+  PropertyChangeRequest: 'PropertyChangeRequest',
   Dispute: 'Dispute',
   VerificationToken: 'VerificationToken',
   Property: 'Property',
@@ -67,12 +68,17 @@ export const ModelName = {
   PropertyImage: 'PropertyImage',
   Amenity: 'Amenity',
   PropertyAvailability: 'PropertyAvailability',
+  PropertyDailyRate: 'PropertyDailyRate',
   Tour: 'Tour',
   TourImage: 'TourImage',
   TourItineraryDay: 'TourItineraryDay',
   TourInclusion: 'TourInclusion',
   TourAvailability: 'TourAvailability',
   Booking: 'Booking',
+  SettlementRun: 'SettlementRun',
+  SettlementHost: 'SettlementHost',
+  SettlementBooking: 'SettlementBooking',
+  PayoutTransaction: 'PayoutTransaction',
   Payment: 'Payment',
   Review: 'Review',
   Promotion: 'Promotion',
@@ -112,6 +118,8 @@ export const UserScalarFieldEnum = {
   nationality: 'nationality',
   gender: 'gender',
   address: 'address',
+  bankName: 'bankName',
+  bankAccountNumber: 'bankAccountNumber',
   role: 'role',
   emailVerified: 'emailVerified',
   isActive: 'isActive',
@@ -182,6 +190,26 @@ export const HostApprovalRequestScalarFieldEnum = {
 export type HostApprovalRequestScalarFieldEnum = (typeof HostApprovalRequestScalarFieldEnum)[keyof typeof HostApprovalRequestScalarFieldEnum]
 
 
+export const PropertyChangeRequestScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  hostId: 'hostId',
+  provinceId: 'provinceId',
+  status: 'status',
+  currentValues: 'currentValues',
+  requestedValues: 'requestedValues',
+  reason: 'reason',
+  documents: 'documents',
+  reviewedBy: 'reviewedBy',
+  reviewedAt: 'reviewedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyChangeRequestScalarFieldEnum = (typeof PropertyChangeRequestScalarFieldEnum)[keyof typeof PropertyChangeRequestScalarFieldEnum]
+
+
 export const DisputeScalarFieldEnum = {
   id: 'id',
   bookingId: 'bookingId',
@@ -189,8 +217,17 @@ export const DisputeScalarFieldEnum = {
   guestId: 'guestId',
   provinceId: 'provinceId',
   status: 'status',
+  reporter: 'reporter',
+  category: 'category',
+  severity: 'severity',
   subject: 'subject',
   description: 'description',
+  requestedOutcome: 'requestedOutcome',
+  evidence: 'evidence',
+  operatorNotes: 'operatorNotes',
+  refundAdjustment: 'refundAdjustment',
+  payoutAdjustment: 'payoutAdjustment',
+  decision: 'decision',
   resolution: 'resolution',
   resolvedBy: 'resolvedBy',
   resolvedAt: 'resolvedAt',
@@ -361,6 +398,18 @@ export const PropertyAvailabilityScalarFieldEnum = {
 export type PropertyAvailabilityScalarFieldEnum = (typeof PropertyAvailabilityScalarFieldEnum)[keyof typeof PropertyAvailabilityScalarFieldEnum]
 
 
+export const PropertyDailyRateScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  date: 'date',
+  pricePerNight: 'pricePerNight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PropertyDailyRateScalarFieldEnum = (typeof PropertyDailyRateScalarFieldEnum)[keyof typeof PropertyDailyRateScalarFieldEnum]
+
+
 export const TourScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -443,11 +492,122 @@ export const BookingScalarFieldEnum = {
   paymentStatus: 'paymentStatus',
   promotionId: 'promotionId',
   notes: 'notes',
+  cancellationRefundAmount: 'cancellationRefundAmount',
+  cancellationPenaltyAmount: 'cancellationPenaltyAmount',
+  refundStatus: 'refundStatus',
+  refundedAt: 'refundedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const SettlementRunScalarFieldEnum = {
+  id: 'id',
+  period: 'period',
+  status: 'status',
+  generatedBy: 'generatedBy',
+  generatedAt: 'generatedAt',
+  summary: 'summary',
+  charts: 'charts',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementRunScalarFieldEnum = (typeof SettlementRunScalarFieldEnum)[keyof typeof SettlementRunScalarFieldEnum]
+
+
+export const SettlementHostScalarFieldEnum = {
+  id: 'id',
+  settlementId: 'settlementId',
+  hostId: 'hostId',
+  hostName: 'hostName',
+  hostEmail: 'hostEmail',
+  period: 'period',
+  bookingCount: 'bookingCount',
+  grossAmount: 'grossAmount',
+  refundAmount: 'refundAmount',
+  disputeCount: 'disputeCount',
+  commission: 'commission',
+  adjustment: 'adjustment',
+  hostPayout: 'hostPayout',
+  commissionReceivable: 'commissionReceivable',
+  status: 'status',
+  paidAt: 'paidAt',
+  paidBy: 'paidBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettlementHostScalarFieldEnum = (typeof SettlementHostScalarFieldEnum)[keyof typeof SettlementHostScalarFieldEnum]
+
+
+export const SettlementBookingScalarFieldEnum = {
+  id: 'id',
+  settlementId: 'settlementId',
+  settlementHostId: 'settlementHostId',
+  bookingId: 'bookingId',
+  code: 'code',
+  hostId: 'hostId',
+  hostName: 'hostName',
+  hostEmail: 'hostEmail',
+  guest: 'guest',
+  guestEmail: 'guestEmail',
+  property: 'property',
+  province: 'province',
+  propertyType: 'propertyType',
+  checkIn: 'checkIn',
+  checkOut: 'checkOut',
+  createdAtSnapshot: 'createdAtSnapshot',
+  settlementPeriod: 'settlementPeriod',
+  grossAmount: 'grossAmount',
+  settlementBase: 'settlementBase',
+  refundAmount: 'refundAmount',
+  penaltyAmount: 'penaltyAmount',
+  commissionRate: 'commissionRate',
+  commission: 'commission',
+  netRevenue: 'netRevenue',
+  transferReceived: 'transferReceived',
+  hostDirectReceived: 'hostDirectReceived',
+  hostPayout: 'hostPayout',
+  commissionReceivable: 'commissionReceivable',
+  adjustment: 'adjustment',
+  bookingStatus: 'bookingStatus',
+  refundStatus: 'refundStatus',
+  refundedAt: 'refundedAt',
+  paymentMethod: 'paymentMethod',
+  paymentMethodLabel: 'paymentMethodLabel',
+  paymentModel: 'paymentModel',
+  paymentStatus: 'paymentStatus',
+  payoutStatus: 'payoutStatus',
+  disputeStatus: 'disputeStatus',
+  disputeSubject: 'disputeSubject',
+  createdAt: 'createdAt'
+} as const
+
+export type SettlementBookingScalarFieldEnum = (typeof SettlementBookingScalarFieldEnum)[keyof typeof SettlementBookingScalarFieldEnum]
+
+
+export const PayoutTransactionScalarFieldEnum = {
+  id: 'id',
+  settlementId: 'settlementId',
+  settlementHostId: 'settlementHostId',
+  hostId: 'hostId',
+  period: 'period',
+  bookingCount: 'bookingCount',
+  amount: 'amount',
+  commissionReceivable: 'commissionReceivable',
+  status: 'status',
+  paidAt: 'paidAt',
+  paidBy: 'paidBy',
+  referenceCode: 'referenceCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PayoutTransactionScalarFieldEnum = (typeof PayoutTransactionScalarFieldEnum)[keyof typeof PayoutTransactionScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {
@@ -471,8 +631,20 @@ export const ReviewScalarFieldEnum = {
   userId: 'userId',
   bookingId: 'bookingId',
   rating: 'rating',
+  cleanlinessRating: 'cleanlinessRating',
+  comfortRating: 'comfortRating',
+  locationRating: 'locationRating',
+  amenitiesRating: 'amenitiesRating',
+  valueRating: 'valueRating',
   comment: 'comment',
-  createdAt: 'createdAt'
+  images: 'images',
+  revisionCount: 'revisionCount',
+  lastEditedAt: 'lastEditedAt',
+  operatorFlaggedAt: 'operatorFlaggedAt',
+  adminReportedAt: 'adminReportedAt',
+  adminReportNote: 'adminReportNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
@@ -597,6 +769,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

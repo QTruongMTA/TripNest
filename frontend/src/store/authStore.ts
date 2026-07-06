@@ -14,6 +14,8 @@ export type SessionUser = {
   nationality: string;
   gender: string | null;
   address: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
   emailVerified?: boolean;
 };
 

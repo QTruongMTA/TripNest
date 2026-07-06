@@ -1,7 +1,9 @@
 import { BookingForm } from "@/components/booking/BookingForm";
 import { QuickFaqList } from "@/components/chat/QuickFaqList";
 import { StartPropertyConversationButton } from "@/components/chat/StartPropertyConversationButton";
+import { FavoritePropertyButton } from "@/components/property/FavoritePropertyButton";
 import { PropertyPhotoGallery } from "@/components/property/PropertyPhotoGallery";
+import { PropertyReviews } from "@/components/review/PropertyReviews";
 import type { PropertyDetail } from "@/types/property";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -31,8 +33,6 @@ const propertyTypeLabels: Record<string, string> = {
   RESORT: "resort",
   UNIQUE: "chỗ nghỉ độc đáo",
 };
-
-const reviewCategories = ["Sạch sẽ", "Thoải mái", "Vị trí", "Tiện nghi", "Đáng giá tiền"];
 
 async function getProperty(id: string) {
   const response = await fetch(
@@ -203,10 +203,11 @@ export default async function PropertyDetailPage({
   const mapUrl = getMapUrl(property);
   const reviewScore = getReviewScore(property);
   const locationHighlight = getLocationHighlight(property);
+  const latestReview = property.reviews[0];
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-700">
             {property.type} tại {property.city}
@@ -218,6 +219,7 @@ export default async function PropertyDetailPage({
             {addressText}, {property.country}
           </p>
         </div>
+        <FavoritePropertyButton property={property} showLabel className="border-slate-200 shadow-sm" />
       </div>
 
       <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_350px]">
@@ -227,6 +229,7 @@ export default async function PropertyDetailPage({
             images={property.images}
             ratingAverage={property.rating.average}
             ratingCount={property.rating.count}
+            reviews={property.reviews}
           />
         </div>
 
@@ -245,6 +248,13 @@ export default async function PropertyDetailPage({
                   {property.rating.average.toFixed(1)}
                 </div>
               </div>
+              {latestReview ? (
+                <div className="mt-4 rounded-md border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">Đánh giá gần nhất</p>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-emerald-950">{latestReview.comment}</p>
+                  <p className="mt-2 text-xs font-medium text-emerald-800">{latestReview.guest.name}</p>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -328,42 +338,7 @@ export default async function PropertyDetailPage({
           ) : null}
 
           <Section title="Đánh giá của khách" eyebrow="Thang điểm 5 sao">
-            <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-              <div className="rounded-lg bg-blue-50 p-5">
-                <p className="text-5xl font-semibold text-blue-950">{reviewScore ? reviewScore.toFixed(1) : "0.0"}</p>
-                <div className="mt-3">
-                  <StarRating score={reviewScore} />
-                </div>
-                <p className="mt-2 text-sm text-slate-600">
-                  {property.rating.count ? `${property.rating.count} đánh giá` : "Chưa có đánh giá"}
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {reviewCategories.map((category, index) => {
-                  const score = reviewScore ? Math.max(0, Math.min(5, reviewScore - (index % 2 === 0 ? 0 : 0.2))) : 0;
-                  return (
-                    <div key={category}>
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-slate-800">{category}</span>
-                        <span className="text-slate-600">{score.toFixed(1)}</span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-slate-100">
-                        <div className="h-full rounded-full bg-blue-700" style={{ width: `${(score / 5) * 100}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="mt-6 rounded-lg border border-dashed border-slate-300 p-5">
-              <p className="font-semibold text-slate-950">Đọc xem khách yêu thích điều gì nhất</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Các đánh giá gần đây sẽ hiển thị tại đây sau khi hệ thống xử lý nội dung đánh giá chi tiết.
-              </p>
-              <button className="mt-4 rounded-md border border-blue-700 px-4 py-2 text-sm font-semibold text-blue-700">
-                Đọc tất cả đánh giá
-              </button>
-            </div>
+            <PropertyReviews rating={property.rating} reviews={property.reviews} />
           </Section>
 
           <Section title="Câu hỏi thường gặp">

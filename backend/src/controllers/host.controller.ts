@@ -4,8 +4,9 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { bookingService } from "../services/booking.service";
 import { prisma } from "../lib/prisma";
-import { BookingMethod, CancellationPolicy, ParkingType, PetPolicy, PropertyType } from "../generated/prisma/enums";
+import { BookingMethod, CancellationPolicy, DiscountType, ParkingType, PetPolicy, PropertyType } from "../generated/prisma/enums";
 import { normalizePropertyImageUrl } from "../utils/property-image.utils";
+import { parseVoucherMetadata } from "../utils/voucher.utils";
 
 const MIN_PROPERTY_IMAGES = 8;
 const TIME_PATTERN = /^([01]\d|2[0-3]):00$/;
@@ -44,6 +45,47 @@ function parseInteger(value: unknown, fallback: number, min = 0) {
   const numericValue = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numericValue)) return fallback;
   return Math.max(min, Math.floor(numericValue));
+}
+
+function parseVoucherCode(value: unknown) {
+  return String(value ?? "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 24);
+}
+
+function parseVoucherConditions(value: unknown) {
+  const conditions = Array.isArray(value) ? value : [];
+  return conditions.filter((condition): condition is "MIN_ORDER_500K" | "MIN_GUESTS_5" =>
+    condition === "MIN_ORDER_500K" || condition === "MIN_GUESTS_5"
+  );
+}
+
+function serializeVoucher(promotion: {
+  id: string;
+  code: string;
+  description: string | null;
+  discountType: DiscountType;
+  discountValue: { toNumber(): number };
+  maxUses: number | null;
+  usedCount: number;
+  endDate: Date;
+  isActive: boolean;
+}) {
+  const metadata = parseVoucherMetadata(promotion.description);
+  const now = new Date();
+  const isExpired = promotion.endDate < now;
+  const isFull = promotion.maxUses !== null && promotion.usedCount >= promotion.maxUses;
+
+  return {
+    id: promotion.id,
+    code: promotion.code,
+    discountType: promotion.discountType,
+    discountValue: promotion.discountValue.toNumber(),
+    quantity: promotion.maxUses ?? 0,
+    usedCount: promotion.usedCount,
+    expiresAt: promotion.endDate.toISOString().slice(0, 10),
+    voucherType: metadata?.voucherType ?? "Khác",
+    conditions: metadata?.conditions ?? [],
+    status: isExpired ? "EXPIRED" : isFull ? "FULL" : promotion.isActive ? "ACTIVE" : "INACTIVE",
+  };
 }
 
 function parseSizeM2(value: unknown, details: Record<string, unknown>) {
@@ -598,7 +640,9 @@ export const hostController = {
     const amenityNames = parseStringList(body.amenities, []);
     const languageNames = parseStringList(body.languages, ["Tiếng Việt"]);
     const services = typeof body.services === "object" && body.services !== null ? body.services as Record<string, unknown> : {};
+    const details = typeof body.details === "object" && body.details !== null ? body.details as Record<string, unknown> : null;
     const rules = typeof body.rules === "object" && body.rules !== null ? body.rules as Record<string, unknown> : {};
+    const sizeM2 = details ? Number(details.sizeM2) : null;
 
     const updated = await prisma.property.update({
       where: { id: property.id },
@@ -616,6 +660,17 @@ export const hostController = {
           : { amenities: { set: [] } }),
         breakfastIncluded: services.breakfastIncluded === true,
         parkingType: parseParkingType(services.parkingType),
+        ...(details
+          ? {
+              livingRoomSofaBeds: parseInteger(details.livingRoomSofaBeds, 0),
+              bedroomCount: parseInteger(details.bedroomCount, 0),
+              bathrooms: parseInteger(details.bathrooms, 1, 1),
+              maxGuests: parseInteger(details.maxGuests, 1, 1),
+              childrenAllowed: details.childrenAllowed !== false,
+              cribsAvailable: details.cribsAvailable === true,
+              sizeM2: sizeM2 !== null && Number.isFinite(sizeM2) && sizeM2 > 0 ? sizeM2 : null,
+            }
+          : {}),
         smokingAllowed: rules.smokingAllowed === true,
         partiesAllowed: rules.partiesAllowed === true,
         petsPolicy: parsePetPolicy(rules.petsPolicy),
@@ -688,7 +743,7 @@ export const hostController = {
     }
 
     const rates = await prisma.$queryRaw<Array<{ date: Date; pricePerNight: string }>>`
-      SELECT "date", "pricePerNight"
+      SELECT "date", "price" AS "pricePerNight"
       FROM "PropertyDailyRate"
       WHERE "propertyId" = ${property.id}
         AND "date" >= ${from}
@@ -758,7 +813,7 @@ export const hostController = {
       return res.status(400).json({
         error: {
           code: "DAILY_RATE_OUT_OF_RANGE",
-          message: "Daily rates must stay within 30% of the base price",
+          message: `Thay đổi mức giá không thành công. Vui lòng nhập trong khoảng ${minPrice.toLocaleString("vi-VN")} ₫ - ${maxPrice.toLocaleString("vi-VN")} ₫.`,
         },
       });
     }
@@ -773,10 +828,10 @@ export const hostController = {
           `;
         } else {
           await tx.$executeRaw`
-            INSERT INTO "PropertyDailyRate" ("id", "propertyId", "date", "pricePerNight", "createdAt", "updatedAt")
+            INSERT INTO "PropertyDailyRate" ("id", "propertyId", "date", "price", "createdAt", "updatedAt")
             VALUES (${randomUUID()}, ${property.id}, ${rate.date}, ${rate.pricePerNight}, NOW(), NOW())
             ON CONFLICT ("propertyId", "date")
-            DO UPDATE SET "pricePerNight" = EXCLUDED."pricePerNight", "updatedAt" = NOW()
+            DO UPDATE SET "price" = EXCLUDED."price", "updatedAt" = NOW()
           `;
         }
       }
@@ -792,6 +847,115 @@ export const hostController = {
         })),
       },
     });
+  },
+
+  async listPropertyVouchers(req: Request, res: Response) {
+    const { id } = req.params;
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({ error: { code: "INVALID_PROPERTY_ID", message: "Property id is required" } });
+    }
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id,
+        ...(req.user!.role === "ADMIN" ? {} : { hostId: req.user!.id }),
+      },
+      select: { id: true },
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: { code: "PROPERTY_NOT_FOUND", message: "Property not found" } });
+    }
+
+    const promotions = await prisma.promotion.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.json({
+      data: promotions
+        .filter((promotion) => {
+          const metadata = parseVoucherMetadata(promotion.description);
+          return promotion.isActive && metadata?.kind === "HOST_PROPERTY_VOUCHER" && metadata.propertyId === property.id;
+        })
+        .map(serializeVoucher),
+    });
+  },
+
+  async createPropertyVoucher(req: Request, res: Response) {
+    const { id } = req.params;
+    const code = parseVoucherCode(req.body?.code);
+    const discountType = req.body?.discountType === "FIXED_AMOUNT" ? DiscountType.FIXED_AMOUNT : DiscountType.PERCENTAGE;
+    const discountValue = Number(req.body?.discountValue);
+    const quantity = parseInteger(req.body?.quantity, 10, 1);
+    const expiresAt = typeof req.body?.expiresAt === "string" ? new Date(`${req.body.expiresAt}T23:59:59.999Z`) : null;
+    const voucherType = String(req.body?.voucherType ?? "Khác").trim() || "Khác";
+    const conditions = parseVoucherConditions(req.body?.conditions);
+
+    if (typeof id !== "string" || !id || !code || !Number.isFinite(discountValue) || discountValue <= 0 || !expiresAt || Number.isNaN(expiresAt.getTime())) {
+      return res.status(400).json({ error: { code: "INVALID_VOUCHER", message: "Voucher không hợp lệ." } });
+    }
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id,
+        ...(req.user!.role === "ADMIN" ? {} : { hostId: req.user!.id }),
+      },
+      select: { id: true },
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: { code: "PROPERTY_NOT_FOUND", message: "Property not found" } });
+    }
+
+    try {
+      const promotion = await prisma.promotion.create({
+        data: {
+          code,
+          description: JSON.stringify({
+            kind: "HOST_PROPERTY_VOUCHER",
+            propertyId: property.id,
+            voucherType,
+            conditions,
+          }),
+          discountType,
+          discountValue: discountType === DiscountType.PERCENTAGE ? Math.min(100, Math.round(discountValue)) : Math.round(discountValue),
+          minOrderValue: conditions.includes("MIN_ORDER_500K") ? 500000 : null,
+          maxUses: quantity,
+          startDate: new Date(),
+          endDate: expiresAt,
+          isActive: true,
+        },
+      });
+
+      return res.status(201).json({ data: serializeVoucher(promotion) });
+    } catch {
+      return res.status(409).json({ error: { code: "VOUCHER_CODE_EXISTS", message: "Mã voucher đã tồn tại." } });
+    }
+  },
+
+  async deletePropertyVoucher(req: Request, res: Response) {
+    const { id, voucherId } = req.params;
+    if (typeof id !== "string" || typeof voucherId !== "string" || !id || !voucherId) {
+      return res.status(400).json({ error: { code: "INVALID_VOUCHER", message: "Voucher không hợp lệ." } });
+    }
+
+    const property = await prisma.property.findFirst({
+      where: {
+        id,
+        ...(req.user!.role === "ADMIN" ? {} : { hostId: req.user!.id }),
+      },
+      select: { id: true },
+    });
+
+    const promotion = await prisma.promotion.findUnique({ where: { id: voucherId } });
+    const metadata = parseVoucherMetadata(promotion?.description);
+
+    if (!property || !promotion || metadata?.kind !== "HOST_PROPERTY_VOUCHER" || metadata.propertyId !== property.id) {
+      return res.status(404).json({ error: { code: "VOUCHER_NOT_FOUND", message: "Voucher not found" } });
+    }
+
+    await prisma.promotion.update({ where: { id: promotion.id }, data: { isActive: false } });
+    return res.json({ data: { id: promotion.id } });
   },
 
   async listProperties(req: Request, res: Response) {
@@ -884,6 +1048,11 @@ export const hostController = {
   async listBookings(req: Request, res: Response) {
     const bookings = await bookingService.listHostBookings(req.user!.id);
     return res.json({ data: bookings });
+  },
+
+  async revenue(req: Request, res: Response) {
+    const data = await bookingService.getHostRevenue(req.user!.id);
+    return res.json({ data });
   },
 
   async confirmBooking(req: Request, res: Response) {

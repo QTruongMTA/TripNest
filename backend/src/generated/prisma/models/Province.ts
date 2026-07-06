@@ -184,6 +184,7 @@ export type ProvinceWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Province"> | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   hostApprovalRequests?: Prisma.HostApprovalRequestListRelationFilter
+  propertyChangeRequests?: Prisma.PropertyChangeRequestListRelationFilter
   tasks?: Prisma.OperatorTaskListRelationFilter
   disputes?: Prisma.DisputeListRelationFilter
 }
@@ -196,6 +197,7 @@ export type ProvinceOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   operatorAssignments?: Prisma.OperatorProvinceAssignmentOrderByRelationAggregateInput
   hostApprovalRequests?: Prisma.HostApprovalRequestOrderByRelationAggregateInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestOrderByRelationAggregateInput
   tasks?: Prisma.OperatorTaskOrderByRelationAggregateInput
   disputes?: Prisma.DisputeOrderByRelationAggregateInput
 }
@@ -211,6 +213,7 @@ export type ProvinceWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Province"> | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   hostApprovalRequests?: Prisma.HostApprovalRequestListRelationFilter
+  propertyChangeRequests?: Prisma.PropertyChangeRequestListRelationFilter
   tasks?: Prisma.OperatorTaskListRelationFilter
   disputes?: Prisma.DisputeListRelationFilter
 }, "id" | "name" | "code">
@@ -245,6 +248,7 @@ export type ProvinceCreateInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeCreateNestedManyWithoutProvinceInput
 }
@@ -257,6 +261,7 @@ export type ProvinceUncheckedCreateInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutProvinceInput
 }
@@ -269,6 +274,7 @@ export type ProvinceUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUpdateManyWithoutProvinceNestedInput
 }
@@ -281,6 +287,7 @@ export type ProvinceUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUncheckedUpdateManyWithoutProvinceNestedInput
 }
@@ -393,6 +400,22 @@ export type ProvinceUpdateOneWithoutHostApprovalRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProvinceUpdateToOneWithWhereWithoutHostApprovalRequestsInput, Prisma.ProvinceUpdateWithoutHostApprovalRequestsInput>, Prisma.ProvinceUncheckedUpdateWithoutHostApprovalRequestsInput>
 }
 
+export type ProvinceCreateNestedOneWithoutPropertyChangeRequestsInput = {
+  create?: Prisma.XOR<Prisma.ProvinceCreateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedCreateWithoutPropertyChangeRequestsInput>
+  connectOrCreate?: Prisma.ProvinceCreateOrConnectWithoutPropertyChangeRequestsInput
+  connect?: Prisma.ProvinceWhereUniqueInput
+}
+
+export type ProvinceUpdateOneWithoutPropertyChangeRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProvinceCreateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedCreateWithoutPropertyChangeRequestsInput>
+  connectOrCreate?: Prisma.ProvinceCreateOrConnectWithoutPropertyChangeRequestsInput
+  upsert?: Prisma.ProvinceUpsertWithoutPropertyChangeRequestsInput
+  disconnect?: Prisma.ProvinceWhereInput | boolean
+  delete?: Prisma.ProvinceWhereInput | boolean
+  connect?: Prisma.ProvinceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProvinceUpdateToOneWithWhereWithoutPropertyChangeRequestsInput, Prisma.ProvinceUpdateWithoutPropertyChangeRequestsInput>, Prisma.ProvinceUncheckedUpdateWithoutPropertyChangeRequestsInput>
+}
+
 export type ProvinceCreateNestedOneWithoutDisputesInput = {
   create?: Prisma.XOR<Prisma.ProvinceCreateWithoutDisputesInput, Prisma.ProvinceUncheckedCreateWithoutDisputesInput>
   connectOrCreate?: Prisma.ProvinceCreateOrConnectWithoutDisputesInput
@@ -416,6 +439,7 @@ export type ProvinceCreateWithoutOperatorAssignmentsInput = {
   type?: $Enums.ProvinceType
   createdAt?: Date | string
   hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeCreateNestedManyWithoutProvinceInput
 }
@@ -427,6 +451,7 @@ export type ProvinceUncheckedCreateWithoutOperatorAssignmentsInput = {
   type?: $Enums.ProvinceType
   createdAt?: Date | string
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutProvinceInput
 }
@@ -454,6 +479,7 @@ export type ProvinceUpdateWithoutOperatorAssignmentsInput = {
   type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUpdateManyWithoutProvinceNestedInput
 }
@@ -465,6 +491,7 @@ export type ProvinceUncheckedUpdateWithoutOperatorAssignmentsInput = {
   type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUncheckedUpdateManyWithoutProvinceNestedInput
 }
@@ -477,6 +504,7 @@ export type ProvinceCreateWithoutTasksInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeCreateNestedManyWithoutProvinceInput
 }
 
@@ -488,6 +516,7 @@ export type ProvinceUncheckedCreateWithoutTasksInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutProvinceInput
 }
 
@@ -515,6 +544,7 @@ export type ProvinceUpdateWithoutTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUpdateManyWithoutProvinceNestedInput
 }
 
@@ -526,6 +556,7 @@ export type ProvinceUncheckedUpdateWithoutTasksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUncheckedUpdateManyWithoutProvinceNestedInput
 }
 
@@ -536,6 +567,7 @@ export type ProvinceCreateWithoutHostApprovalRequestsInput = {
   type?: $Enums.ProvinceType
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeCreateNestedManyWithoutProvinceInput
 }
@@ -547,6 +579,7 @@ export type ProvinceUncheckedCreateWithoutHostApprovalRequestsInput = {
   type?: $Enums.ProvinceType
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutProvinceInput
   disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutProvinceInput
 }
@@ -574,6 +607,7 @@ export type ProvinceUpdateWithoutHostApprovalRequestsInput = {
   type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUpdateManyWithoutProvinceNestedInput
 }
@@ -585,6 +619,71 @@ export type ProvinceUncheckedUpdateWithoutHostApprovalRequestsInput = {
   type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutProvinceNestedInput
+  tasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutProvinceNestedInput
+  disputes?: Prisma.DisputeUncheckedUpdateManyWithoutProvinceNestedInput
+}
+
+export type ProvinceCreateWithoutPropertyChangeRequestsInput = {
+  id?: string
+  name: string
+  code: string
+  type?: $Enums.ProvinceType
+  createdAt?: Date | string
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutProvinceInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutProvinceInput
+  tasks?: Prisma.OperatorTaskCreateNestedManyWithoutProvinceInput
+  disputes?: Prisma.DisputeCreateNestedManyWithoutProvinceInput
+}
+
+export type ProvinceUncheckedCreateWithoutPropertyChangeRequestsInput = {
+  id?: string
+  name: string
+  code: string
+  type?: $Enums.ProvinceType
+  createdAt?: Date | string
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutProvinceInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutProvinceInput
+  tasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutProvinceInput
+  disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutProvinceInput
+}
+
+export type ProvinceCreateOrConnectWithoutPropertyChangeRequestsInput = {
+  where: Prisma.ProvinceWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProvinceCreateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedCreateWithoutPropertyChangeRequestsInput>
+}
+
+export type ProvinceUpsertWithoutPropertyChangeRequestsInput = {
+  update: Prisma.XOR<Prisma.ProvinceUpdateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedUpdateWithoutPropertyChangeRequestsInput>
+  create: Prisma.XOR<Prisma.ProvinceCreateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedCreateWithoutPropertyChangeRequestsInput>
+  where?: Prisma.ProvinceWhereInput
+}
+
+export type ProvinceUpdateToOneWithWhereWithoutPropertyChangeRequestsInput = {
+  where?: Prisma.ProvinceWhereInput
+  data: Prisma.XOR<Prisma.ProvinceUpdateWithoutPropertyChangeRequestsInput, Prisma.ProvinceUncheckedUpdateWithoutPropertyChangeRequestsInput>
+}
+
+export type ProvinceUpdateWithoutPropertyChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutProvinceNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutProvinceNestedInput
+  tasks?: Prisma.OperatorTaskUpdateManyWithoutProvinceNestedInput
+  disputes?: Prisma.DisputeUpdateManyWithoutProvinceNestedInput
+}
+
+export type ProvinceUncheckedUpdateWithoutPropertyChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumProvinceTypeFieldUpdateOperationsInput | $Enums.ProvinceType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutProvinceNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutProvinceNestedInput
   disputes?: Prisma.DisputeUncheckedUpdateManyWithoutProvinceNestedInput
 }
@@ -597,6 +696,7 @@ export type ProvinceCreateWithoutDisputesInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskCreateNestedManyWithoutProvinceInput
 }
 
@@ -608,6 +708,7 @@ export type ProvinceUncheckedCreateWithoutDisputesInput = {
   createdAt?: Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutProvinceInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutProvinceInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutProvinceInput
   tasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutProvinceInput
 }
 
@@ -635,6 +736,7 @@ export type ProvinceUpdateWithoutDisputesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUpdateManyWithoutProvinceNestedInput
 }
 
@@ -646,6 +748,7 @@ export type ProvinceUncheckedUpdateWithoutDisputesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutProvinceNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutProvinceNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutProvinceNestedInput
   tasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutProvinceNestedInput
 }
 
@@ -657,6 +760,7 @@ export type ProvinceUncheckedUpdateWithoutDisputesInput = {
 export type ProvinceCountOutputType = {
   operatorAssignments: number
   hostApprovalRequests: number
+  propertyChangeRequests: number
   tasks: number
   disputes: number
 }
@@ -664,6 +768,7 @@ export type ProvinceCountOutputType = {
 export type ProvinceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   operatorAssignments?: boolean | ProvinceCountOutputTypeCountOperatorAssignmentsArgs
   hostApprovalRequests?: boolean | ProvinceCountOutputTypeCountHostApprovalRequestsArgs
+  propertyChangeRequests?: boolean | ProvinceCountOutputTypeCountPropertyChangeRequestsArgs
   tasks?: boolean | ProvinceCountOutputTypeCountTasksArgs
   disputes?: boolean | ProvinceCountOutputTypeCountDisputesArgs
 }
@@ -695,6 +800,13 @@ export type ProvinceCountOutputTypeCountHostApprovalRequestsArgs<ExtArgs extends
 /**
  * ProvinceCountOutputType without action
  */
+export type ProvinceCountOutputTypeCountPropertyChangeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyChangeRequestWhereInput
+}
+
+/**
+ * ProvinceCountOutputType without action
+ */
 export type ProvinceCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OperatorTaskWhereInput
 }
@@ -715,6 +827,7 @@ export type ProvinceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   operatorAssignments?: boolean | Prisma.Province$operatorAssignmentsArgs<ExtArgs>
   hostApprovalRequests?: boolean | Prisma.Province$hostApprovalRequestsArgs<ExtArgs>
+  propertyChangeRequests?: boolean | Prisma.Province$propertyChangeRequestsArgs<ExtArgs>
   tasks?: boolean | Prisma.Province$tasksArgs<ExtArgs>
   disputes?: boolean | Prisma.Province$disputesArgs<ExtArgs>
   _count?: boolean | Prisma.ProvinceCountOutputTypeDefaultArgs<ExtArgs>
@@ -748,6 +861,7 @@ export type ProvinceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type ProvinceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   operatorAssignments?: boolean | Prisma.Province$operatorAssignmentsArgs<ExtArgs>
   hostApprovalRequests?: boolean | Prisma.Province$hostApprovalRequestsArgs<ExtArgs>
+  propertyChangeRequests?: boolean | Prisma.Province$propertyChangeRequestsArgs<ExtArgs>
   tasks?: boolean | Prisma.Province$tasksArgs<ExtArgs>
   disputes?: boolean | Prisma.Province$disputesArgs<ExtArgs>
   _count?: boolean | Prisma.ProvinceCountOutputTypeDefaultArgs<ExtArgs>
@@ -760,6 +874,7 @@ export type $ProvincePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     operatorAssignments: Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>[]
     hostApprovalRequests: Prisma.$HostApprovalRequestPayload<ExtArgs>[]
+    propertyChangeRequests: Prisma.$PropertyChangeRequestPayload<ExtArgs>[]
     tasks: Prisma.$OperatorTaskPayload<ExtArgs>[]
     disputes: Prisma.$DisputePayload<ExtArgs>[]
   }
@@ -1165,6 +1280,7 @@ export interface Prisma__ProvinceClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   operatorAssignments<T extends Prisma.Province$operatorAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Province$operatorAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   hostApprovalRequests<T extends Prisma.Province$hostApprovalRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Province$hostApprovalRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HostApprovalRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  propertyChangeRequests<T extends Prisma.Province$propertyChangeRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Province$propertyChangeRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tasks<T extends Prisma.Province$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Province$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   disputes<T extends Prisma.Province$disputesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Province$disputesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DisputePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1639,6 +1755,30 @@ export type Province$hostApprovalRequestsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.HostApprovalRequestScalarFieldEnum | Prisma.HostApprovalRequestScalarFieldEnum[]
+}
+
+/**
+ * Province.propertyChangeRequests
+ */
+export type Province$propertyChangeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyChangeRequest
+   */
+  select?: Prisma.PropertyChangeRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyChangeRequest
+   */
+  omit?: Prisma.PropertyChangeRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyChangeRequestInclude<ExtArgs> | null
+  where?: Prisma.PropertyChangeRequestWhereInput
+  orderBy?: Prisma.PropertyChangeRequestOrderByWithRelationInput | Prisma.PropertyChangeRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyChangeRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyChangeRequestScalarFieldEnum | Prisma.PropertyChangeRequestScalarFieldEnum[]
 }
 
 /**

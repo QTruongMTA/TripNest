@@ -175,6 +175,8 @@ model User {
   nationality   String   @default("Việt Nam")
   gender        String?
   address       String?
+  bankName      String?
+  bankAccountNumber String?
   role          Role     @default(GUEST)
   emailVerified Boolean  @default(false)
   isActive      Boolean  @default(true)
@@ -329,8 +331,17 @@ model Dispute {
   guestId     String
   provinceId  String?
   status      DisputeStatus @default(OPEN)
+  reporter    String        @default("TRAVELER")
+  category    String        @default("OTHER")
+  severity    String        @default("MEDIUM")
   subject     String
   description String
+  requestedOutcome String?
+  evidence    Json?
+  operatorNotes Json?
+  refundAdjustment Decimal? @db.Decimal(10, 2)
+  payoutAdjustment Decimal? @db.Decimal(10, 2)
+  decision    String?
   resolution  String?
   resolvedBy  String?
   resolvedAt  DateTime?
@@ -346,6 +357,8 @@ model Dispute {
   @@index([hostId])
   @@index([guestId])
   @@index([status])
+  @@index([category])
+  @@index([severity])
   @@index([provinceId])
 }
 
@@ -702,6 +715,10 @@ model Booking {
   paymentStatus PaymentStatus @default(UNPAID)
   promotionId   String?
   notes         String?
+  cancellationRefundAmount Decimal? @db.Decimal(10, 2)
+  cancellationPenaltyAmount Decimal? @db.Decimal(10, 2)
+  refundStatus  String?
+  refundedAt    DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -712,6 +729,7 @@ model Booking {
   payment             Payment?
   review              Review?
   promotionRedemption PromotionRedemption?
+  settlementBookings  SettlementBooking[]
 
   @@index([userId])
   @@index([propertyId])
@@ -722,6 +740,137 @@ model Booking {
 }
 
 // ─── Payment ──────────────────────────────────────────────────────────────────
+
+model SettlementRun {
+  id          String   @id @default(cuid())
+  period      String   @unique
+  status      String   @default("READY_FOR_PAYOUT")
+  generatedBy String?
+  generatedAt DateTime @default(now())
+  summary     Json?
+  charts      Json?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  hosts    SettlementHost[]
+  bookings SettlementBooking[]
+  payouts  PayoutTransaction[]
+
+  @@index([period])
+  @@index([status])
+}
+
+model SettlementHost {
+  id                  String   @id @default(cuid())
+  settlementId        String
+  hostId              String
+  hostName            String
+  hostEmail           String?
+  period              String
+  bookingCount        Int      @default(0)
+  grossAmount         Decimal  @default(0) @db.Decimal(12, 2)
+  refundAmount        Decimal  @default(0) @db.Decimal(12, 2)
+  disputeCount        Int      @default(0)
+  commission          Decimal  @default(0) @db.Decimal(12, 2)
+  adjustment          Decimal  @default(0) @db.Decimal(12, 2)
+  hostPayout          Decimal  @default(0) @db.Decimal(12, 2)
+  commissionReceivable Decimal @default(0) @db.Decimal(12, 2)
+  status              String   @default("READY_FOR_PAYOUT")
+  paidAt              DateTime?
+  paidBy              String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  settlement SettlementRun       @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  bookings   SettlementBooking[]
+  payouts    PayoutTransaction[]
+
+  @@unique([settlementId, hostId])
+  @@index([hostId])
+  @@index([period])
+  @@index([status])
+}
+
+model SettlementBooking {
+  id                  String   @id @default(cuid())
+  settlementId        String
+  settlementHostId    String
+  bookingId           String
+  code                String
+  hostId              String
+  hostName            String
+  hostEmail           String?
+  guest               String
+  guestEmail          String
+  property            String
+  province            String
+  propertyType        String
+  checkIn             String?
+  checkOut            String?
+  createdAtSnapshot   DateTime
+  settlementPeriod    String
+  grossAmount         Decimal  @default(0) @db.Decimal(12, 2)
+  settlementBase      Decimal  @default(0) @db.Decimal(12, 2)
+  refundAmount        Decimal  @default(0) @db.Decimal(12, 2)
+  penaltyAmount       Decimal  @default(0) @db.Decimal(12, 2)
+  commissionRate      Decimal  @default(0) @db.Decimal(7, 4)
+  commission          Decimal  @default(0) @db.Decimal(12, 2)
+  netRevenue          Decimal  @default(0) @db.Decimal(12, 2)
+  transferReceived    Decimal  @default(0) @db.Decimal(12, 2)
+  hostDirectReceived  Decimal  @default(0) @db.Decimal(12, 2)
+  hostPayout          Decimal  @default(0) @db.Decimal(12, 2)
+  commissionReceivable Decimal @default(0) @db.Decimal(12, 2)
+  adjustment          Decimal  @default(0) @db.Decimal(12, 2)
+  bookingStatus       String
+  refundStatus        String?
+  refundedAt          DateTime?
+  paymentMethod       String?
+  paymentMethodLabel  String
+  paymentModel        String
+  paymentStatus       String
+  payoutStatus        String
+  disputeStatus       String?
+  disputeSubject      String?
+  createdAt           DateTime @default(now())
+
+  settlement     SettlementRun  @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  settlementHost SettlementHost @relation(fields: [settlementHostId], references: [id], onDelete: Cascade)
+  booking        Booking        @relation(fields: [bookingId], references: [id])
+
+  @@unique([settlementId, bookingId])
+  @@index([settlementHostId])
+  @@index([bookingId])
+  @@index([hostId])
+  @@index([settlementPeriod])
+  @@index([payoutStatus])
+}
+
+model PayoutTransaction {
+  id                  String   @id @default(cuid())
+  settlementId        String
+  settlementHostId    String
+  hostId              String
+  period              String
+  bookingCount        Int      @default(0)
+  amount              Decimal  @default(0) @db.Decimal(12, 2)
+  commissionReceivable Decimal @default(0) @db.Decimal(12, 2)
+  status              String   @default("READY")
+  paidAt              DateTime?
+  paidBy              String?
+  referenceCode       String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  settlement     SettlementRun  @relation(fields: [settlementId], references: [id], onDelete: Cascade)
+  settlementHost SettlementHost @relation(fields: [settlementHostId], references: [id], onDelete: Cascade)
+
+  @@unique([settlementHostId])
+  @@index([settlementId])
+  @@index([hostId])
+  @@index([period])
+  @@index([status])
+}
 
 model Payment {
   id            String        @id @default(cuid())
@@ -741,17 +890,31 @@ model Payment {
 // ─── Review ───────────────────────────────────────────────────────────────────
 
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  bookingId String   @unique
-  rating    Int
-  comment   String
-  createdAt DateTime @default(now())
+  id                String   @id @default(cuid())
+  userId            String
+  bookingId         String   @unique
+  rating            Int
+  cleanlinessRating Int      @default(5)
+  comfortRating     Int      @default(5)
+  locationRating    Int      @default(5)
+  amenitiesRating   Int      @default(5)
+  valueRating       Int      @default(5)
+  comment           String
+  images            Json?
+  revisionCount     Int      @default(0)
+  lastEditedAt      DateTime?
+  operatorFlaggedAt DateTime?
+  adminReportedAt   DateTime?
+  adminReportNote   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id])
   booking Booking @relation(fields: [bookingId], references: [id])
 
   @@index([userId])
+  @@index([rating])
+  @@index([createdAt])
 }
 
 // ─── Promotions ───────────────────────────────────────────────────────────────

@@ -76,4 +76,6 @@ export const profileSchema = Joi.object({
     .allow(null, "")
     .optional(),
   address: Joi.string().max(255).allow(null, "").optional(),
+  bankName: Joi.string().max(100).allow(null, "").optional(),
+  bankAccountNumber: Joi.string().pattern(/^[\d\s]{4,32}$/).allow(null, "").optional(),
 });

@@ -7,4 +7,9 @@ export const createPropertyBookingSchema = Joi.object({
   guests: Joi.number().integer().min(1).required(),
   notes: Joi.string().allow("", null).optional(),
   paymentOption: Joi.string().valid("PAY_AT_PROPERTY", "DEPOSIT_30", "PAY_FULL").optional(),
+  voucherCode: Joi.string().allow("", null).optional(),
+});
+
+export const cancelBookingSchema = Joi.object({
+  reason: Joi.string().trim().min(3).max(500).required(),
 });

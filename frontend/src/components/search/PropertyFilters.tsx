@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type SearchValues = {
   city?: string;
@@ -68,7 +68,6 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
           "amenities",
           "minPrice",
           "maxPrice",
-          "guests",
           "bedrooms",
           "bathrooms",
           "cancellationPolicy",
@@ -91,27 +90,9 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
 
       <section className="space-y-3 border-t border-slate-100 pt-4">
         <h3 className="font-semibold text-slate-900">Ngân sách mỗi đêm</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="minPrice" type="number" min="0" defaultValue={values.minPrice} placeholder="Từ" className="rounded-2xl border border-slate-200 px-3 py-2 text-sm" />
-          <input name="maxPrice" type="number" min="0" defaultValue={values.maxPrice} placeholder="Đến" className="rounded-2xl border border-slate-200 px-3 py-2 text-sm" />
-        </div>
-      </section>
-
-      <section className="space-y-3 border-t border-slate-100 pt-4">
-        <h3 className="font-semibold text-slate-900">Sức chứa</h3>
-        <div className="grid grid-cols-3 gap-2">
-          <label className="grid gap-1 text-sm text-slate-600">
-            <span>Khách</span>
-            <input name="guests" type="number" min="1" defaultValue={values.guests} placeholder="2" className="rounded-2xl border border-slate-200 px-3 py-2" />
-          </label>
-          <label className="grid gap-1 text-sm text-slate-600">
-            <span>Ngủ</span>
-            <input name="bedrooms" type="number" min="1" defaultValue={values.bedrooms} placeholder="1" className="rounded-2xl border border-slate-200 px-3 py-2" />
-          </label>
-          <label className="grid gap-1 text-sm text-slate-600">
-            <span>Tắm</span>
-            <input name="bathrooms" type="number" min="1" defaultValue={values.bathrooms} placeholder="1" className="rounded-2xl border border-slate-200 px-3 py-2" />
-          </label>
+        <div className="grid gap-3">
+          <PriceStepper name="minPrice" label="Từ" value={values.minPrice} />
+          <PriceStepper name="maxPrice" label="Đến" value={values.maxPrice} />
         </div>
       </section>
 
@@ -140,5 +121,72 @@ export function PropertyFilters({ values }: { values: SearchValues }) {
         <a href="/properties" className="block rounded-full border border-slate-200 px-4 py-2 text-center font-medium text-slate-700 transition hover:bg-slate-50">Xóa bộ lọc</a>
       </div>
     </form>
+  );
+}
+
+function formatPrice(value: number | null) {
+  return value === null ? "" : value.toLocaleString("vi-VN");
+}
+
+function parsePrice(value?: string) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  if (!digits) return null;
+  const parsed = Number(digits);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function PriceStepper({ name, label, value }: { name: "minPrice" | "maxPrice"; label: string; value?: string }) {
+  const initial = parsePrice(value);
+  const [amount, setAmount] = useState<number | null>(initial);
+
+  function submitFromElement(element: HTMLElement) {
+    window.setTimeout(() => element.closest("form")?.requestSubmit(), 0);
+  }
+
+  function adjust(delta: number, element: HTMLElement) {
+    setAmount((current) => Math.max(0, (current ?? 0) + delta));
+    submitFromElement(element);
+  }
+
+  return (
+    <label className="grid gap-1 text-sm text-slate-600">
+      <span>{label}</span>
+      <input type="hidden" name={name} value={amount ?? ""} />
+      <div className="grid grid-cols-[36px_1fr_36px] overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <button
+          type="button"
+          onClick={(event) => adjust(-100000, event.currentTarget)}
+          className="grid min-h-10 place-items-center border-r border-slate-200 text-lg font-semibold text-slate-600 transition hover:bg-slate-50"
+          aria-label={`Giảm ${label.toLowerCase()} 100.000 đồng`}
+        >
+          -
+        </button>
+        <input
+          value={formatPrice(amount)}
+          onChange={(event) => {
+            event.stopPropagation();
+            setAmount(parsePrice(event.target.value));
+          }}
+          onBlur={(event) => submitFromElement(event.currentTarget)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              submitFromElement(event.currentTarget);
+            }
+          }}
+          inputMode="numeric"
+          placeholder="0"
+          className="min-w-0 px-3 py-2 text-center text-sm font-semibold text-slate-900 outline-none"
+        />
+        <button
+          type="button"
+          onClick={(event) => adjust(100000, event.currentTarget)}
+          className="grid min-h-10 place-items-center border-l border-slate-200 text-lg font-semibold text-teal-800 transition hover:bg-teal-50"
+          aria-label={`Tăng ${label.toLowerCase()} 100.000 đồng`}
+        >
+          +
+        </button>
+      </div>
+    </label>
   );
 }

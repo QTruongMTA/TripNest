@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import type { PropertyDetail } from "@/types/property";
 
 type PropertyPhoto = {
   id: string;
@@ -14,6 +15,7 @@ type PropertyPhotoGalleryProps = {
   images: PropertyPhoto[];
   ratingAverage: number | null;
   ratingCount: number;
+  reviews?: PropertyDetail["reviews"];
 };
 
 function getRatingLabel(score: number | null) {
@@ -29,6 +31,7 @@ export function PropertyPhotoGallery({
   images,
   ratingAverage,
   ratingCount,
+  reviews = [],
 }: PropertyPhotoGalleryProps) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"grid" | "single">("grid");
@@ -147,6 +150,7 @@ export function PropertyPhotoGallery({
           activeIndex={activeIndex}
           ratingAverage={ratingAverage}
           ratingCount={ratingCount}
+          reviews={reviews}
           onClose={() => setOpen(false)}
           onModeChange={setMode}
           onActiveIndexChange={setActiveIndex}
@@ -163,6 +167,7 @@ function GalleryModal({
   activeIndex,
   ratingAverage,
   ratingCount,
+  reviews,
   onClose,
   onModeChange,
   onActiveIndexChange,
@@ -173,6 +178,7 @@ function GalleryModal({
   activeIndex: number;
   ratingAverage: number | null;
   ratingCount: number;
+  reviews: PropertyDetail["reviews"];
   onClose: () => void;
   onModeChange: (mode: "grid" | "single") => void;
   onActiveIndexChange: (index: number | ((index: number) => number)) => void;
@@ -220,7 +226,7 @@ function GalleryModal({
             />
           )}
 
-          <ReviewSidebar ratingAverage={ratingAverage} ratingCount={ratingCount} />
+          <ReviewSidebar ratingAverage={ratingAverage} ratingCount={ratingCount} reviews={reviews} />
         </div>
       </div>
     </div>
@@ -332,20 +338,18 @@ function SinglePhoto({
 function ReviewSidebar({
   ratingAverage,
   ratingCount,
+  reviews,
 }: {
   ratingAverage: number | null;
   ratingCount: number;
+  reviews: PropertyDetail["reviews"];
 }) {
   const score = ratingAverage ?? 0;
-
-  if (!ratingCount || !ratingAverage) {
-    return <aside className="hidden min-h-0 border-l border-slate-200 bg-white lg:block" />;
-  }
 
   return (
     <aside className="hidden min-h-0 border-l border-slate-200 bg-white lg:block">
       <div className="flex items-center gap-3 border-b border-slate-200 p-5 shadow-sm">
-        <span className="rounded-md bg-blue-800 px-2.5 py-2 text-xl font-semibold text-white">
+        <span className="rounded-md bg-emerald-900 px-2.5 py-2 text-xl font-semibold text-white">
           {score ? score.toFixed(1) : "Mới"}
         </span>
         <div>
@@ -354,6 +358,20 @@ function ReviewSidebar({
             {ratingCount ? `${ratingCount} đánh giá` : "Chưa có đánh giá"}
           </p>
         </div>
+      </div>
+      <div className="space-y-3 overflow-y-auto p-5">
+        {reviews.slice(0, 4).map((review) => (
+          <article key={review.id} className="rounded-lg border border-slate-200 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-semibold text-slate-950">{review.guest.name}</p>
+              <span className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-800">{review.rating.toFixed(1)}</span>
+            </div>
+            <p className="mt-2 line-clamp-4 text-sm leading-6 text-slate-600">{review.comment}</p>
+          </article>
+        ))}
+        {!reviews.length ? (
+          <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">Chưa có đánh giá hiển thị trong thư viện ảnh.</p>
+        ) : null}
       </div>
     </aside>
   );

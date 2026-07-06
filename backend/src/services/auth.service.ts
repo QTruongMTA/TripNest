@@ -14,6 +14,8 @@ function toPublicUser(user: {
   nationality: string;
   gender: string | null;
   address: string | null;
+  bankName: string | null;
+  bankAccountNumber: string | null;
   role: string;
   emailVerified: boolean;
 }) {
@@ -28,6 +30,8 @@ function toPublicUser(user: {
     nationality: user.nationality,
     gender: user.gender,
     address: user.address,
+    bankName: user.bankName,
+    bankAccountNumber: user.bankAccountNumber,
     role: user.role,
     emailVerified: user.emailVerified,
   };
@@ -60,6 +64,8 @@ export const authService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
       },
@@ -105,6 +111,8 @@ export const authService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
         isActive: true,
@@ -159,6 +167,8 @@ export const authService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
       },
@@ -182,6 +192,8 @@ export const authService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
       },
@@ -200,6 +212,8 @@ export const authService = {
       nationality?: string;
       gender?: string | null;
       address?: string | null;
+      bankName?: string | null;
+      bankAccountNumber?: string | null;
     }
   ) {
     const user = await prisma.user.update({
@@ -218,6 +232,10 @@ export const authService = {
           : {}),
         ...(input.gender !== undefined ? { gender: input.gender?.trim() || null } : {}),
         ...(input.address !== undefined ? { address: input.address?.trim() || null } : {}),
+        ...(input.bankName !== undefined ? { bankName: input.bankName?.trim() || null } : {}),
+        ...(input.bankAccountNumber !== undefined
+          ? { bankAccountNumber: input.bankAccountNumber?.replace(/\s/g, "") || null }
+          : {}),
       },
       select: {
         id: true,
@@ -230,6 +248,8 @@ export const authService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
       },

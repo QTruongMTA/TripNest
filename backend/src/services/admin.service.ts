@@ -1,12 +1,15 @@
 import {
   BookingStatus,
   CancellationPolicy,
+  DiscountType,
   ListingStatus,
+  PaymentMethod,
   PaymentStatus,
   PropertyType,
   TourCategory,
 } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
+import { parseVoucherMetadata } from "../utils/voucher.utils";
 import { sessionService } from "./session.service";
 
 function formatAge(date: Date): string {
@@ -51,6 +54,200 @@ function mapPaymentMethod(method: string): string {
     CREDIT_CARD: "Thẻ tín dụng",
   };
   return map[method] ?? method;
+}
+
+function monthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(date: Date) {
+  return `T${date.getMonth() + 1}/${date.getFullYear()}`;
+}
+
+function addToBucket<T extends Record<string, number | string>>(buckets: Map<string, T>, key: string, seed: T, fields: Partial<Record<keyof T, number>>) {
+  const current = buckets.get(key) ?? seed;
+  Object.entries(fields).forEach(([field, value]) => {
+    if (typeof value === "number" && typeof current[field as keyof T] === "number") {
+      (current as Record<string, number | string>)[field] = Number(current[field as keyof T]) + value;
+    }
+  });
+  buckets.set(key, current);
+}
+
+type RevenueBookingRow = {
+  id: string;
+  code: string;
+  hostId: string;
+  hostName: string;
+  hostEmail: string;
+  guest: string;
+  guestEmail: string;
+  property: string;
+  province: string;
+  propertyType: string;
+  checkIn: string;
+  checkOut: string;
+  createdAt: string;
+  settlementPeriod: string;
+  grossAmount: number;
+  settlementBase: number;
+  refundAmount: number;
+  penaltyAmount: number;
+  commissionRate: number;
+  commission: number;
+  netRevenue: number;
+  transferReceived: number;
+  hostDirectReceived: number;
+  hostPayout: number;
+  commissionReceivable: number;
+  adjustment: number;
+  status: string;
+  refundStatus: string | null;
+  refundedAt: string | null;
+  paymentMethod: string | null;
+  paymentMethodLabel: string;
+  paymentModel: string;
+  paymentStatus: string;
+  payoutStatus: string;
+  disputeStatus: string | null;
+  disputeSubject: string | null;
+};
+
+function buildRevenuePayloadFromRows(input: {
+  rows: RevenueBookingRow[];
+  period: string;
+  generatedAt: string;
+  payoutPaidByHost?: Map<string, { paidAt: string | null; paidBy: string | null; status: string }>;
+}) {
+  const rows = input.rows;
+  const sum = (selector: (row: RevenueBookingRow) => number) => rows.reduce((total, row) => total + selector(row), 0);
+  const readyRows = rows.filter((row) => row.payoutStatus === "READY_FOR_PAYOUT");
+  const refundRows = rows.filter((row) => row.refundAmount > 0 || row.refundStatus);
+  const disputeRows = rows.filter((row) => row.payoutStatus === "PENDING_SETTLEMENT");
+
+  const settlementByHost = Array.from(rows.reduce((map, row) => {
+    const current = map.get(row.hostId) ?? {
+      hostId: row.hostId,
+      hostName: row.hostName,
+      hostEmail: row.hostEmail,
+      period: input.period,
+      bookingCount: 0,
+      grossAmount: 0,
+      refundAmount: 0,
+      disputeCount: 0,
+      commission: 0,
+      adjustment: 0,
+      hostPayout: 0,
+      commissionReceivable: 0,
+      status: "WAITING_SETTLEMENT",
+    };
+    current.bookingCount += row.payoutStatus === "READY_FOR_PAYOUT" ? 1 : 0;
+    current.grossAmount += row.settlementBase;
+    current.refundAmount += row.refundAmount;
+    current.disputeCount += row.payoutStatus === "PENDING_SETTLEMENT" ? 1 : 0;
+    current.commission += row.commission;
+    current.adjustment += row.adjustment;
+    current.hostPayout += row.hostPayout;
+    current.commissionReceivable += row.commissionReceivable;
+    current.status = current.disputeCount > 0 ? "PENDING_SETTLEMENT" : current.hostPayout > 0 || current.commissionReceivable > 0 ? "READY_FOR_PAYOUT" : "WAITING_SETTLEMENT";
+    map.set(row.hostId, current);
+    return map;
+  }, new Map<string, {
+    hostId: string;
+    hostName: string;
+    hostEmail: string;
+    period: string;
+    bookingCount: number;
+    grossAmount: number;
+    refundAmount: number;
+    disputeCount: number;
+    commission: number;
+    adjustment: number;
+    hostPayout: number;
+    commissionReceivable: number;
+    status: string;
+  }>()).values()).sort((a, b) => b.grossAmount - a.grossAmount);
+
+  const monthBuckets = new Map<string, { month: string; grossBookingValue: number; netRevenue: number; refundAmount: number; hostPayout: number }>();
+  const provinceBuckets = new Map<string, { province: string; grossBookingValue: number; netRevenue: number; bookings: number }>();
+  const typeBuckets = new Map<string, { propertyType: string; grossBookingValue: number; netRevenue: number; bookings: number }>();
+
+  rows.forEach((row) => {
+    const date = new Date(row.checkOut || row.createdAt);
+    addToBucket(monthBuckets, row.settlementPeriod, {
+      month: monthLabel(date),
+      grossBookingValue: 0,
+      netRevenue: 0,
+      refundAmount: 0,
+      hostPayout: 0,
+    }, {
+      grossBookingValue: row.grossAmount,
+      netRevenue: row.netRevenue,
+      refundAmount: row.refundAmount,
+      hostPayout: row.hostPayout,
+    });
+    addToBucket(provinceBuckets, row.province, {
+      province: row.province,
+      grossBookingValue: 0,
+      netRevenue: 0,
+      bookings: 0,
+    }, {
+      grossBookingValue: row.grossAmount,
+      netRevenue: row.netRevenue,
+      bookings: 1,
+    });
+    addToBucket(typeBuckets, row.propertyType, {
+      propertyType: row.propertyType,
+      grossBookingValue: 0,
+      netRevenue: 0,
+      bookings: 0,
+    }, {
+      grossBookingValue: row.grossAmount,
+      netRevenue: row.netRevenue,
+      bookings: 1,
+    });
+  });
+
+  return {
+    generatedAt: input.generatedAt,
+    period: input.period,
+    snapshot: true,
+    summary: {
+      grossBookingValue: sum((row) => row.grossAmount),
+      netRevenue: sum((row) => row.netRevenue),
+      pendingPayout: sum((row) => row.hostPayout),
+      commissionReceivable: sum((row) => row.commissionReceivable),
+      totalRefund: sum((row) => row.refundAmount),
+      disputedBookings: disputeRows.length,
+      waitingSettlementBookings: rows.filter((row) => row.payoutStatus === "WAITING_SETTLEMENT").length,
+      readyBookings: readyRows.length,
+      cancellationRate: rows.length ? Math.round((rows.filter((row) => row.status === BookingStatus.CANCELLED).length / rows.length) * 1000) / 10 : 0,
+      refundRate: rows.length ? Math.round((refundRows.length / rows.length) * 1000) / 10 : 0,
+    },
+    charts: {
+      monthly: Array.from(monthBuckets.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value),
+      byProvince: Array.from(provinceBuckets.values()).sort((a, b) => b.grossBookingValue - a.grossBookingValue),
+      byPropertyType: Array.from(typeBuckets.values()).sort((a, b) => b.grossBookingValue - a.grossBookingValue),
+    },
+    settlements: settlementByHost,
+    bookingDetails: rows,
+    refunds: refundRows,
+    disputes: disputeRows,
+    payouts: settlementByHost.filter((row) => row.hostPayout > 0 || row.commissionReceivable > 0).map((row) => {
+      const paid = input.payoutPaidByHost?.get(row.hostId);
+      return {
+        hostId: row.hostId,
+        hostName: row.hostName,
+        period: row.period,
+        bookingCount: row.bookingCount,
+        amount: row.hostPayout,
+        commissionReceivable: row.commissionReceivable,
+        status: paid?.status ?? (row.status === "READY_FOR_PAYOUT" ? "READY" : "PENDING"),
+        paidAt: paid?.paidAt ?? null,
+        paidBy: paid?.paidBy ?? null,
+      };
+    }),
+  };
 }
 
 export type CreatePropertyInput = {
@@ -132,6 +329,8 @@ export const adminService = {
         email: true,
         role: true,
         phone: true,
+        bankName: true,
+        bankAccountNumber: true,
         emailVerified: true,
         isActive: true,
         createdAt: true,
@@ -177,6 +376,8 @@ export const adminService = {
         nationality: true,
         gender: true,
         address: true,
+        bankName: true,
+        bankAccountNumber: true,
         role: true,
         emailVerified: true,
         isActive: true,
@@ -531,12 +732,14 @@ export const adminService = {
 
   async listAdminBookings() {
     const bookings = await prisma.booking.findMany({
+      where: { type: "PROPERTY" },
       orderBy: { createdAt: "desc" },
       include: {
         user: { select: { email: true } },
-        property: { select: { title: true } },
+        property: { select: { title: true, commission: true } },
         tour: { select: { title: true } },
-        payment: { select: { method: true } },
+        promotion: { select: { code: true, description: true, discountType: true, discountValue: true } },
+        payment: { select: { method: true, amount: true, status: true } },
       },
     });
 
@@ -566,6 +769,101 @@ export const adminService = {
     });
   },
 
+  async listAdminPropertyBookings() {
+    const bookings = await prisma.booking.findMany({
+      where: { type: "PROPERTY" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { email: true } },
+        property: { select: { title: true, commission: true } },
+        promotion: { select: { code: true, description: true, discountType: true, discountValue: true } },
+        payment: { select: { method: true, amount: true, status: true } },
+      },
+    });
+
+    return bookings.map((booking) => {
+      const guestPaidValue = booking.totalPrice.toNumber();
+      const cancellationRefundValue = booking.cancellationRefundAmount?.toNumber() ?? 0;
+      const cancellationPenaltyValue = booking.cancellationPenaltyAmount?.toNumber() ?? 0;
+      const isCancelled = booking.status === "CANCELLED";
+      const commissionRate = booking.property?.commission?.toNumber() ?? 0.15;
+      const voucherMetadata = parseVoucherMetadata(booking.promotion?.description);
+      const discountRate = booking.promotion?.discountType === "PERCENTAGE"
+        ? booking.promotion.discountValue.toNumber() / 100
+        : 0;
+      const fixedDiscount = booking.promotion?.discountType === "FIXED_AMOUNT"
+        ? Math.round(booking.promotion.discountValue.toNumber())
+        : 0;
+      const originalPriceValue = booking.promotion
+        ? booking.promotion.discountType === "PERCENTAGE"
+          ? Math.round(guestPaidValue / Math.max(0.01, 1 - discountRate))
+          : guestPaidValue + fixedDiscount
+        : guestPaidValue;
+      const totalDiscountValue = Math.max(0, originalPriceValue - guestPaidValue);
+      const hostDiscountValue = voucherMetadata?.kind === "HOST_PROPERTY_VOUCHER" ? totalDiscountValue : 0;
+      const systemDiscountValue = voucherMetadata?.kind === "SYSTEM_VOUCHER" ? totalDiscountValue : 0;
+      const transferReceivedValue = booking.payment?.method === "BANK_TRANSFER" ? booking.payment.amount.toNumber() : 0;
+      const settlementBaseValue = isCancelled ? cancellationPenaltyValue : originalPriceValue;
+      const platformFeeValue = Math.round(settlementBaseValue * commissionRate);
+      const businessRevenueValue = isCancelled
+        ? Math.max(0, platformFeeValue)
+        : Math.max(0, platformFeeValue - systemDiscountValue);
+      const hostReceivableValue = isCancelled
+        ? Math.max(0, cancellationPenaltyValue - platformFeeValue)
+        : Math.max(0, originalPriceValue - platformFeeValue - hostDiscountValue);
+      const hostDirectReceivedValue = isCancelled ? 0 : Math.max(0, guestPaidValue - transferReceivedValue);
+      const checkIn = booking.checkIn?.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) ?? "";
+      const checkOut = booking.checkOut?.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) ?? "";
+
+      return {
+        id: `BK-${booking.id.slice(-8).toUpperCase()}`,
+        fullId: booking.id,
+        guest: booking.user.email,
+        item: booking.property?.title ?? "Chỗ ở",
+        date: checkIn && checkOut ? `${checkIn} - ${checkOut}` : "",
+        amount: formatVND(guestPaidValue),
+        guestPaid: formatVND(isCancelled ? cancellationPenaltyValue : guestPaidValue),
+        guestPaidValue: isCancelled ? cancellationPenaltyValue : guestPaidValue,
+        originalPrice: formatVND(originalPriceValue),
+        originalPriceValue,
+        hostDiscount: formatVND(hostDiscountValue),
+        hostDiscountValue,
+        systemDiscount: formatVND(systemDiscountValue),
+        systemDiscountValue,
+        revenue: businessRevenueValue,
+        businessAmount: formatVND(businessRevenueValue),
+        businessRevenue: businessRevenueValue,
+        platformFee: formatVND(platformFeeValue),
+        platformFeeValue,
+        hostReceivable: formatVND(hostReceivableValue),
+        hostReceivableValue,
+        commissionRate,
+        transferReceived: formatVND(transferReceivedValue),
+        transferReceivedValue,
+        hostDirectReceived: formatVND(hostDirectReceivedValue),
+        hostDirectReceivedValue,
+        cancellationRefundAmount: cancellationRefundValue,
+        cancellationRefund: formatVND(cancellationRefundValue),
+        cancellationPenaltyAmount: cancellationPenaltyValue,
+        cancellationPenalty: formatVND(cancellationPenaltyValue),
+        refundStatus: booking.refundStatus ?? null,
+        refundedAt: booking.refundedAt?.toISOString() ?? null,
+        voucherCode: booking.promotion?.code ?? null,
+        voucherOwner: voucherMetadata?.kind === "SYSTEM_VOUCHER" ? "ADMIN" : voucherMetadata?.kind === "HOST_PROPERTY_VOUCHER" ? "HOST" : null,
+        voucherDiscount: totalDiscountValue > 0 ? formatVND(totalDiscountValue) : null,
+        voucherDiscountValue: totalDiscountValue,
+        status: mapBookingStatus(booking.status),
+        rawStatus: booking.status,
+        paymentMethod: booking.payment ? mapPaymentMethod(booking.payment.method) : "—",
+        paymentStatus: booking.payment
+          ? booking.payment.method === "BANK_TRANSFER"
+            ? "Đã thanh toán"
+            : mapPaymentStatus(booking.payment.status)
+          : "—",
+      };
+    });
+  },
+
   async listAdminPayments() {
     const payments = await prisma.payment.findMany({
       orderBy: { createdAt: "desc" },
@@ -586,6 +884,566 @@ export const adminService = {
     }));
   },
 
+  async getSettlementSnapshot(period: string) {
+    const settlement = await prisma.settlementRun.findUnique({
+      where: { period },
+      include: {
+        bookings: { orderBy: { createdAt: "asc" } },
+        payouts: { orderBy: { createdAt: "desc" } },
+      },
+    });
+
+    if (!settlement) return null;
+
+    const paidMap = new Map(settlement.payouts.map((payout) => [
+      payout.hostId,
+      {
+        paidAt: payout.paidAt?.toISOString() ?? null,
+        paidBy: payout.paidBy,
+        status: payout.status,
+      },
+    ]));
+
+    return buildRevenuePayloadFromRows({
+      period: settlement.period,
+      generatedAt: settlement.generatedAt.toISOString(),
+      payoutPaidByHost: paidMap,
+      rows: settlement.bookings.map((row) => ({
+        id: row.bookingId,
+        code: row.code,
+        hostId: row.hostId,
+        hostName: row.hostName,
+        hostEmail: row.hostEmail ?? "",
+        guest: row.guest,
+        guestEmail: row.guestEmail,
+        property: row.property,
+        province: row.province,
+        propertyType: row.propertyType,
+        checkIn: row.checkIn ?? "",
+        checkOut: row.checkOut ?? "",
+        createdAt: row.createdAtSnapshot.toISOString(),
+        settlementPeriod: row.settlementPeriod,
+        grossAmount: row.grossAmount.toNumber(),
+        settlementBase: row.settlementBase.toNumber(),
+        refundAmount: row.refundAmount.toNumber(),
+        penaltyAmount: row.penaltyAmount.toNumber(),
+        commissionRate: row.commissionRate.toNumber(),
+        commission: row.commission.toNumber(),
+        netRevenue: row.netRevenue.toNumber(),
+        transferReceived: row.transferReceived.toNumber(),
+        hostDirectReceived: row.hostDirectReceived.toNumber(),
+        hostPayout: row.hostPayout.toNumber(),
+        commissionReceivable: row.commissionReceivable.toNumber(),
+        adjustment: row.adjustment.toNumber(),
+        status: row.bookingStatus,
+        refundStatus: row.refundStatus,
+        refundedAt: row.refundedAt?.toISOString() ?? null,
+        paymentMethod: row.paymentMethod,
+        paymentMethodLabel: row.paymentMethodLabel,
+        paymentModel: row.paymentModel,
+        paymentStatus: row.paymentStatus,
+        payoutStatus: row.payoutStatus,
+        disputeStatus: row.disputeStatus,
+        disputeSubject: row.disputeSubject,
+      })),
+    });
+  },
+
+  async getRevenueManagement(period?: string, options: { ignoreSnapshot?: boolean } = {}) {
+    const now = new Date();
+    const targetPeriod = period ?? monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    if (!options.ignoreSnapshot) {
+      const snapshot = await this.getSettlementSnapshot(targetPeriod);
+      if (snapshot) return snapshot;
+    }
+    const bookings = await prisma.booking.findMany({
+      where: { type: "PROPERTY" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { email: true, name: true, displayName: true } },
+        property: {
+          select: {
+            id: true,
+            title: true,
+            city: true,
+            type: true,
+            commission: true,
+            host: { select: { id: true, email: true, name: true, displayName: true } },
+          },
+        },
+        payment: { select: { method: true, amount: true, status: true, paidAt: true } },
+      },
+    });
+
+    const disputes = await prisma.dispute.findMany({
+      where: {
+        bookingId: { in: bookings.map((booking) => booking.id) },
+        status: { in: ["OPEN", "INVESTIGATING", "ESCALATED"] },
+      },
+      select: { bookingId: true, status: true, subject: true },
+    });
+    const disputeByBooking = new Map(disputes.filter((dispute) => dispute.bookingId).map((dispute) => [dispute.bookingId as string, dispute]));
+
+    const rows = bookings.map((booking) => {
+      const total = booking.totalPrice.toNumber();
+      const refundAmount = booking.cancellationRefundAmount?.toNumber() ?? 0;
+      const penaltyAmount = booking.cancellationPenaltyAmount?.toNumber() ?? 0;
+      const isCancelled = booking.status === BookingStatus.CANCELLED;
+      const isChargeableCancel = isCancelled && penaltyAmount > 0;
+      const isCompletedLike = booking.status === BookingStatus.COMPLETED || (booking.status === BookingStatus.CONFIRMED && booking.checkOut !== null && booking.checkOut <= now);
+      const dispute = disputeByBooking.get(booking.id);
+      const hasDispute = Boolean(dispute);
+      const requiresRefund = isCancelled && refundAmount > 0;
+      const isRefunded = booking.refundStatus === "REFUNDED";
+      const isEligible = !hasDispute && (isCompletedLike || isChargeableCancel) && (!requiresRefund || isRefunded) && !requiresRefund;
+      const settlementBase = isChargeableCancel ? penaltyAmount : isEligible ? total : 0;
+      const commissionRate = booking.property?.commission?.toNumber() ?? 0.15;
+      const commission = Math.round(settlementBase * commissionRate);
+      const transferReceived = booking.payment?.method === PaymentMethod.BANK_TRANSFER ? booking.payment.amount.toNumber() : 0;
+      const hostDirectReceived = booking.payment?.method === PaymentMethod.CASH && !isCancelled
+        ? total
+        : booking.payment?.method === PaymentMethod.BANK_TRANSFER && !isCancelled
+          ? Math.max(0, total - transferReceived)
+          : 0;
+      const tripNestHeldForSettlement = isChargeableCancel ? penaltyAmount : isEligible ? transferReceived : 0;
+      const hostPayout = Math.max(0, tripNestHeldForSettlement - commission);
+      const commissionReceivable = Math.max(0, commission - tripNestHeldForSettlement);
+      const netRevenue = isEligible ? commission : 0;
+      const payoutStatus = hasDispute
+        ? "PENDING_SETTLEMENT"
+        : requiresRefund
+          ? isRefunded ? "REFUNDED" : "REFUND_PENDING"
+          : isEligible
+            ? "READY_FOR_PAYOUT"
+            : "WAITING_SETTLEMENT";
+      const paymentModel = booking.payment?.method === PaymentMethod.CASH ? "PAY_AT_PROPERTY" : transferReceived >= total ? "PAY_FULL" : transferReceived > 0 ? "DEPOSIT_30" : "UNPAID";
+      const hostName = booking.property?.host.displayName ?? booking.property?.host.name ?? booking.property?.host.email ?? "Host";
+      const guestName = booking.user.displayName ?? booking.user.name ?? booking.user.email;
+
+      return {
+        id: booking.id,
+        code: `BK-${booking.id.slice(-8).toUpperCase()}`,
+        hostId: booking.property?.host.id ?? "unknown",
+        hostName,
+        hostEmail: booking.property?.host.email ?? "",
+        guest: guestName,
+        guestEmail: booking.user.email,
+        property: booking.property?.title ?? "Chỗ ở",
+        province: booking.property?.city ?? "Không rõ",
+        propertyType: booking.property?.type ?? "PROPERTY",
+        checkIn: booking.checkIn?.toISOString().slice(0, 10) ?? "",
+        checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? "",
+        createdAt: booking.createdAt.toISOString(),
+        settlementPeriod: monthKey(booking.checkOut ?? booking.createdAt),
+        grossAmount: total,
+        settlementBase,
+        refundAmount,
+        penaltyAmount,
+        commissionRate,
+        commission,
+        netRevenue,
+        transferReceived,
+        hostDirectReceived,
+        hostPayout,
+        commissionReceivable,
+        adjustment: 0,
+        status: booking.status,
+        refundStatus: booking.refundStatus ?? null,
+        refundedAt: booking.refundedAt?.toISOString() ?? null,
+        paymentMethod: booking.payment?.method ?? null,
+        paymentMethodLabel: booking.payment ? mapPaymentMethod(booking.payment.method) : "—",
+        paymentModel,
+        paymentStatus: booking.payment?.status ?? booking.paymentStatus,
+        payoutStatus,
+        disputeStatus: dispute?.status ?? null,
+        disputeSubject: dispute?.subject ?? null,
+      };
+    });
+
+    const sum = (selector: (row: (typeof rows)[number]) => number) => rows.reduce((total, row) => total + selector(row), 0);
+    const readyRows = rows.filter((row) => row.payoutStatus === "READY_FOR_PAYOUT");
+    const refundRows = rows.filter((row) => row.refundAmount > 0 || row.refundStatus);
+    const disputeRows = rows.filter((row) => row.payoutStatus === "PENDING_SETTLEMENT");
+
+    const settlementByHost = Array.from(rows.reduce((map, row) => {
+      const current = map.get(row.hostId) ?? {
+        hostId: row.hostId,
+        hostName: row.hostName,
+        hostEmail: row.hostEmail,
+        period: row.settlementPeriod,
+        bookingCount: 0,
+        grossAmount: 0,
+        refundAmount: 0,
+        disputeCount: 0,
+        commission: 0,
+        adjustment: 0,
+        hostPayout: 0,
+        commissionReceivable: 0,
+        status: "WAITING_SETTLEMENT",
+      };
+      current.bookingCount += row.payoutStatus === "READY_FOR_PAYOUT" ? 1 : 0;
+      current.grossAmount += row.settlementBase;
+      current.refundAmount += row.refundAmount;
+      current.disputeCount += row.payoutStatus === "PENDING_SETTLEMENT" ? 1 : 0;
+      current.commission += row.commission;
+      current.hostPayout += row.hostPayout;
+      current.commissionReceivable += row.commissionReceivable;
+      current.status = current.disputeCount > 0 ? "PENDING_SETTLEMENT" : current.hostPayout > 0 || current.commissionReceivable > 0 ? "READY_FOR_PAYOUT" : "WAITING_SETTLEMENT";
+      map.set(row.hostId, current);
+      return map;
+    }, new Map<string, {
+      hostId: string;
+      hostName: string;
+      hostEmail: string;
+      period: string;
+      bookingCount: number;
+      grossAmount: number;
+      refundAmount: number;
+      disputeCount: number;
+      commission: number;
+      adjustment: number;
+      hostPayout: number;
+      commissionReceivable: number;
+      status: string;
+    }>()).values()).sort((a, b) => b.grossAmount - a.grossAmount);
+
+    const monthBuckets = new Map<string, { month: string; grossBookingValue: number; netRevenue: number; refundAmount: number; hostPayout: number }>();
+    const provinceBuckets = new Map<string, { province: string; grossBookingValue: number; netRevenue: number; bookings: number }>();
+    const typeBuckets = new Map<string, { propertyType: string; grossBookingValue: number; netRevenue: number; bookings: number }>();
+
+    rows.forEach((row) => {
+      const date = new Date(row.checkOut || row.createdAt);
+      addToBucket(monthBuckets, row.settlementPeriod, {
+        month: monthLabel(date),
+        grossBookingValue: 0,
+        netRevenue: 0,
+        refundAmount: 0,
+        hostPayout: 0,
+      }, {
+        grossBookingValue: row.grossAmount,
+        netRevenue: row.netRevenue,
+        refundAmount: row.refundAmount,
+        hostPayout: row.hostPayout,
+      });
+      addToBucket(provinceBuckets, row.province, {
+        province: row.province,
+        grossBookingValue: 0,
+        netRevenue: 0,
+        bookings: 0,
+      }, {
+        grossBookingValue: row.grossAmount,
+        netRevenue: row.netRevenue,
+        bookings: 1,
+      });
+      addToBucket(typeBuckets, row.propertyType, {
+        propertyType: row.propertyType,
+        grossBookingValue: 0,
+        netRevenue: 0,
+        bookings: 0,
+      }, {
+        grossBookingValue: row.grossAmount,
+        netRevenue: row.netRevenue,
+        bookings: 1,
+      });
+    });
+
+    const payoutLogs = await prisma.auditLog.findMany({
+      where: {
+        action: "HOST_PAYOUT_PAID",
+        entity: "HOST_PAYOUT",
+        entityId: { in: settlementByHost.map((row) => row.hostId) },
+      },
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { email: true, name: true, displayName: true } } },
+    });
+    const payoutLogByHost = new Map<string, (typeof payoutLogs)[number]>();
+    payoutLogs.forEach((log) => {
+      if (log.entityId && !payoutLogByHost.has(log.entityId)) {
+        payoutLogByHost.set(log.entityId, log);
+      }
+    });
+
+    return {
+      generatedAt: new Date().toISOString(),
+      period: monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+      summary: {
+        grossBookingValue: sum((row) => row.grossAmount),
+        netRevenue: sum((row) => row.netRevenue),
+        pendingPayout: sum((row) => row.hostPayout),
+        commissionReceivable: sum((row) => row.commissionReceivable),
+        totalRefund: sum((row) => row.refundAmount),
+        disputedBookings: disputeRows.length,
+        waitingSettlementBookings: rows.filter((row) => row.payoutStatus === "WAITING_SETTLEMENT").length,
+        readyBookings: readyRows.length,
+        cancellationRate: rows.length ? Math.round((rows.filter((row) => row.status === BookingStatus.CANCELLED).length / rows.length) * 1000) / 10 : 0,
+        refundRate: rows.length ? Math.round((refundRows.length / rows.length) * 1000) / 10 : 0,
+      },
+      charts: {
+        monthly: Array.from(monthBuckets.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value),
+        byProvince: Array.from(provinceBuckets.values()).sort((a, b) => b.grossBookingValue - a.grossBookingValue),
+        byPropertyType: Array.from(typeBuckets.values()).sort((a, b) => b.grossBookingValue - a.grossBookingValue),
+      },
+      settlements: settlementByHost,
+      bookingDetails: rows,
+      refunds: refundRows,
+      disputes: disputeRows,
+      payouts: settlementByHost.filter((row) => row.hostPayout > 0 || row.commissionReceivable > 0).map((row) => {
+        const paidLog = payoutLogByHost.get(row.hostId);
+        return {
+          hostId: row.hostId,
+          hostName: row.hostName,
+          period: row.period,
+          bookingCount: row.bookingCount,
+          amount: row.hostPayout,
+          commissionReceivable: row.commissionReceivable,
+          status: paidLog ? "PAID" : row.status === "READY_FOR_PAYOUT" ? "READY" : "PENDING",
+          paidAt: paidLog?.createdAt.toISOString() ?? null,
+          paidBy: paidLog?.user?.displayName ?? paidLog?.user?.name ?? paidLog?.user?.email ?? null,
+        };
+      }),
+    };
+  },
+
+  async markHostPayoutPaid(input: {
+    adminId: string | null;
+    hostId: string;
+    period: string;
+    amount: number;
+    bookingCount: number;
+    commissionReceivable: number;
+  }) {
+    return prisma.$transaction(async (tx) => {
+      const host = await tx.user.findFirst({
+        where: { id: input.hostId, role: "HOST" },
+        select: { id: true, email: true, displayName: true, name: true },
+      });
+
+      if (!host) return { kind: "HOST_NOT_FOUND" as const };
+
+      const auditLog = await tx.auditLog.create({
+        data: {
+          userId: input.adminId,
+          action: "HOST_PAYOUT_PAID",
+          entity: "HOST_PAYOUT",
+          entityId: host.id,
+          newValue: {
+            hostId: host.id,
+            hostName: host.displayName ?? host.name ?? host.email,
+            period: input.period,
+            amount: Math.round(input.amount),
+            bookingCount: input.bookingCount,
+            commissionReceivable: Math.round(input.commissionReceivable),
+          },
+        },
+        include: { user: { select: { email: true, name: true, displayName: true } } },
+      });
+
+      const paidBy = auditLog.user?.displayName ?? auditLog.user?.name ?? auditLog.user?.email ?? null;
+      const settlementHost = await tx.settlementHost.findFirst({
+        where: { hostId: host.id, period: input.period },
+        select: { id: true, settlementId: true },
+      });
+      if (settlementHost) {
+        await tx.settlementHost.update({
+          where: { id: settlementHost.id },
+          data: {
+            status: "PAID_OUT",
+            paidAt: auditLog.createdAt,
+            paidBy,
+          },
+        });
+        await tx.payoutTransaction.upsert({
+          where: { settlementHostId: settlementHost.id },
+          create: {
+            settlementId: settlementHost.settlementId,
+            settlementHostId: settlementHost.id,
+            hostId: host.id,
+            period: input.period,
+            bookingCount: input.bookingCount,
+            amount: Math.round(input.amount),
+            commissionReceivable: Math.round(input.commissionReceivable),
+            status: "PAID",
+            paidAt: auditLog.createdAt,
+            paidBy,
+          },
+          update: {
+            status: "PAID",
+            paidAt: auditLog.createdAt,
+            paidBy,
+            bookingCount: input.bookingCount,
+            amount: Math.round(input.amount),
+            commissionReceivable: Math.round(input.commissionReceivable),
+          },
+        });
+      }
+
+      await tx.notification.create({
+        data: {
+          userId: host.id,
+          type: "SYSTEM",
+          title: "TripNest đã thanh toán kỳ đối soát",
+          message: `TripNest đã ghi nhận thanh toán ${input.amount.toLocaleString("vi-VN")} đ cho kỳ ${input.period}.`,
+          metadata: {
+            action: "HOST_PAYOUT_PAID",
+            period: input.period,
+            amount: Math.round(input.amount),
+            bookingCount: input.bookingCount,
+            commissionReceivable: Math.round(input.commissionReceivable),
+          },
+        },
+      });
+
+      return {
+        kind: "SUCCESS" as const,
+        data: {
+          hostId: host.id,
+          status: "PAID",
+          paidAt: auditLog.createdAt.toISOString(),
+          paidBy,
+        },
+      };
+    });
+  },
+
+  async generateMonthlySettlement(input: {
+    adminId: string | null;
+    period: string;
+    force?: boolean;
+  }) {
+    const existing = await prisma.settlementRun.findUnique({ where: { period: input.period } });
+    if (existing && !input.force) {
+      const snapshot = await this.getSettlementSnapshot(input.period);
+      return { kind: "ALREADY_EXISTS" as const, data: snapshot };
+    }
+
+    const live = await this.getRevenueManagement(input.period, { ignoreSnapshot: true });
+    const periodRows = (live.bookingDetails as RevenueBookingRow[]).filter((row) => row.settlementPeriod === input.period);
+    const payload = buildRevenuePayloadFromRows({
+      rows: periodRows,
+      period: input.period,
+      generatedAt: new Date().toISOString(),
+    });
+
+    const saved = await prisma.$transaction(async (tx) => {
+      if (existing && input.force) {
+        await tx.settlementRun.delete({ where: { id: existing.id } });
+      }
+
+      const settlement = await tx.settlementRun.create({
+        data: {
+          period: input.period,
+          status: payload.summary.disputedBookings > 0 ? "PENDING_SETTLEMENT" : "READY_FOR_PAYOUT",
+          generatedBy: input.adminId,
+          summary: payload.summary,
+          charts: payload.charts,
+          notes: "Monthly settlement snapshot generated from eligible booking, refund, dispute and payout data.",
+        },
+      });
+
+      for (const host of payload.settlements) {
+        const hostSnapshot = await tx.settlementHost.create({
+          data: {
+            settlementId: settlement.id,
+            hostId: host.hostId,
+            hostName: host.hostName,
+            hostEmail: host.hostEmail,
+            period: input.period,
+            bookingCount: host.bookingCount,
+            grossAmount: host.grossAmount,
+            refundAmount: host.refundAmount,
+            disputeCount: host.disputeCount,
+            commission: host.commission,
+            adjustment: host.adjustment,
+            hostPayout: host.hostPayout,
+            commissionReceivable: host.commissionReceivable,
+            status: host.status,
+          },
+        });
+
+        const hostRows = periodRows.filter((row) => row.hostId === host.hostId);
+        if (hostRows.length) {
+          await tx.settlementBooking.createMany({
+            data: hostRows.map((row) => ({
+              settlementId: settlement.id,
+              settlementHostId: hostSnapshot.id,
+              bookingId: row.id,
+              code: row.code,
+              hostId: row.hostId,
+              hostName: row.hostName,
+              hostEmail: row.hostEmail,
+              guest: row.guest,
+              guestEmail: row.guestEmail,
+              property: row.property,
+              province: row.province,
+              propertyType: row.propertyType,
+              checkIn: row.checkIn || null,
+              checkOut: row.checkOut || null,
+              createdAtSnapshot: new Date(row.createdAt),
+              settlementPeriod: row.settlementPeriod,
+              grossAmount: row.grossAmount,
+              settlementBase: row.settlementBase,
+              refundAmount: row.refundAmount,
+              penaltyAmount: row.penaltyAmount,
+              commissionRate: row.commissionRate,
+              commission: row.commission,
+              netRevenue: row.netRevenue,
+              transferReceived: row.transferReceived,
+              hostDirectReceived: row.hostDirectReceived,
+              hostPayout: row.hostPayout,
+              commissionReceivable: row.commissionReceivable,
+              adjustment: row.adjustment,
+              bookingStatus: row.status,
+              refundStatus: row.refundStatus,
+              refundedAt: row.refundedAt ? new Date(row.refundedAt) : null,
+              paymentMethod: row.paymentMethod,
+              paymentMethodLabel: row.paymentMethodLabel,
+              paymentModel: row.paymentModel,
+              paymentStatus: row.paymentStatus,
+              payoutStatus: row.payoutStatus,
+              disputeStatus: row.disputeStatus,
+              disputeSubject: row.disputeSubject,
+            })),
+          });
+        }
+
+        if (host.hostPayout > 0 || host.commissionReceivable > 0) {
+          await tx.payoutTransaction.create({
+            data: {
+              settlementId: settlement.id,
+              settlementHostId: hostSnapshot.id,
+              hostId: host.hostId,
+              period: input.period,
+              bookingCount: host.bookingCount,
+              amount: host.hostPayout,
+              commissionReceivable: host.commissionReceivable,
+              status: host.status === "READY_FOR_PAYOUT" ? "READY" : "PENDING",
+            },
+          });
+        }
+      }
+
+      await tx.auditLog.create({
+        data: {
+          userId: input.adminId,
+          action: existing && input.force ? "SETTLEMENT_REGENERATED" : "SETTLEMENT_GENERATED",
+          entity: "SETTLEMENT",
+          entityId: settlement.id,
+          newValue: {
+            period: input.period,
+            bookingCount: periodRows.length,
+            hostCount: payload.settlements.length,
+            summary: payload.summary,
+          },
+        },
+      });
+
+      return settlement;
+    });
+
+    const snapshot = await this.getSettlementSnapshot(saved.period);
+    return { kind: "SUCCESS" as const, data: snapshot };
+  },
+
   async listAdminPromotions() {
     const promotions = await prisma.promotion.findMany({ orderBy: { createdAt: "desc" } });
 
@@ -603,6 +1461,116 @@ export const adminService = {
       const endVN = p.endDate.toLocaleDateString("vi-VN");
 
       return { code: p.code, value, uses, period: `${startVN}–${endVN}`, status };
+    });
+  },
+
+  async listSystemPromotions() {
+    const promotions = await prisma.promotion.findMany({ orderBy: { createdAt: "desc" } });
+
+    return promotions
+      .filter((promotion) => parseVoucherMetadata(promotion.description)?.kind === "SYSTEM_VOUCHER")
+      .map((promotion) => {
+        const metadata = parseVoucherMetadata(promotion.description);
+        const expired = promotion.endDate < new Date();
+        const isFull = promotion.maxUses !== null && promotion.usedCount >= promotion.maxUses;
+
+        return {
+          id: promotion.id,
+          code: promotion.code,
+          description: metadata?.voucherType ?? "Voucher hệ thống",
+          discountType: promotion.discountType,
+          discountValue: promotion.discountValue.toNumber(),
+          usedCount: promotion.usedCount,
+          maxUses: promotion.maxUses,
+          startDate: promotion.startDate.toISOString().slice(0, 10),
+          endDate: promotion.endDate.toISOString().slice(0, 10),
+          conditions: metadata?.conditions ?? [],
+          isActive: promotion.isActive,
+          status: expired ? "EXPIRED" : isFull ? "FULL" : promotion.isActive ? "ACTIVE" : "INACTIVE",
+        };
+      });
+  },
+
+  async createSystemPromotion(input: {
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    quantity: number;
+    expiresAt: Date;
+    voucherType: string;
+    conditions: Array<"MIN_ORDER_500K" | "MIN_GUESTS_5">;
+  }) {
+    return prisma.promotion.create({
+      data: {
+        code: input.code,
+        description: JSON.stringify({
+          kind: "SYSTEM_VOUCHER",
+          voucherType: input.voucherType,
+          conditions: input.conditions,
+        }),
+        discountType: input.discountType,
+        discountValue: input.discountType === DiscountType.PERCENTAGE
+          ? Math.min(100, Math.round(input.discountValue))
+          : Math.round(input.discountValue),
+        minOrderValue: input.conditions.includes("MIN_ORDER_500K") ? 500000 : null,
+        maxUses: input.quantity,
+        startDate: new Date(),
+        endDate: input.expiresAt,
+        isActive: true,
+      },
+    });
+  },
+
+  async markBookingRefunded(bookingId: string) {
+    return prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: { id: bookingId },
+        select: {
+          id: true,
+          userId: true,
+          status: true,
+          cancellationRefundAmount: true,
+          refundStatus: true,
+          property: { select: { title: true } },
+        },
+      });
+
+      if (!booking) return { kind: "BOOKING_NOT_FOUND" as const };
+      const refundAmount = booking.cancellationRefundAmount?.toNumber() ?? 0;
+      if (booking.status !== "CANCELLED" || refundAmount <= 0) {
+        return { kind: "REFUND_NOT_REQUIRED" as const };
+      }
+
+      const updated = await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          refundStatus: "REFUNDED",
+          refundedAt: new Date(),
+          paymentStatus: "REFUNDED",
+        },
+        select: {
+          id: true,
+          refundStatus: true,
+          refundedAt: true,
+          paymentStatus: true,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: booking.userId,
+          type: "SYSTEM",
+          title: "Đã hoàn tiền đặt chỗ",
+          message: `TripNest đã hoàn ${refundAmount.toLocaleString("vi-VN")} đ cho đơn ${booking.property?.title ?? "đặt chỗ"}.`,
+          metadata: {
+            bookingId,
+            action: "BOOKING_REFUNDED",
+            refundAmount,
+          },
+        },
+      });
+
+      return { kind: "SUCCESS" as const, data: updated };
     });
   },
 

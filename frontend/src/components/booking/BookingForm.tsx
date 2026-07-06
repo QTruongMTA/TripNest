@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { getAccessToken } from "@/lib/auth";
+import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -23,7 +24,7 @@ const paymentOptions: Array<{ value: PaymentOption; title: string; note: string 
   {
     value: "PAY_AT_PROPERTY",
     title: "Thanh toán khi nhận phòng",
-    note: "Thay đổi miễn phí trước 7 ngày từ ngày nhận phòng, sau 7 ngày tính thêm phụ phí 25% giá trị đơn.",
+    note: "Thay đổi miễn phí, nhưng không được thêm mã giảm giá.",
   },
   {
     value: "DEPOSIT_30",
@@ -56,7 +57,7 @@ function getMissingDateMessage(checkIn: string, checkOut: string) {
   return null;
 }
 
-function getQrUrl(amount: number) {
+function getQrUrl(amount: number, addInfo: string) {
   const bankId = process.env.NEXT_PUBLIC_VIETQR_BANK_ID;
   const accountNo = process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NO;
   if (!bankId || !accountNo || amount <= 0) return null;
@@ -65,6 +66,7 @@ function getQrUrl(amount: number) {
   const params = new URLSearchParams({
     amount: String(Math.round(amount)),
     accountName,
+    addInfo,
   });
 
   return `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?${params.toString()}`;
@@ -81,6 +83,9 @@ export function BookingForm({
   messageAction,
 }: BookingFormProps) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const userEmail = user?.email;
+  const hasRefundBankAccount = Boolean(user?.bankName?.trim() && user?.bankAccountNumber?.trim());
   const today = new Date().toISOString().split("T")[0];
   const initialGuestCount = Number(initialGuests);
   const [checkIn, setCheckIn] = useState(initialCheckIn ?? "");
@@ -98,6 +103,9 @@ export function BookingForm({
   const [showPaymentBox, setShowPaymentBox] = useState(false);
   const [paymentOption, setPaymentOption] = useState<PaymentOption>("PAY_AT_PROPERTY");
   const [notes, setNotes] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherStatus, setVoucherStatus] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number; finalAmount: number } | null>(null);
   const cameFromDatedSearch = Boolean(initialCheckIn && initialCheckOut);
   const minCheckOut = checkIn ? addDaysIso(checkIn, 1) : addDaysIso(today, 1);
 
@@ -113,9 +121,16 @@ export function BookingForm({
     (pricePerNight && nights > 0 ? nights * pricePerNight + (cleaningFee ?? 0) : null);
   const stayPreview = availabilityPricing?.stayPrice ?? nights * (pricePerNight ?? 0);
   const feePreview = availabilityPricing?.cleaningFee ?? (cleaningFee ?? 0);
-  const depositAmount = totalPreview ? Math.round(totalPreview * 0.3) : 0;
-  const transferAmount = paymentOption === "DEPOSIT_30" ? depositAmount : paymentOption === "PAY_FULL" ? totalPreview ?? 0 : 0;
-  const qrUrl = getQrUrl(transferAmount);
+  const discountedTotalPreview = totalPreview !== null ? appliedVoucher?.finalAmount ?? totalPreview : null;
+  const voucherDiscount = totalPreview !== null ? appliedVoucher?.discountAmount ?? 0 : 0;
+  const depositAmount = discountedTotalPreview ? Math.round(discountedTotalPreview * 0.3) : 0;
+  const transferAmount = paymentOption === "DEPOSIT_30" ? depositAmount : paymentOption === "PAY_FULL" ? discountedTotalPreview ?? 0 : 0;
+  const qrContent = useMemo(() => {
+    const email = userEmail ?? "guest";
+    return `TRIPNEST ${email} ${propertyId.slice(-8).toUpperCase()}`;
+  }, [propertyId, userEmail]);
+  const qrUrl = getQrUrl(transferAmount, qrContent);
+  const lockedPaymentTooltip = "Cập nhật tài khoản ngân hàng trong mục Tài khoản của quý khách để lựa chọn phương thức thanh toán này";
 
   function showMessage(nextMessage: string, alert = true) {
     setMessage(nextMessage);
@@ -126,6 +141,44 @@ export function BookingForm({
   function resetAvailability() {
     setAvailabilityPricing(null);
     setShowPaymentBox(false);
+    setAppliedVoucher(null);
+    setVoucherStatus("");
+  }
+
+  async function applyVoucher() {
+    const code = voucherCode.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    setVoucherCode(code);
+
+    if (!code || totalPreview === null) {
+      setVoucherStatus("Vui lòng kiểm tra phòng và nhập mã voucher.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1"}/promotions/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId,
+          code,
+          orderValue: totalPreview,
+          guests,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setAppliedVoucher(null);
+        setVoucherStatus(payload.error?.message ?? "Mã voucher không hợp lệ.");
+        return;
+      }
+
+      setAppliedVoucher(payload.data);
+      setVoucherStatus(`Đã áp dụng voucher ${code}.`);
+    } catch {
+      setAppliedVoucher(null);
+      setVoucherStatus("Không thể kiểm tra mã voucher.");
+    }
   }
 
   async function checkAvailability(options?: { silent?: boolean; alertWhenAvailable?: boolean }) {
@@ -174,6 +227,20 @@ export function BookingForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!hasRefundBankAccount && paymentOption !== "PAY_AT_PROPERTY") {
+      setPaymentOption("PAY_AT_PROPERTY");
+    }
+  }, [hasRefundBankAccount, paymentOption]);
+
+  useEffect(() => {
+    if (paymentOption === "PAY_AT_PROPERTY") {
+      setVoucherCode("");
+      setAppliedVoucher(null);
+      setVoucherStatus("");
+    }
+  }, [paymentOption]);
+
   async function handleOpenPaymentBox() {
     const missingDateMessage = getMissingDateMessage(checkIn, checkOut);
     if (missingDateMessage) {
@@ -196,6 +263,12 @@ export function BookingForm({
       return;
     }
 
+    if (paymentOption !== "PAY_AT_PROPERTY" && !hasRefundBankAccount) {
+      showMessage(lockedPaymentTooltip);
+      setPaymentOption("PAY_AT_PROPERTY");
+      return;
+    }
+
     setBookingLoading(true);
 
     try {
@@ -214,6 +287,7 @@ export function BookingForm({
             guests,
             paymentOption,
             notes,
+            voucherCode: appliedVoucher?.code ?? null,
           }),
         }
       );
@@ -326,6 +400,18 @@ export function BookingForm({
             <span>Tổng cộng</span>
             <span>{formatCurrency(totalPreview)}</span>
           </div>
+          {appliedVoucher ? (
+            <>
+              <div className="mt-2 flex justify-between text-emerald-700">
+                <span>Voucher {appliedVoucher.code}</span>
+                <span>-{formatCurrency(voucherDiscount)}</span>
+              </div>
+              <div className="mt-3 flex justify-between border-t border-slate-200 pt-3 font-semibold text-teal-800">
+                <span>Còn lại</span>
+                <span>{formatCurrency(discountedTotalPreview ?? totalPreview)}</span>
+              </div>
+            </>
+          ) : null}
         </div>
       ) : null}
 
@@ -366,28 +452,79 @@ export function BookingForm({
             </div>
 
             <div className="mt-5 grid gap-3">
-              {paymentOptions.map((option) => (
+              {paymentOptions.map((option) => {
+                const isLocked = option.value !== "PAY_AT_PROPERTY" && !hasRefundBankAccount;
+                const isSelected = paymentOption === option.value;
+
+                return (
                 <label
                   key={option.value}
-                  className={`flex cursor-pointer gap-3 rounded-lg border p-4 transition ${
-                    paymentOption === option.value
-                      ? "border-blue-700 bg-blue-50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
+                  title={isLocked ? lockedPaymentTooltip : undefined}
+                  className={`flex gap-3 rounded-lg border p-4 transition ${
+                    isLocked
+                      ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-50"
+                      : isSelected
+                        ? "cursor-pointer border-blue-700 bg-blue-50"
+                        : "cursor-pointer border-slate-200 bg-white hover:border-slate-300"
                   }`}
                 >
                   <input
                     type="radio"
-                    checked={paymentOption === option.value}
+                    checked={isSelected}
+                    disabled={isLocked}
                     onChange={() => setPaymentOption(option.value)}
-                    className="mt-1 h-4 w-4 accent-blue-700"
+                    className="mt-1 h-4 w-4 accent-blue-700 disabled:cursor-not-allowed"
                   />
                   <span>
                     <span className="block font-semibold text-slate-950">{option.title}</span>
                     <span className="mt-1 block text-sm leading-6 text-slate-500">{option.note}</span>
                   </span>
                 </label>
-              ))}
+                );
+              })}
             </div>
+
+            {paymentOption !== "PAY_AT_PROPERTY" ? (
+            <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <label className="grid gap-2 text-sm">
+                <span className="font-semibold text-slate-700">Mã voucher</span>
+                <div className="grid gap-2 sm:grid-cols-[1fr_120px]">
+                  <input
+                    value={voucherCode}
+                    onChange={(event) => {
+                      setVoucherCode(event.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase());
+                      setAppliedVoucher(null);
+                      setVoucherStatus("");
+                    }}
+                    placeholder="VD: SALE123456"
+                    className="rounded-lg border border-slate-200 bg-white px-4 py-3 font-semibold uppercase tracking-[0.08em] outline-none focus:border-teal-600"
+                  />
+                  <button type="button" onClick={applyVoucher} className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800">
+                    Áp dụng
+                  </button>
+                </div>
+              </label>
+              {voucherStatus ? <p className="mt-3 text-sm font-semibold text-slate-700">{voucherStatus}</p> : null}
+              {totalPreview !== null ? (
+                <div className="mt-4 grid gap-2 text-sm">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Tạm tính</span>
+                    <span>{formatCurrency(totalPreview)}</span>
+                  </div>
+                  {appliedVoucher ? (
+                    <div className="flex justify-between text-emerald-700">
+                      <span>Giảm voucher</span>
+                      <span>-{formatCurrency(voucherDiscount)}</span>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between border-t border-slate-200 pt-2 font-semibold text-slate-950">
+                    <span>Số tiền còn lại</span>
+                    <span>{formatCurrency(discountedTotalPreview ?? totalPreview)}</span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            ) : null}
 
             {paymentOption !== "PAY_AT_PROPERTY" ? (
               <div className="mt-5 grid gap-4 rounded-lg border border-dashed border-teal-200 bg-teal-50 p-4 md:grid-cols-[180px_1fr]">
@@ -402,6 +539,7 @@ export function BookingForm({
                 <div className="text-sm leading-6 text-slate-700">
                   <p className="font-semibold text-slate-950">Số tiền cần thanh toán: {formatCurrency(transferAmount)}</p>
                   <p className="mt-2">Tên tài khoản: {process.env.NEXT_PUBLIC_VIETQR_ACCOUNT_NAME ?? "TRIPNEST"}</p>
+                  <p className="mt-2">Nội dung chuyển khoản: <span className="font-semibold text-slate-950">{qrContent}</span></p>
                 </div>
               </div>
             ) : null}

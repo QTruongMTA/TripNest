@@ -67,6 +67,11 @@ export type OperatorTask = Prisma.OperatorTaskModel
  */
 export type HostApprovalRequest = Prisma.HostApprovalRequestModel
 /**
+ * Model PropertyChangeRequest
+ * 
+ */
+export type PropertyChangeRequest = Prisma.PropertyChangeRequestModel
+/**
  * Model Dispute
  * 
  */
@@ -122,6 +127,11 @@ export type Amenity = Prisma.AmenityModel
  */
 export type PropertyAvailability = Prisma.PropertyAvailabilityModel
 /**
+ * Model PropertyDailyRate
+ * 
+ */
+export type PropertyDailyRate = Prisma.PropertyDailyRateModel
+/**
  * Model Tour
  * 
  */
@@ -151,6 +161,26 @@ export type TourAvailability = Prisma.TourAvailabilityModel
  * 
  */
 export type Booking = Prisma.BookingModel
+/**
+ * Model SettlementRun
+ * 
+ */
+export type SettlementRun = Prisma.SettlementRunModel
+/**
+ * Model SettlementHost
+ * 
+ */
+export type SettlementHost = Prisma.SettlementHostModel
+/**
+ * Model SettlementBooking
+ * 
+ */
+export type SettlementBooking = Prisma.SettlementBookingModel
+/**
+ * Model PayoutTransaction
+ * 
+ */
+export type PayoutTransaction = Prisma.PayoutTransactionModel
 /**
  * Model Payment
  * 

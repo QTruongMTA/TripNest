@@ -36,6 +36,8 @@ export type UserMinAggregateOutputType = {
   nationality: string | null
   gender: string | null
   address: string | null
+  bankName: string | null
+  bankAccountNumber: string | null
   role: $Enums.Role | null
   emailVerified: boolean | null
   isActive: boolean | null
@@ -56,6 +58,8 @@ export type UserMaxAggregateOutputType = {
   nationality: string | null
   gender: string | null
   address: string | null
+  bankName: string | null
+  bankAccountNumber: string | null
   role: $Enums.Role | null
   emailVerified: boolean | null
   isActive: boolean | null
@@ -76,6 +80,8 @@ export type UserCountAggregateOutputType = {
   nationality: number
   gender: number
   address: number
+  bankName: number
+  bankAccountNumber: number
   role: number
   emailVerified: number
   isActive: number
@@ -98,6 +104,8 @@ export type UserMinAggregateInputType = {
   nationality?: true
   gender?: true
   address?: true
+  bankName?: true
+  bankAccountNumber?: true
   role?: true
   emailVerified?: true
   isActive?: true
@@ -118,6 +126,8 @@ export type UserMaxAggregateInputType = {
   nationality?: true
   gender?: true
   address?: true
+  bankName?: true
+  bankAccountNumber?: true
   role?: true
   emailVerified?: true
   isActive?: true
@@ -138,6 +148,8 @@ export type UserCountAggregateInputType = {
   nationality?: true
   gender?: true
   address?: true
+  bankName?: true
+  bankAccountNumber?: true
   role?: true
   emailVerified?: true
   isActive?: true
@@ -231,6 +243,8 @@ export type UserGroupByOutputType = {
   nationality: string
   gender: string | null
   address: string | null
+  bankName: string | null
+  bankAccountNumber: string | null
   role: $Enums.Role
   emailVerified: boolean
   isActive: boolean
@@ -272,6 +286,8 @@ export type UserWhereInput = {
   nationality?: Prisma.StringFilter<"User"> | string
   gender?: Prisma.StringNullableFilter<"User"> | string | null
   address?: Prisma.StringNullableFilter<"User"> | string | null
+  bankName?: Prisma.StringNullableFilter<"User"> | string | null
+  bankAccountNumber?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   isActive?: Prisma.BoolFilter<"User"> | boolean
@@ -289,6 +305,8 @@ export type UserWhereInput = {
   guestConversations?: Prisma.ConversationListRelationFilter
   hostConversations?: Prisma.ConversationListRelationFilter
   sentMessages?: Prisma.ConversationMessageListRelationFilter
+  propertyChangeRequests?: Prisma.PropertyChangeRequestListRelationFilter
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestListRelationFilter
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedByMe?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedTasks?: Prisma.OperatorTaskListRelationFilter
@@ -314,6 +332,8 @@ export type UserOrderByWithRelationInput = {
   nationality?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankAccountNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -331,6 +351,8 @@ export type UserOrderByWithRelationInput = {
   guestConversations?: Prisma.ConversationOrderByRelationAggregateInput
   hostConversations?: Prisma.ConversationOrderByRelationAggregateInput
   sentMessages?: Prisma.ConversationMessageOrderByRelationAggregateInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestOrderByRelationAggregateInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestOrderByRelationAggregateInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentOrderByRelationAggregateInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentOrderByRelationAggregateInput
   assignedTasks?: Prisma.OperatorTaskOrderByRelationAggregateInput
@@ -359,6 +381,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   nationality?: Prisma.StringFilter<"User"> | string
   gender?: Prisma.StringNullableFilter<"User"> | string | null
   address?: Prisma.StringNullableFilter<"User"> | string | null
+  bankName?: Prisma.StringNullableFilter<"User"> | string | null
+  bankAccountNumber?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   isActive?: Prisma.BoolFilter<"User"> | boolean
@@ -376,6 +400,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   guestConversations?: Prisma.ConversationListRelationFilter
   hostConversations?: Prisma.ConversationListRelationFilter
   sentMessages?: Prisma.ConversationMessageListRelationFilter
+  propertyChangeRequests?: Prisma.PropertyChangeRequestListRelationFilter
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestListRelationFilter
   operatorAssignments?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedByMe?: Prisma.OperatorProvinceAssignmentListRelationFilter
   assignedTasks?: Prisma.OperatorTaskListRelationFilter
@@ -401,6 +427,8 @@ export type UserOrderByWithAggregationInput = {
   nationality?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankName?: Prisma.SortOrderInput | Prisma.SortOrder
+  bankAccountNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -427,6 +455,8 @@ export type UserScalarWhereWithAggregatesInput = {
   nationality?: Prisma.StringWithAggregatesFilter<"User"> | string
   gender?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  bankName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  bankAccountNumber?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -447,6 +477,8 @@ export type UserCreateInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -463,6 +495,8 @@ export type UserCreateInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -488,6 +522,8 @@ export type UserUncheckedCreateInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -505,6 +541,8 @@ export type UserUncheckedCreateInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -529,6 +567,8 @@ export type UserUpdateInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -545,6 +585,8 @@ export type UserUpdateInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -570,6 +612,8 @@ export type UserUncheckedUpdateInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -587,6 +631,8 @@ export type UserUncheckedUpdateInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -611,6 +657,8 @@ export type UserCreateManyInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -631,6 +679,8 @@ export type UserUpdateManyMutationInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -650,6 +700,8 @@ export type UserUncheckedUpdateManyInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -685,6 +737,8 @@ export type UserCountOrderByAggregateInput = {
   nationality?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  bankAccountNumber?: Prisma.SortOrder
   role?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -705,6 +759,8 @@ export type UserMaxOrderByAggregateInput = {
   nationality?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  bankAccountNumber?: Prisma.SortOrder
   role?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -725,6 +781,8 @@ export type UserMinOrderByAggregateInput = {
   nationality?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  bankName?: Prisma.SortOrder
+  bankAccountNumber?: Prisma.SortOrder
   role?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -904,6 +962,36 @@ export type UserUpdateOneWithoutReviewedApprovalsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedApprovalsInput, Prisma.UserUpdateWithoutReviewedApprovalsInput>, Prisma.UserUncheckedUpdateWithoutReviewedApprovalsInput>
+}
+
+export type UserCreateNestedOneWithoutPropertyChangeRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedCreateWithoutPropertyChangeRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPropertyChangeRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedPropertyChangesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedCreateWithoutReviewedPropertyChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedPropertyChangesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPropertyChangeRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedCreateWithoutPropertyChangeRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPropertyChangeRequestsInput
+  upsert?: Prisma.UserUpsertWithoutPropertyChangeRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPropertyChangeRequestsInput, Prisma.UserUpdateWithoutPropertyChangeRequestsInput>, Prisma.UserUncheckedUpdateWithoutPropertyChangeRequestsInput>
+}
+
+export type UserUpdateOneWithoutReviewedPropertyChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedCreateWithoutReviewedPropertyChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedPropertyChangesInput
+  upsert?: Prisma.UserUpsertWithoutReviewedPropertyChangesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedPropertyChangesInput, Prisma.UserUpdateWithoutReviewedPropertyChangesInput>, Prisma.UserUncheckedUpdateWithoutReviewedPropertyChangesInput>
 }
 
 export type UserCreateNestedOneWithoutDisputesAsHostInput = {
@@ -1118,6 +1206,8 @@ export type UserCreateWithoutCreatedOperatorsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1134,6 +1224,8 @@ export type UserCreateWithoutCreatedOperatorsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1158,6 +1250,8 @@ export type UserUncheckedCreateWithoutCreatedOperatorsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1175,6 +1269,8 @@ export type UserUncheckedCreateWithoutCreatedOperatorsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1203,6 +1299,8 @@ export type UserCreateWithoutCreatedByAdminInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1219,6 +1317,8 @@ export type UserCreateWithoutCreatedByAdminInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1243,6 +1343,8 @@ export type UserUncheckedCreateWithoutCreatedByAdminInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1259,6 +1361,8 @@ export type UserUncheckedCreateWithoutCreatedByAdminInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1304,6 +1408,8 @@ export type UserUpdateWithoutCreatedOperatorsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1320,6 +1426,8 @@ export type UserUpdateWithoutCreatedOperatorsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -1344,6 +1452,8 @@ export type UserUncheckedUpdateWithoutCreatedOperatorsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1361,6 +1471,8 @@ export type UserUncheckedUpdateWithoutCreatedOperatorsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -1403,6 +1515,8 @@ export type UserScalarWhereInput = {
   nationality?: Prisma.StringFilter<"User"> | string
   gender?: Prisma.StringNullableFilter<"User"> | string | null
   address?: Prisma.StringNullableFilter<"User"> | string | null
+  bankName?: Prisma.StringNullableFilter<"User"> | string | null
+  bankAccountNumber?: Prisma.StringNullableFilter<"User"> | string | null
   role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   isActive?: Prisma.BoolFilter<"User"> | boolean
@@ -1423,6 +1537,8 @@ export type UserCreateWithoutOperatorAssignmentsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1439,6 +1555,8 @@ export type UserCreateWithoutOperatorAssignmentsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1463,6 +1581,8 @@ export type UserUncheckedCreateWithoutOperatorAssignmentsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1480,6 +1600,8 @@ export type UserUncheckedCreateWithoutOperatorAssignmentsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1508,6 +1630,8 @@ export type UserCreateWithoutAssignedByMeInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1524,6 +1648,8 @@ export type UserCreateWithoutAssignedByMeInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1548,6 +1674,8 @@ export type UserUncheckedCreateWithoutAssignedByMeInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1565,6 +1693,8 @@ export type UserUncheckedCreateWithoutAssignedByMeInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1604,6 +1734,8 @@ export type UserUpdateWithoutOperatorAssignmentsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1620,6 +1752,8 @@ export type UserUpdateWithoutOperatorAssignmentsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1644,6 +1778,8 @@ export type UserUncheckedUpdateWithoutOperatorAssignmentsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1661,6 +1797,8 @@ export type UserUncheckedUpdateWithoutOperatorAssignmentsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -1695,6 +1833,8 @@ export type UserUpdateWithoutAssignedByMeInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1711,6 +1851,8 @@ export type UserUpdateWithoutAssignedByMeInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1735,6 +1877,8 @@ export type UserUncheckedUpdateWithoutAssignedByMeInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1752,6 +1896,8 @@ export type UserUncheckedUpdateWithoutAssignedByMeInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -1775,6 +1921,8 @@ export type UserCreateWithoutAssignedTasksInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1791,6 +1939,8 @@ export type UserCreateWithoutAssignedTasksInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
@@ -1815,6 +1965,8 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1832,6 +1984,8 @@ export type UserUncheckedCreateWithoutAssignedTasksInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
@@ -1860,6 +2014,8 @@ export type UserCreateWithoutCreatedTasksInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1876,6 +2032,8 @@ export type UserCreateWithoutCreatedTasksInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -1900,6 +2058,8 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -1917,6 +2077,8 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -1956,6 +2118,8 @@ export type UserUpdateWithoutAssignedTasksInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1972,6 +2136,8 @@ export type UserUpdateWithoutAssignedTasksInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
@@ -1996,6 +2162,8 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2013,6 +2181,8 @@ export type UserUncheckedUpdateWithoutAssignedTasksInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
@@ -2047,6 +2217,8 @@ export type UserUpdateWithoutCreatedTasksInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2063,6 +2235,8 @@ export type UserUpdateWithoutCreatedTasksInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2087,6 +2261,8 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2104,6 +2280,8 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2127,6 +2305,8 @@ export type UserCreateWithoutHostApprovalRequestsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2143,6 +2323,8 @@ export type UserCreateWithoutHostApprovalRequestsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2167,6 +2349,8 @@ export type UserUncheckedCreateWithoutHostApprovalRequestsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2184,6 +2368,8 @@ export type UserUncheckedCreateWithoutHostApprovalRequestsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2212,6 +2398,8 @@ export type UserCreateWithoutReviewedApprovalsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2228,6 +2416,8 @@ export type UserCreateWithoutReviewedApprovalsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2252,6 +2442,8 @@ export type UserUncheckedCreateWithoutReviewedApprovalsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2269,6 +2461,8 @@ export type UserUncheckedCreateWithoutReviewedApprovalsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2308,6 +2502,8 @@ export type UserUpdateWithoutHostApprovalRequestsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2324,6 +2520,8 @@ export type UserUpdateWithoutHostApprovalRequestsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2348,6 +2546,8 @@ export type UserUncheckedUpdateWithoutHostApprovalRequestsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2365,6 +2565,8 @@ export type UserUncheckedUpdateWithoutHostApprovalRequestsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2399,6 +2601,8 @@ export type UserUpdateWithoutReviewedApprovalsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2415,6 +2619,8 @@ export type UserUpdateWithoutReviewedApprovalsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2439,6 +2645,8 @@ export type UserUncheckedUpdateWithoutReviewedApprovalsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2456,11 +2664,397 @@ export type UserUncheckedUpdateWithoutReviewedApprovalsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
   createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
   hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
+  createdOperators?: Prisma.UserUncheckedUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserCreateWithoutPropertyChangeRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeCreateNestedManyWithoutResolverInput
+  createdByAdmin?: Prisma.UserCreateNestedOneWithoutCreatedOperatorsInput
+  createdOperators?: Prisma.UserCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserUncheckedCreateWithoutPropertyChangeRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeUncheckedCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeUncheckedCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutResolverInput
+  createdOperators?: Prisma.UserUncheckedCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserCreateOrConnectWithoutPropertyChangeRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedCreateWithoutPropertyChangeRequestsInput>
+}
+
+export type UserCreateWithoutReviewedPropertyChangesInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeCreateNestedManyWithoutResolverInput
+  createdByAdmin?: Prisma.UserCreateNestedOneWithoutCreatedOperatorsInput
+  createdOperators?: Prisma.UserCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserUncheckedCreateWithoutReviewedPropertyChangesInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  displayName?: string | null
+  phone?: string | null
+  avatar?: string | null
+  birthDate?: Date | string | null
+  nationality?: string
+  gender?: string | null
+  address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdById?: string | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutHostInput
+  tours?: Prisma.TourUncheckedCreateNestedManyWithoutHostInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
+  hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
+  createdTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssignerInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutUserInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedCreateNestedManyWithoutReviewerInput
+  disputesAsHost?: Prisma.DisputeUncheckedCreateNestedManyWithoutHostInput
+  disputesAsGuest?: Prisma.DisputeUncheckedCreateNestedManyWithoutGuestInput
+  resolvedDisputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutResolverInput
+  createdOperators?: Prisma.UserUncheckedCreateNestedManyWithoutCreatedByAdminInput
+}
+
+export type UserCreateOrConnectWithoutReviewedPropertyChangesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedCreateWithoutReviewedPropertyChangesInput>
+}
+
+export type UserUpsertWithoutPropertyChangeRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedUpdateWithoutPropertyChangeRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedCreateWithoutPropertyChangeRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPropertyChangeRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPropertyChangeRequestsInput, Prisma.UserUncheckedUpdateWithoutPropertyChangeRequestsInput>
+}
+
+export type UserUpdateWithoutPropertyChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUpdateManyWithoutResolverNestedInput
+  createdByAdmin?: Prisma.UserUpdateOneWithoutCreatedOperatorsNestedInput
+  createdOperators?: Prisma.UserUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPropertyChangeRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUncheckedUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
+  createdOperators?: Prisma.UserUncheckedUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUpsertWithoutReviewedPropertyChangesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedUpdateWithoutReviewedPropertyChangesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedCreateWithoutReviewedPropertyChangesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedPropertyChangesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedPropertyChangesInput, Prisma.UserUncheckedUpdateWithoutReviewedPropertyChangesInput>
+}
+
+export type UserUpdateWithoutReviewedPropertyChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUpdateManyWithoutReviewerNestedInput
+  disputesAsHost?: Prisma.DisputeUpdateManyWithoutHostNestedInput
+  disputesAsGuest?: Prisma.DisputeUpdateManyWithoutGuestNestedInput
+  resolvedDisputes?: Prisma.DisputeUpdateManyWithoutResolverNestedInput
+  createdByAdmin?: Prisma.UserUpdateOneWithoutCreatedOperatorsNestedInput
+  createdOperators?: Prisma.UserUpdateManyWithoutCreatedByAdminNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedPropertyChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nationality?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutHostNestedInput
+  tours?: Prisma.TourUncheckedUpdateManyWithoutHostNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  promotionRedemptions?: Prisma.PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
+  hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
+  assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
+  assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
+  createdTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssignerNestedInput
+  hostApprovalRequests?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutUserNestedInput
+  reviewedApprovals?: Prisma.HostApprovalRequestUncheckedUpdateManyWithoutReviewerNestedInput
   disputesAsHost?: Prisma.DisputeUncheckedUpdateManyWithoutHostNestedInput
   disputesAsGuest?: Prisma.DisputeUncheckedUpdateManyWithoutGuestNestedInput
   resolvedDisputes?: Prisma.DisputeUncheckedUpdateManyWithoutResolverNestedInput
@@ -2479,6 +3073,8 @@ export type UserCreateWithoutDisputesAsHostInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2495,6 +3091,8 @@ export type UserCreateWithoutDisputesAsHostInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2519,6 +3117,8 @@ export type UserUncheckedCreateWithoutDisputesAsHostInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2536,6 +3136,8 @@ export type UserUncheckedCreateWithoutDisputesAsHostInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2564,6 +3166,8 @@ export type UserCreateWithoutDisputesAsGuestInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2580,6 +3184,8 @@ export type UserCreateWithoutDisputesAsGuestInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2604,6 +3210,8 @@ export type UserUncheckedCreateWithoutDisputesAsGuestInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2621,6 +3229,8 @@ export type UserUncheckedCreateWithoutDisputesAsGuestInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2649,6 +3259,8 @@ export type UserCreateWithoutResolvedDisputesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2665,6 +3277,8 @@ export type UserCreateWithoutResolvedDisputesInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -2689,6 +3303,8 @@ export type UserUncheckedCreateWithoutResolvedDisputesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -2706,6 +3322,8 @@ export type UserUncheckedCreateWithoutResolvedDisputesInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -2745,6 +3363,8 @@ export type UserUpdateWithoutDisputesAsHostInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2761,6 +3381,8 @@ export type UserUpdateWithoutDisputesAsHostInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2785,6 +3407,8 @@ export type UserUncheckedUpdateWithoutDisputesAsHostInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2802,6 +3426,8 @@ export type UserUncheckedUpdateWithoutDisputesAsHostInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2836,6 +3462,8 @@ export type UserUpdateWithoutDisputesAsGuestInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2852,6 +3480,8 @@ export type UserUpdateWithoutDisputesAsGuestInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2876,6 +3506,8 @@ export type UserUncheckedUpdateWithoutDisputesAsGuestInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2893,6 +3525,8 @@ export type UserUncheckedUpdateWithoutDisputesAsGuestInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -2927,6 +3561,8 @@ export type UserUpdateWithoutResolvedDisputesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2943,6 +3579,8 @@ export type UserUpdateWithoutResolvedDisputesInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -2967,6 +3605,8 @@ export type UserUncheckedUpdateWithoutResolvedDisputesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2984,6 +3624,8 @@ export type UserUncheckedUpdateWithoutResolvedDisputesInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3007,6 +3649,8 @@ export type UserCreateWithoutVerificationTokensInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3022,6 +3666,8 @@ export type UserCreateWithoutVerificationTokensInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3047,6 +3693,8 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3063,6 +3711,8 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3103,6 +3753,8 @@ export type UserUpdateWithoutVerificationTokensInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3118,6 +3770,8 @@ export type UserUpdateWithoutVerificationTokensInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3143,6 +3797,8 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3159,6 +3815,8 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3183,6 +3841,8 @@ export type UserCreateWithoutPropertiesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3198,6 +3858,8 @@ export type UserCreateWithoutPropertiesInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3223,6 +3885,8 @@ export type UserUncheckedCreateWithoutPropertiesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3239,6 +3903,8 @@ export type UserUncheckedCreateWithoutPropertiesInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3279,6 +3945,8 @@ export type UserUpdateWithoutPropertiesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3294,6 +3962,8 @@ export type UserUpdateWithoutPropertiesInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3319,6 +3989,8 @@ export type UserUncheckedUpdateWithoutPropertiesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3335,6 +4007,8 @@ export type UserUncheckedUpdateWithoutPropertiesInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3359,6 +4033,8 @@ export type UserCreateWithoutToursInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3374,6 +4050,8 @@ export type UserCreateWithoutToursInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3399,6 +4077,8 @@ export type UserUncheckedCreateWithoutToursInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3415,6 +4095,8 @@ export type UserUncheckedCreateWithoutToursInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3455,6 +4137,8 @@ export type UserUpdateWithoutToursInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3470,6 +4154,8 @@ export type UserUpdateWithoutToursInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3495,6 +4181,8 @@ export type UserUncheckedUpdateWithoutToursInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3511,6 +4199,8 @@ export type UserUncheckedUpdateWithoutToursInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3535,6 +4225,8 @@ export type UserCreateWithoutBookingsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3550,6 +4242,8 @@ export type UserCreateWithoutBookingsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3575,6 +4269,8 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3591,6 +4287,8 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3631,6 +4329,8 @@ export type UserUpdateWithoutBookingsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3646,6 +4346,8 @@ export type UserUpdateWithoutBookingsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3671,6 +4373,8 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3687,6 +4391,8 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3711,6 +4417,8 @@ export type UserCreateWithoutReviewsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3726,6 +4434,8 @@ export type UserCreateWithoutReviewsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3751,6 +4461,8 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3767,6 +4479,8 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3807,6 +4521,8 @@ export type UserUpdateWithoutReviewsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3822,6 +4538,8 @@ export type UserUpdateWithoutReviewsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -3847,6 +4565,8 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3863,6 +4583,8 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -3887,6 +4609,8 @@ export type UserCreateWithoutPromotionRedemptionsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3902,6 +4626,8 @@ export type UserCreateWithoutPromotionRedemptionsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -3927,6 +4653,8 @@ export type UserUncheckedCreateWithoutPromotionRedemptionsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -3943,6 +4671,8 @@ export type UserUncheckedCreateWithoutPromotionRedemptionsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -3983,6 +4713,8 @@ export type UserUpdateWithoutPromotionRedemptionsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3998,6 +4730,8 @@ export type UserUpdateWithoutPromotionRedemptionsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4023,6 +4757,8 @@ export type UserUncheckedUpdateWithoutPromotionRedemptionsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4039,6 +4775,8 @@ export type UserUncheckedUpdateWithoutPromotionRedemptionsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4063,6 +4801,8 @@ export type UserCreateWithoutAuditLogsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4078,6 +4818,8 @@ export type UserCreateWithoutAuditLogsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4103,6 +4845,8 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4119,6 +4863,8 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4159,6 +4905,8 @@ export type UserUpdateWithoutAuditLogsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4174,6 +4922,8 @@ export type UserUpdateWithoutAuditLogsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4199,6 +4949,8 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4215,6 +4967,8 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4239,6 +4993,8 @@ export type UserCreateWithoutNotificationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4254,6 +5010,8 @@ export type UserCreateWithoutNotificationsInput = {
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4279,6 +5037,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4295,6 +5055,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4335,6 +5097,8 @@ export type UserUpdateWithoutNotificationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4350,6 +5114,8 @@ export type UserUpdateWithoutNotificationsInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4375,6 +5141,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4391,6 +5159,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4415,6 +5185,8 @@ export type UserCreateWithoutGuestConversationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4430,6 +5202,8 @@ export type UserCreateWithoutGuestConversationsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4455,6 +5229,8 @@ export type UserUncheckedCreateWithoutGuestConversationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4471,6 +5247,8 @@ export type UserUncheckedCreateWithoutGuestConversationsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4500,6 +5278,8 @@ export type UserCreateWithoutHostConversationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4515,6 +5295,8 @@ export type UserCreateWithoutHostConversationsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   sentMessages?: Prisma.ConversationMessageCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4540,6 +5322,8 @@ export type UserUncheckedCreateWithoutHostConversationsInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4556,6 +5340,8 @@ export type UserUncheckedCreateWithoutHostConversationsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   sentMessages?: Prisma.ConversationMessageUncheckedCreateNestedManyWithoutSenderInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4596,6 +5382,8 @@ export type UserUpdateWithoutGuestConversationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4611,6 +5399,8 @@ export type UserUpdateWithoutGuestConversationsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4636,6 +5426,8 @@ export type UserUncheckedUpdateWithoutGuestConversationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4652,6 +5444,8 @@ export type UserUncheckedUpdateWithoutGuestConversationsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4687,6 +5481,8 @@ export type UserUpdateWithoutHostConversationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4702,6 +5498,8 @@ export type UserUpdateWithoutHostConversationsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4727,6 +5525,8 @@ export type UserUncheckedUpdateWithoutHostConversationsInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4743,6 +5543,8 @@ export type UserUncheckedUpdateWithoutHostConversationsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4767,6 +5569,8 @@ export type UserCreateWithoutSentMessagesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4782,6 +5586,8 @@ export type UserCreateWithoutSentMessagesInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   guestConversations?: Prisma.ConversationCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationCreateNestedManyWithoutHostInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskCreateNestedManyWithoutAssigneeInput
@@ -4807,6 +5613,8 @@ export type UserUncheckedCreateWithoutSentMessagesInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4823,6 +5631,8 @@ export type UserUncheckedCreateWithoutSentMessagesInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   guestConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutGuestInput
   hostConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutHostInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutHostInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedCreateNestedManyWithoutReviewerInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutOperatorInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedCreateNestedManyWithoutAssignedByUserInput
   assignedTasks?: Prisma.OperatorTaskUncheckedCreateNestedManyWithoutAssigneeInput
@@ -4863,6 +5673,8 @@ export type UserUpdateWithoutSentMessagesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4878,6 +5690,8 @@ export type UserUpdateWithoutSentMessagesInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -4903,6 +5717,8 @@ export type UserUncheckedUpdateWithoutSentMessagesInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4919,6 +5735,8 @@ export type UserUncheckedUpdateWithoutSentMessagesInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -4943,6 +5761,8 @@ export type UserCreateManyCreatedByAdminInput = {
   nationality?: string
   gender?: string | null
   address?: string | null
+  bankName?: string | null
+  bankAccountNumber?: string | null
   role?: $Enums.Role
   emailVerified?: boolean
   isActive?: boolean
@@ -4962,6 +5782,8 @@ export type UserUpdateWithoutCreatedByAdminInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4978,6 +5800,8 @@ export type UserUpdateWithoutCreatedByAdminInput = {
   guestConversations?: Prisma.ConversationUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUpdateManyWithoutAssigneeNestedInput
@@ -5002,6 +5826,8 @@ export type UserUncheckedUpdateWithoutCreatedByAdminInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -5018,6 +5844,8 @@ export type UserUncheckedUpdateWithoutCreatedByAdminInput = {
   guestConversations?: Prisma.ConversationUncheckedUpdateManyWithoutGuestNestedInput
   hostConversations?: Prisma.ConversationUncheckedUpdateManyWithoutHostNestedInput
   sentMessages?: Prisma.ConversationMessageUncheckedUpdateManyWithoutSenderNestedInput
+  propertyChangeRequests?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutHostNestedInput
+  reviewedPropertyChanges?: Prisma.PropertyChangeRequestUncheckedUpdateManyWithoutReviewerNestedInput
   operatorAssignments?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutOperatorNestedInput
   assignedByMe?: Prisma.OperatorProvinceAssignmentUncheckedUpdateManyWithoutAssignedByUserNestedInput
   assignedTasks?: Prisma.OperatorTaskUncheckedUpdateManyWithoutAssigneeNestedInput
@@ -5042,6 +5870,8 @@ export type UserUncheckedUpdateManyWithoutCreatedByAdminInput = {
   nationality?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bankAccountNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -5066,6 +5896,8 @@ export type UserCountOutputType = {
   guestConversations: number
   hostConversations: number
   sentMessages: number
+  propertyChangeRequests: number
+  reviewedPropertyChanges: number
   operatorAssignments: number
   assignedByMe: number
   assignedTasks: number
@@ -5090,6 +5922,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   guestConversations?: boolean | UserCountOutputTypeCountGuestConversationsArgs
   hostConversations?: boolean | UserCountOutputTypeCountHostConversationsArgs
   sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
+  propertyChangeRequests?: boolean | UserCountOutputTypeCountPropertyChangeRequestsArgs
+  reviewedPropertyChanges?: boolean | UserCountOutputTypeCountReviewedPropertyChangesArgs
   operatorAssignments?: boolean | UserCountOutputTypeCountOperatorAssignmentsArgs
   assignedByMe?: boolean | UserCountOutputTypeCountAssignedByMeArgs
   assignedTasks?: boolean | UserCountOutputTypeCountAssignedTasksArgs
@@ -5192,6 +6026,20 @@ export type UserCountOutputTypeCountSentMessagesArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountPropertyChangeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyChangeRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedPropertyChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PropertyChangeRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountOperatorAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OperatorProvinceAssignmentWhereInput
 }
@@ -5272,6 +6120,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   nationality?: boolean
   gender?: boolean
   address?: boolean
+  bankName?: boolean
+  bankAccountNumber?: boolean
   role?: boolean
   emailVerified?: boolean
   isActive?: boolean
@@ -5289,6 +6139,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   guestConversations?: boolean | Prisma.User$guestConversationsArgs<ExtArgs>
   hostConversations?: boolean | Prisma.User$hostConversationsArgs<ExtArgs>
   sentMessages?: boolean | Prisma.User$sentMessagesArgs<ExtArgs>
+  propertyChangeRequests?: boolean | Prisma.User$propertyChangeRequestsArgs<ExtArgs>
+  reviewedPropertyChanges?: boolean | Prisma.User$reviewedPropertyChangesArgs<ExtArgs>
   operatorAssignments?: boolean | Prisma.User$operatorAssignmentsArgs<ExtArgs>
   assignedByMe?: boolean | Prisma.User$assignedByMeArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
@@ -5315,6 +6167,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   nationality?: boolean
   gender?: boolean
   address?: boolean
+  bankName?: boolean
+  bankAccountNumber?: boolean
   role?: boolean
   emailVerified?: boolean
   isActive?: boolean
@@ -5336,6 +6190,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   nationality?: boolean
   gender?: boolean
   address?: boolean
+  bankName?: boolean
+  bankAccountNumber?: boolean
   role?: boolean
   emailVerified?: boolean
   isActive?: boolean
@@ -5357,6 +6213,8 @@ export type UserSelectScalar = {
   nationality?: boolean
   gender?: boolean
   address?: boolean
+  bankName?: boolean
+  bankAccountNumber?: boolean
   role?: boolean
   emailVerified?: boolean
   isActive?: boolean
@@ -5365,7 +6223,7 @@ export type UserSelectScalar = {
   createdById?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "name" | "displayName" | "phone" | "avatar" | "birthDate" | "nationality" | "gender" | "address" | "role" | "emailVerified" | "isActive" | "createdAt" | "updatedAt" | "createdById", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "name" | "displayName" | "phone" | "avatar" | "birthDate" | "nationality" | "gender" | "address" | "bankName" | "bankAccountNumber" | "role" | "emailVerified" | "isActive" | "createdAt" | "updatedAt" | "createdById", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   properties?: boolean | Prisma.User$propertiesArgs<ExtArgs>
   tours?: boolean | Prisma.User$toursArgs<ExtArgs>
@@ -5378,6 +6236,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   guestConversations?: boolean | Prisma.User$guestConversationsArgs<ExtArgs>
   hostConversations?: boolean | Prisma.User$hostConversationsArgs<ExtArgs>
   sentMessages?: boolean | Prisma.User$sentMessagesArgs<ExtArgs>
+  propertyChangeRequests?: boolean | Prisma.User$propertyChangeRequestsArgs<ExtArgs>
+  reviewedPropertyChanges?: boolean | Prisma.User$reviewedPropertyChangesArgs<ExtArgs>
   operatorAssignments?: boolean | Prisma.User$operatorAssignmentsArgs<ExtArgs>
   assignedByMe?: boolean | Prisma.User$assignedByMeArgs<ExtArgs>
   assignedTasks?: boolean | Prisma.User$assignedTasksArgs<ExtArgs>
@@ -5412,6 +6272,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     guestConversations: Prisma.$ConversationPayload<ExtArgs>[]
     hostConversations: Prisma.$ConversationPayload<ExtArgs>[]
     sentMessages: Prisma.$ConversationMessagePayload<ExtArgs>[]
+    propertyChangeRequests: Prisma.$PropertyChangeRequestPayload<ExtArgs>[]
+    reviewedPropertyChanges: Prisma.$PropertyChangeRequestPayload<ExtArgs>[]
     operatorAssignments: Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>[]
     assignedByMe: Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>[]
     assignedTasks: Prisma.$OperatorTaskPayload<ExtArgs>[]
@@ -5436,6 +6298,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     nationality: string
     gender: string | null
     address: string | null
+    bankName: string | null
+    bankAccountNumber: string | null
     role: $Enums.Role
     emailVerified: boolean
     isActive: boolean
@@ -5847,6 +6711,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   guestConversations<T extends Prisma.User$guestConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$guestConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   hostConversations<T extends Prisma.User$hostConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$hostConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentMessages<T extends Prisma.User$sentMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  propertyChangeRequests<T extends Prisma.User$propertyChangeRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$propertyChangeRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedPropertyChanges<T extends Prisma.User$reviewedPropertyChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedPropertyChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyChangeRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   operatorAssignments<T extends Prisma.User$operatorAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$operatorAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedByMe<T extends Prisma.User$assignedByMeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedByMeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorProvinceAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedTasks<T extends Prisma.User$assignedTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OperatorTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5898,6 +6764,8 @@ export interface UserFieldRefs {
   readonly nationality: Prisma.FieldRef<"User", 'String'>
   readonly gender: Prisma.FieldRef<"User", 'String'>
   readonly address: Prisma.FieldRef<"User", 'String'>
+  readonly bankName: Prisma.FieldRef<"User", 'String'>
+  readonly bankAccountNumber: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
@@ -6566,6 +7434,54 @@ export type User$sentMessagesArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ConversationMessageScalarFieldEnum | Prisma.ConversationMessageScalarFieldEnum[]
+}
+
+/**
+ * User.propertyChangeRequests
+ */
+export type User$propertyChangeRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyChangeRequest
+   */
+  select?: Prisma.PropertyChangeRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyChangeRequest
+   */
+  omit?: Prisma.PropertyChangeRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyChangeRequestInclude<ExtArgs> | null
+  where?: Prisma.PropertyChangeRequestWhereInput
+  orderBy?: Prisma.PropertyChangeRequestOrderByWithRelationInput | Prisma.PropertyChangeRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyChangeRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyChangeRequestScalarFieldEnum | Prisma.PropertyChangeRequestScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedPropertyChanges
+ */
+export type User$reviewedPropertyChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PropertyChangeRequest
+   */
+  select?: Prisma.PropertyChangeRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PropertyChangeRequest
+   */
+  omit?: Prisma.PropertyChangeRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PropertyChangeRequestInclude<ExtArgs> | null
+  where?: Prisma.PropertyChangeRequestWhereInput
+  orderBy?: Prisma.PropertyChangeRequestOrderByWithRelationInput | Prisma.PropertyChangeRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PropertyChangeRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PropertyChangeRequestScalarFieldEnum | Prisma.PropertyChangeRequestScalarFieldEnum[]
 }
 
 /**

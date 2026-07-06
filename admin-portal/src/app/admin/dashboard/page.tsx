@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { BookOpen, Building2, CreditCard, MapPin, UserCog, Users } from "lucide-react";
 import { PortalShell } from "@/components/layout/PortalShell";
@@ -7,10 +8,8 @@ import api from "@/lib/api";
 interface DashboardData {
   totalUsers?: number;
   totalProperties?: number;
-  totalTours?: number;
   totalBookings?: number;
   totalRevenue?: number;
-  totalOperators?: number;
   recentBookings?: { id: string; status: string; totalPrice: number; createdAt: string }[];
 }
 
@@ -56,7 +55,7 @@ export default function AdminDashboard() {
       setData(dashRes.data.data ?? {});
       const ops = opRes.data.data ?? [];
       setOperators(Array.isArray(ops) ? ops.length : 0);
-    }).catch(console.error).finally(() => setLoading(false));
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -78,7 +77,7 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-3xl font-semibold">Điều phối TripNest hôm nay</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">
-                Theo dõi người dùng, booking, doanh thu và độ phủ operator trên toàn hệ thống.
+                Theo dõi người dùng, đặt chỗ, doanh thu và độ phủ operator trên toàn hệ thống.
               </p>
             </div>
             <span className="w-fit rounded-md bg-amber-400 px-4 py-2 text-sm font-semibold text-teal-950">
@@ -89,9 +88,9 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <StatCard title="Người dùng" value={data.totalUsers ?? 0} icon={<Users size={20} />} tone="teal" />
-          <StatCard title="Chỗ ở & Tour" value={(data.totalProperties ?? 0) + (data.totalTours ?? 0)} icon={<Building2 size={20} />} tone="slate" />
+          <StatCard title="Chỗ ở" value={data.totalProperties ?? 0} icon={<Building2 size={20} />} tone="slate" />
           <StatCard title="Đặt chỗ" value={data.totalBookings ?? 0} icon={<BookOpen size={20} />} tone="slate" />
-          <StatCard title="Doanh thu (VNĐ)" value={(data.totalRevenue ?? 0).toLocaleString("vi-VN")} icon={<CreditCard size={20} />} tone="amber" />
+          <StatCard title="Doanh thu" value={(data.totalRevenue ?? 0).toLocaleString("vi-VN")} icon={<CreditCard size={20} />} tone="amber" />
           <StatCard title="Operators" value={operators} icon={<UserCog size={20} />} tone="teal" />
           <StatCard title="Tỉnh đã phủ" value={operators} icon={<MapPin size={20} />} tone="amber" />
         </div>
@@ -105,19 +104,19 @@ export default function AdminDashboard() {
                   <tr className="border-b border-slate-100">
                     <th className="py-2 text-left font-medium text-slate-500">ID</th>
                     <th className="py-2 text-left font-medium text-slate-500">Trạng thái</th>
-                    <th className="py-2 text-right font-medium text-slate-500">Tổng tiền</th>
+                    <th className="py-2 text-right font-medium text-slate-500">Doanh thu</th>
                     <th className="py-2 text-right font-medium text-slate-500">Ngày tạo</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.recentBookings?.map((b) => (
-                    <tr key={b.id} className="border-b border-slate-50">
-                      <td className="py-2 font-mono text-xs text-slate-500">{b.id.slice(0, 8)}...</td>
+                  {data.recentBookings?.map((booking) => (
+                    <tr key={booking.id} className="border-b border-slate-50">
+                      <td className="py-2 font-mono text-xs text-slate-500">{booking.id.slice(0, 8)}...</td>
                       <td className="py-2">
-                        <span className="rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-800">{b.status}</span>
+                        <span className="rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-800">{booking.status}</span>
                       </td>
-                      <td className="py-2 text-right font-medium">{Number(b.totalPrice).toLocaleString("vi-VN")}đ</td>
-                      <td className="py-2 text-right text-slate-400">{new Date(b.createdAt).toLocaleDateString("vi-VN")}</td>
+                      <td className="py-2 text-right font-medium">{Number(booking.totalPrice).toLocaleString("vi-VN")} ₫</td>
+                      <td className="py-2 text-right text-slate-400">{new Date(booking.createdAt).toLocaleDateString("vi-VN")}</td>
                     </tr>
                   ))}
                 </tbody>

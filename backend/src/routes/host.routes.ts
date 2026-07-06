@@ -15,7 +15,11 @@ router.post("/properties/:id/change-requests", hostController.createPropertyChan
 router.patch("/properties/:id/operational-settings", hostController.updatePropertyOperationalSettings);
 router.get("/properties/:id/daily-rates", hostController.listPropertyDailyRates);
 router.patch("/properties/:id/daily-rates", hostController.updatePropertyDailyRates);
+router.get("/properties/:id/vouchers", hostController.listPropertyVouchers);
+router.post("/properties/:id/vouchers", hostController.createPropertyVoucher);
+router.delete("/properties/:id/vouchers/:voucherId", hostController.deletePropertyVoucher);
 router.get("/bookings", hostController.listBookings);
+router.get("/revenue", hostController.revenue);
 router.patch("/bookings/:id/confirm", hostController.confirmBooking);
 router.patch("/bookings/:id/cancel", hostController.cancelBooking);
 

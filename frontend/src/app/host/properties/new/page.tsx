@@ -1425,7 +1425,7 @@ function NightlyPriceStep({ city, price, setPrice, launchDiscount, setLaunchDisc
             Số tiền khách trả
             <div className="flex rounded-md border border-slate-400 bg-white focus-within:border-teal-600 focus-within:ring-4 focus-within:ring-teal-100">
               <span className="border-r border-slate-300 px-4 py-3 text-slate-600">VND</span>
-              <input value={price} onChange={(event) => setPrice(event.target.value.replace(/\D/g, ""))} className="min-w-0 flex-1 px-4 py-3 outline-none" inputMode="numeric" />
+              <input value={formatMoneyInput(price)} onChange={(event) => setPrice(parseMoneyInput(event.target.value))} className="min-w-0 flex-1 px-4 py-3 outline-none" inputMode="numeric" />
             </div>
           </label>
           <p className="mt-3 text-sm text-slate-600">Bao gồm các loại thuế, phí và hoa hồng</p>
@@ -1623,7 +1623,7 @@ function RatePlansStep({
                 {childDraft.infantMode === "fixed" ? (
                   <div className="flex rounded-md border border-slate-400 bg-white focus-within:border-teal-600">
                     <span className="border-r border-slate-300 px-4 py-3 text-slate-500">VND</span>
-                    <input value={childDraft.infantPrice} onChange={(event) => setChildDraft({ ...childDraft, infantPrice: event.target.value.replace(/\D/g, "") })} className="min-w-0 px-4 py-3 outline-none" inputMode="numeric" />
+                    <input value={formatMoneyInput(childDraft.infantPrice)} onChange={(event) => setChildDraft({ ...childDraft, infantPrice: parseMoneyInput(event.target.value) })} className="min-w-0 px-4 py-3 outline-none" inputMode="numeric" />
                   </div>
                 ) : null}
               </div>
@@ -1653,7 +1653,7 @@ function RatePlansStep({
                   {childDraft.childMode === "fixed" ? (
                     <div className="flex rounded-md border border-slate-400 bg-white focus-within:border-teal-600">
                       <span className="border-r border-slate-300 px-4 py-3 text-slate-500">VND</span>
-                      <input value={childDraft.childPrice} onChange={(event) => setChildDraft({ ...childDraft, childPrice: event.target.value.replace(/\D/g, "") })} className="min-w-0 px-4 py-3 outline-none" inputMode="numeric" />
+                      <input value={formatMoneyInput(childDraft.childPrice)} onChange={(event) => setChildDraft({ ...childDraft, childPrice: parseMoneyInput(event.target.value) })} className="min-w-0 px-4 py-3 outline-none" inputMode="numeric" />
                     </div>
                   ) : null}
                 </div>
@@ -2433,6 +2433,16 @@ function getCalendarDays(monthDate: Date) {
 
 function formatVnd(value: number) {
   return `VND${Math.round(value).toLocaleString("vi-VN")}`;
+}
+
+function parseMoneyInput(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function formatMoneyInput(value: string) {
+  const digits = parseMoneyInput(value);
+  if (!digits) return "";
+  return Number(digits).toLocaleString("vi-VN");
 }
 
 function getPricePercentiles(values: number[]) {

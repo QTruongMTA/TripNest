@@ -15,6 +15,7 @@ type HostBooking = {
   numGuests: number;
   totalPrice: number;
   notes: string | null;
+  cancellationReason?: string | null;
   createdAt: string;
   guest: {
     id: string;
@@ -37,6 +38,21 @@ const statusLabel: Record<string, string> = {
   CANCELLED: "Đã hủy",
   COMPLETED: "Hoàn thành",
 };
+
+function formatDate(value: string | null) {
+  if (!value) return "-";
+  return new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function getStatusClass(status: string) {
+  if (status === "CANCELLED") return "bg-rose-50 text-rose-700";
+  if (status === "CONFIRMED") return "bg-emerald-50 text-emerald-700";
+  return "bg-amber-50 text-amber-700";
+}
 
 export default function HostBookingsPage() {
   const router = useRouter();
@@ -180,7 +196,7 @@ export default function HostBookingsPage() {
                       Khách: {booking.guest.name} · {booking.guest.email}
                     </p>
                   </div>
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700">
+                  <span className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusClass(booking.status)}`}>
                     {statusLabel[booking.status] ?? booking.status}
                   </span>
                 </div>
@@ -189,13 +205,13 @@ export default function HostBookingsPage() {
                   <div>
                     <p className="text-slate-400">Nhận phòng</p>
                     <p className="mt-1 font-medium text-slate-800">
-                      {booking.checkIn ?? "—"}
+                      {formatDate(booking.checkIn)}
                     </p>
                   </div>
                   <div>
                     <p className="text-slate-400">Trả phòng</p>
                     <p className="mt-1 font-medium text-slate-800">
-                      {booking.checkOut ?? "—"}
+                      {formatDate(booking.checkOut)}
                     </p>
                   </div>
                   <div>
@@ -230,6 +246,13 @@ export default function HostBookingsPage() {
                       Hủy
                     </button>
                   </div>
+                ) : null}
+
+                {booking.status === "CANCELLED" && booking.cancellationReason ? (
+                  <details className="mt-5 rounded-lg border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                    <summary className="cursor-pointer font-semibold">Xem lý do hủy</summary>
+                    <p className="mt-2">{booking.cancellationReason}</p>
+                  </details>
                 ) : null}
               </div>
             </div>

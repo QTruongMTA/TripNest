@@ -52,21 +52,49 @@ function toNumber(value: { toNumber(): number } | null) {
 }
 
 function buildRating(
-  bookings: Array<{ review: { rating: number } | null }>
+  bookings: Array<{ review: {
+    rating: number;
+    cleanlinessRating?: number;
+    comfortRating?: number;
+    locationRating?: number;
+    amenitiesRating?: number;
+    valueRating?: number;
+  } | null }>
 ) {
   const ratings = bookings
     .map((booking) => booking.review?.rating)
     .filter((rating): rating is number => rating !== undefined);
 
   if (ratings.length === 0) {
-    return { average: null, count: 0 };
+    return {
+      average: null,
+      count: 0,
+      criteria: { cleanliness: 0, comfort: 0, location: 0, amenities: 0, value: 0 },
+    };
   }
 
   const total = ratings.reduce((sum, rating) => sum + rating, 0);
+  const average = (selector: (review: NonNullable<(typeof bookings)[number]["review"]>) => number | undefined) => {
+    const values = bookings
+      .map((booking) => booking.review ? selector(booking.review) : undefined)
+      .filter((value): value is number => typeof value === "number");
+    return values.length ? Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1)) : 0;
+  };
   return {
     average: Number((total / ratings.length).toFixed(1)),
     count: ratings.length,
+    criteria: {
+      cleanliness: average((review) => review.cleanlinessRating),
+      comfort: average((review) => review.comfortRating),
+      location: average((review) => review.locationRating),
+      amenities: average((review) => review.amenitiesRating),
+      value: average((review) => review.valueRating),
+    },
   };
+}
+
+function parseReviewImages(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
 function normalizeFaqs(value: unknown): PropertyFaq[] {
@@ -264,7 +292,14 @@ export const propertyService = {
             checkOut: true,
             numGuests: true,
             review: {
-              select: { rating: true },
+              select: {
+                rating: true,
+                cleanlinessRating: true,
+                comfortRating: true,
+                locationRating: true,
+                amenitiesRating: true,
+                valueRating: true,
+              },
             },
           },
         },
@@ -362,8 +397,24 @@ export const propertyService = {
           where: { review: { isNot: null } },
           select: {
             review: {
-              select: { rating: true },
+              select: {
+                id: true,
+                rating: true,
+                cleanlinessRating: true,
+                comfortRating: true,
+                locationRating: true,
+                amenitiesRating: true,
+                valueRating: true,
+                comment: true,
+                images: true,
+                revisionCount: true,
+                createdAt: true,
+                lastEditedAt: true,
+                user: { select: { displayName: true, name: true, email: true, avatar: true } },
+              },
             },
+            checkIn: true,
+            checkOut: true,
           },
         },
       },
@@ -396,6 +447,33 @@ export const propertyService = {
         property.type
       ),
       rating: buildRating(property.bookings),
+      reviews: property.bookings
+        .filter((booking) => booking.review)
+        .map((booking) => ({
+          id: booking.review!.id,
+          rating: booking.review!.rating,
+          criteria: {
+            cleanliness: booking.review!.cleanlinessRating,
+            comfort: booking.review!.comfortRating,
+            location: booking.review!.locationRating,
+            amenities: booking.review!.amenitiesRating,
+            value: booking.review!.valueRating,
+          },
+          comment: booking.review!.comment,
+          images: parseReviewImages(booking.review!.images),
+          revisionCount: booking.review!.revisionCount,
+          createdAt: booking.review!.createdAt.toISOString(),
+          lastEditedAt: booking.review!.lastEditedAt?.toISOString() ?? null,
+          guest: {
+            name: booking.review!.user.displayName ?? booking.review!.user.name ?? booking.review!.user.email,
+            avatar: booking.review!.user.avatar,
+          },
+          stay: {
+            checkIn: booking.checkIn?.toISOString().slice(0, 10) ?? null,
+            checkOut: booking.checkOut?.toISOString().slice(0, 10) ?? null,
+          },
+        }))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
       description: property.description,
       notes: property.notes,
       faqs: normalizeFaqs(property.faqs),

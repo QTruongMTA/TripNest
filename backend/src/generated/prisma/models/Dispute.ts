@@ -20,8 +20,20 @@ export type DisputeModel = runtime.Types.Result.DefaultSelection<Prisma.$Dispute
 
 export type AggregateDispute = {
   _count: DisputeCountAggregateOutputType | null
+  _avg: DisputeAvgAggregateOutputType | null
+  _sum: DisputeSumAggregateOutputType | null
   _min: DisputeMinAggregateOutputType | null
   _max: DisputeMaxAggregateOutputType | null
+}
+
+export type DisputeAvgAggregateOutputType = {
+  refundAdjustment: runtime.Decimal | null
+  payoutAdjustment: runtime.Decimal | null
+}
+
+export type DisputeSumAggregateOutputType = {
+  refundAdjustment: runtime.Decimal | null
+  payoutAdjustment: runtime.Decimal | null
 }
 
 export type DisputeMinAggregateOutputType = {
@@ -31,8 +43,15 @@ export type DisputeMinAggregateOutputType = {
   guestId: string | null
   provinceId: string | null
   status: $Enums.DisputeStatus | null
+  reporter: string | null
+  category: string | null
+  severity: string | null
   subject: string | null
   description: string | null
+  requestedOutcome: string | null
+  refundAdjustment: runtime.Decimal | null
+  payoutAdjustment: runtime.Decimal | null
+  decision: string | null
   resolution: string | null
   resolvedBy: string | null
   resolvedAt: Date | null
@@ -48,8 +67,15 @@ export type DisputeMaxAggregateOutputType = {
   guestId: string | null
   provinceId: string | null
   status: $Enums.DisputeStatus | null
+  reporter: string | null
+  category: string | null
+  severity: string | null
   subject: string | null
   description: string | null
+  requestedOutcome: string | null
+  refundAdjustment: runtime.Decimal | null
+  payoutAdjustment: runtime.Decimal | null
+  decision: string | null
   resolution: string | null
   resolvedBy: string | null
   resolvedAt: Date | null
@@ -65,8 +91,17 @@ export type DisputeCountAggregateOutputType = {
   guestId: number
   provinceId: number
   status: number
+  reporter: number
+  category: number
+  severity: number
   subject: number
   description: number
+  requestedOutcome: number
+  evidence: number
+  operatorNotes: number
+  refundAdjustment: number
+  payoutAdjustment: number
+  decision: number
   resolution: number
   resolvedBy: number
   resolvedAt: number
@@ -77,6 +112,16 @@ export type DisputeCountAggregateOutputType = {
 }
 
 
+export type DisputeAvgAggregateInputType = {
+  refundAdjustment?: true
+  payoutAdjustment?: true
+}
+
+export type DisputeSumAggregateInputType = {
+  refundAdjustment?: true
+  payoutAdjustment?: true
+}
+
 export type DisputeMinAggregateInputType = {
   id?: true
   bookingId?: true
@@ -84,8 +129,15 @@ export type DisputeMinAggregateInputType = {
   guestId?: true
   provinceId?: true
   status?: true
+  reporter?: true
+  category?: true
+  severity?: true
   subject?: true
   description?: true
+  requestedOutcome?: true
+  refundAdjustment?: true
+  payoutAdjustment?: true
+  decision?: true
   resolution?: true
   resolvedBy?: true
   resolvedAt?: true
@@ -101,8 +153,15 @@ export type DisputeMaxAggregateInputType = {
   guestId?: true
   provinceId?: true
   status?: true
+  reporter?: true
+  category?: true
+  severity?: true
   subject?: true
   description?: true
+  requestedOutcome?: true
+  refundAdjustment?: true
+  payoutAdjustment?: true
+  decision?: true
   resolution?: true
   resolvedBy?: true
   resolvedAt?: true
@@ -118,8 +177,17 @@ export type DisputeCountAggregateInputType = {
   guestId?: true
   provinceId?: true
   status?: true
+  reporter?: true
+  category?: true
+  severity?: true
   subject?: true
   description?: true
+  requestedOutcome?: true
+  evidence?: true
+  operatorNotes?: true
+  refundAdjustment?: true
+  payoutAdjustment?: true
+  decision?: true
   resolution?: true
   resolvedBy?: true
   resolvedAt?: true
@@ -167,6 +235,18 @@ export type DisputeAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: DisputeAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: DisputeSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: DisputeMinAggregateInputType
@@ -197,6 +277,8 @@ export type DisputeGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: DisputeCountAggregateInputType | true
+  _avg?: DisputeAvgAggregateInputType
+  _sum?: DisputeSumAggregateInputType
   _min?: DisputeMinAggregateInputType
   _max?: DisputeMaxAggregateInputType
 }
@@ -208,8 +290,17 @@ export type DisputeGroupByOutputType = {
   guestId: string
   provinceId: string | null
   status: $Enums.DisputeStatus
+  reporter: string
+  category: string
+  severity: string
   subject: string
   description: string
+  requestedOutcome: string | null
+  evidence: runtime.JsonValue | null
+  operatorNotes: runtime.JsonValue | null
+  refundAdjustment: runtime.Decimal | null
+  payoutAdjustment: runtime.Decimal | null
+  decision: string | null
   resolution: string | null
   resolvedBy: string | null
   resolvedAt: Date | null
@@ -217,6 +308,8 @@ export type DisputeGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: DisputeCountAggregateOutputType | null
+  _avg: DisputeAvgAggregateOutputType | null
+  _sum: DisputeSumAggregateOutputType | null
   _min: DisputeMinAggregateOutputType | null
   _max: DisputeMaxAggregateOutputType | null
 }
@@ -246,8 +339,17 @@ export type DisputeWhereInput = {
   guestId?: Prisma.StringFilter<"Dispute"> | string
   provinceId?: Prisma.StringNullableFilter<"Dispute"> | string | null
   status?: Prisma.EnumDisputeStatusFilter<"Dispute"> | $Enums.DisputeStatus
+  reporter?: Prisma.StringFilter<"Dispute"> | string
+  category?: Prisma.StringFilter<"Dispute"> | string
+  severity?: Prisma.StringFilter<"Dispute"> | string
   subject?: Prisma.StringFilter<"Dispute"> | string
   description?: Prisma.StringFilter<"Dispute"> | string
+  requestedOutcome?: Prisma.StringNullableFilter<"Dispute"> | string | null
+  evidence?: Prisma.JsonNullableFilter<"Dispute">
+  operatorNotes?: Prisma.JsonNullableFilter<"Dispute">
+  refundAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolution?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedBy?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Dispute"> | Date | string | null
@@ -267,8 +369,17 @@ export type DisputeOrderByWithRelationInput = {
   guestId?: Prisma.SortOrder
   provinceId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  reporter?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  requestedOutcome?: Prisma.SortOrderInput | Prisma.SortOrder
+  evidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  operatorNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundAdjustment?: Prisma.SortOrderInput | Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrderInput | Prisma.SortOrder
+  decision?: Prisma.SortOrderInput | Prisma.SortOrder
   resolution?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -291,8 +402,17 @@ export type DisputeWhereUniqueInput = Prisma.AtLeast<{
   guestId?: Prisma.StringFilter<"Dispute"> | string
   provinceId?: Prisma.StringNullableFilter<"Dispute"> | string | null
   status?: Prisma.EnumDisputeStatusFilter<"Dispute"> | $Enums.DisputeStatus
+  reporter?: Prisma.StringFilter<"Dispute"> | string
+  category?: Prisma.StringFilter<"Dispute"> | string
+  severity?: Prisma.StringFilter<"Dispute"> | string
   subject?: Prisma.StringFilter<"Dispute"> | string
   description?: Prisma.StringFilter<"Dispute"> | string
+  requestedOutcome?: Prisma.StringNullableFilter<"Dispute"> | string | null
+  evidence?: Prisma.JsonNullableFilter<"Dispute">
+  operatorNotes?: Prisma.JsonNullableFilter<"Dispute">
+  refundAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolution?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedBy?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Dispute"> | Date | string | null
@@ -312,8 +432,17 @@ export type DisputeOrderByWithAggregationInput = {
   guestId?: Prisma.SortOrder
   provinceId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  reporter?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  requestedOutcome?: Prisma.SortOrderInput | Prisma.SortOrder
+  evidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  operatorNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  refundAdjustment?: Prisma.SortOrderInput | Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrderInput | Prisma.SortOrder
+  decision?: Prisma.SortOrderInput | Prisma.SortOrder
   resolution?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -321,8 +450,10 @@ export type DisputeOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DisputeCountOrderByAggregateInput
+  _avg?: Prisma.DisputeAvgOrderByAggregateInput
   _max?: Prisma.DisputeMaxOrderByAggregateInput
   _min?: Prisma.DisputeMinOrderByAggregateInput
+  _sum?: Prisma.DisputeSumOrderByAggregateInput
 }
 
 export type DisputeScalarWhereWithAggregatesInput = {
@@ -335,8 +466,17 @@ export type DisputeScalarWhereWithAggregatesInput = {
   guestId?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
   provinceId?: Prisma.StringNullableWithAggregatesFilter<"Dispute"> | string | null
   status?: Prisma.EnumDisputeStatusWithAggregatesFilter<"Dispute"> | $Enums.DisputeStatus
+  reporter?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
+  category?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
+  severity?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
   subject?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
   description?: Prisma.StringWithAggregatesFilter<"Dispute"> | string
+  requestedOutcome?: Prisma.StringNullableWithAggregatesFilter<"Dispute"> | string | null
+  evidence?: Prisma.JsonNullableWithAggregatesFilter<"Dispute">
+  operatorNotes?: Prisma.JsonNullableWithAggregatesFilter<"Dispute">
+  refundAdjustment?: Prisma.DecimalNullableWithAggregatesFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.DecimalNullableWithAggregatesFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.StringNullableWithAggregatesFilter<"Dispute"> | string | null
   resolution?: Prisma.StringNullableWithAggregatesFilter<"Dispute"> | string | null
   resolvedBy?: Prisma.StringNullableWithAggregatesFilter<"Dispute"> | string | null
   resolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Dispute"> | Date | string | null
@@ -349,8 +489,17 @@ export type DisputeCreateInput = {
   id?: string
   bookingId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -369,8 +518,17 @@ export type DisputeUncheckedCreateInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -383,8 +541,17 @@ export type DisputeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -403,8 +570,17 @@ export type DisputeUncheckedUpdateInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -420,8 +596,17 @@ export type DisputeCreateManyInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -434,8 +619,17 @@ export type DisputeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -450,8 +644,17 @@ export type DisputeUncheckedUpdateManyInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -477,14 +680,28 @@ export type DisputeCountOrderByAggregateInput = {
   guestId?: Prisma.SortOrder
   provinceId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  reporter?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  requestedOutcome?: Prisma.SortOrder
+  evidence?: Prisma.SortOrder
+  operatorNotes?: Prisma.SortOrder
+  refundAdjustment?: Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrder
+  decision?: Prisma.SortOrder
   resolution?: Prisma.SortOrder
   resolvedBy?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
   escalatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type DisputeAvgOrderByAggregateInput = {
+  refundAdjustment?: Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrder
 }
 
 export type DisputeMaxOrderByAggregateInput = {
@@ -494,8 +711,15 @@ export type DisputeMaxOrderByAggregateInput = {
   guestId?: Prisma.SortOrder
   provinceId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  reporter?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  requestedOutcome?: Prisma.SortOrder
+  refundAdjustment?: Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrder
+  decision?: Prisma.SortOrder
   resolution?: Prisma.SortOrder
   resolvedBy?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
@@ -511,14 +735,26 @@ export type DisputeMinOrderByAggregateInput = {
   guestId?: Prisma.SortOrder
   provinceId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  reporter?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  severity?: Prisma.SortOrder
   subject?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  requestedOutcome?: Prisma.SortOrder
+  refundAdjustment?: Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrder
+  decision?: Prisma.SortOrder
   resolution?: Prisma.SortOrder
   resolvedBy?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrder
   escalatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type DisputeSumOrderByAggregateInput = {
+  refundAdjustment?: Prisma.SortOrder
+  payoutAdjustment?: Prisma.SortOrder
 }
 
 export type DisputeCreateNestedManyWithoutHostInput = {
@@ -693,12 +929,29 @@ export type EnumDisputeStatusFieldUpdateOperationsInput = {
   set?: $Enums.DisputeStatus
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type DisputeCreateWithoutHostInput = {
   id?: string
   bookingId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -715,8 +968,17 @@ export type DisputeUncheckedCreateWithoutHostInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -739,8 +1001,17 @@ export type DisputeCreateWithoutGuestInput = {
   id?: string
   bookingId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -757,8 +1028,17 @@ export type DisputeUncheckedCreateWithoutGuestInput = {
   hostId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -781,8 +1061,17 @@ export type DisputeCreateWithoutResolverInput = {
   id?: string
   bookingId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -800,8 +1089,17 @@ export type DisputeUncheckedCreateWithoutResolverInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -845,8 +1143,17 @@ export type DisputeScalarWhereInput = {
   guestId?: Prisma.StringFilter<"Dispute"> | string
   provinceId?: Prisma.StringNullableFilter<"Dispute"> | string | null
   status?: Prisma.EnumDisputeStatusFilter<"Dispute"> | $Enums.DisputeStatus
+  reporter?: Prisma.StringFilter<"Dispute"> | string
+  category?: Prisma.StringFilter<"Dispute"> | string
+  severity?: Prisma.StringFilter<"Dispute"> | string
   subject?: Prisma.StringFilter<"Dispute"> | string
   description?: Prisma.StringFilter<"Dispute"> | string
+  requestedOutcome?: Prisma.StringNullableFilter<"Dispute"> | string | null
+  evidence?: Prisma.JsonNullableFilter<"Dispute">
+  operatorNotes?: Prisma.JsonNullableFilter<"Dispute">
+  refundAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.DecimalNullableFilter<"Dispute"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolution?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedBy?: Prisma.StringNullableFilter<"Dispute"> | string | null
   resolvedAt?: Prisma.DateTimeNullableFilter<"Dispute"> | Date | string | null
@@ -891,8 +1198,17 @@ export type DisputeCreateWithoutProvinceInput = {
   id?: string
   bookingId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -909,8 +1225,17 @@ export type DisputeUncheckedCreateWithoutProvinceInput = {
   hostId: string
   guestId: string
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -951,8 +1276,17 @@ export type DisputeCreateManyHostInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -967,8 +1301,17 @@ export type DisputeCreateManyGuestInput = {
   hostId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -984,8 +1327,17 @@ export type DisputeCreateManyResolverInput = {
   guestId: string
   provinceId?: string | null
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedAt?: Date | string | null
   escalatedAt?: Date | string | null
@@ -997,8 +1349,17 @@ export type DisputeUpdateWithoutHostInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1015,8 +1376,17 @@ export type DisputeUncheckedUpdateWithoutHostInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1031,8 +1401,17 @@ export type DisputeUncheckedUpdateManyWithoutHostInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1045,8 +1424,17 @@ export type DisputeUpdateWithoutGuestInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1063,8 +1451,17 @@ export type DisputeUncheckedUpdateWithoutGuestInput = {
   hostId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1079,8 +1476,17 @@ export type DisputeUncheckedUpdateManyWithoutGuestInput = {
   hostId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1093,8 +1499,17 @@ export type DisputeUpdateWithoutResolverInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1112,8 +1527,17 @@ export type DisputeUncheckedUpdateWithoutResolverInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1128,8 +1552,17 @@ export type DisputeUncheckedUpdateManyWithoutResolverInput = {
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   provinceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1143,8 +1576,17 @@ export type DisputeCreateManyProvinceInput = {
   hostId: string
   guestId: string
   status?: $Enums.DisputeStatus
+  reporter?: string
+  category?: string
+  severity?: string
   subject: string
   description: string
+  requestedOutcome?: string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: string | null
   resolution?: string | null
   resolvedBy?: string | null
   resolvedAt?: Date | string | null
@@ -1157,8 +1599,17 @@ export type DisputeUpdateWithoutProvinceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   escalatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1175,8 +1626,17 @@ export type DisputeUncheckedUpdateWithoutProvinceInput = {
   hostId?: Prisma.StringFieldUpdateOperationsInput | string
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1191,8 +1651,17 @@ export type DisputeUncheckedUpdateManyWithoutProvinceInput = {
   hostId?: Prisma.StringFieldUpdateOperationsInput | string
   guestId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDisputeStatusFieldUpdateOperationsInput | $Enums.DisputeStatus
+  reporter?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
   subject?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
+  requestedOutcome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  evidence?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operatorNotes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  refundAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payoutAdjustment?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  decision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1210,8 +1679,17 @@ export type DisputeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   guestId?: boolean
   provinceId?: boolean
   status?: boolean
+  reporter?: boolean
+  category?: boolean
+  severity?: boolean
   subject?: boolean
   description?: boolean
+  requestedOutcome?: boolean
+  evidence?: boolean
+  operatorNotes?: boolean
+  refundAdjustment?: boolean
+  payoutAdjustment?: boolean
+  decision?: boolean
   resolution?: boolean
   resolvedBy?: boolean
   resolvedAt?: boolean
@@ -1231,8 +1709,17 @@ export type DisputeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   guestId?: boolean
   provinceId?: boolean
   status?: boolean
+  reporter?: boolean
+  category?: boolean
+  severity?: boolean
   subject?: boolean
   description?: boolean
+  requestedOutcome?: boolean
+  evidence?: boolean
+  operatorNotes?: boolean
+  refundAdjustment?: boolean
+  payoutAdjustment?: boolean
+  decision?: boolean
   resolution?: boolean
   resolvedBy?: boolean
   resolvedAt?: boolean
@@ -1252,8 +1739,17 @@ export type DisputeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   guestId?: boolean
   provinceId?: boolean
   status?: boolean
+  reporter?: boolean
+  category?: boolean
+  severity?: boolean
   subject?: boolean
   description?: boolean
+  requestedOutcome?: boolean
+  evidence?: boolean
+  operatorNotes?: boolean
+  refundAdjustment?: boolean
+  payoutAdjustment?: boolean
+  decision?: boolean
   resolution?: boolean
   resolvedBy?: boolean
   resolvedAt?: boolean
@@ -1273,8 +1769,17 @@ export type DisputeSelectScalar = {
   guestId?: boolean
   provinceId?: boolean
   status?: boolean
+  reporter?: boolean
+  category?: boolean
+  severity?: boolean
   subject?: boolean
   description?: boolean
+  requestedOutcome?: boolean
+  evidence?: boolean
+  operatorNotes?: boolean
+  refundAdjustment?: boolean
+  payoutAdjustment?: boolean
+  decision?: boolean
   resolution?: boolean
   resolvedBy?: boolean
   resolvedAt?: boolean
@@ -1283,7 +1788,7 @@ export type DisputeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DisputeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bookingId" | "hostId" | "guestId" | "provinceId" | "status" | "subject" | "description" | "resolution" | "resolvedBy" | "resolvedAt" | "escalatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["dispute"]>
+export type DisputeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bookingId" | "hostId" | "guestId" | "provinceId" | "status" | "reporter" | "category" | "severity" | "subject" | "description" | "requestedOutcome" | "evidence" | "operatorNotes" | "refundAdjustment" | "payoutAdjustment" | "decision" | "resolution" | "resolvedBy" | "resolvedAt" | "escalatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["dispute"]>
 export type DisputeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   host?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   guest?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1318,8 +1823,17 @@ export type $DisputePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     guestId: string
     provinceId: string | null
     status: $Enums.DisputeStatus
+    reporter: string
+    category: string
+    severity: string
     subject: string
     description: string
+    requestedOutcome: string | null
+    evidence: runtime.JsonValue | null
+    operatorNotes: runtime.JsonValue | null
+    refundAdjustment: runtime.Decimal | null
+    payoutAdjustment: runtime.Decimal | null
+    decision: string | null
     resolution: string | null
     resolvedBy: string | null
     resolvedAt: Date | null
@@ -1759,8 +2273,17 @@ export interface DisputeFieldRefs {
   readonly guestId: Prisma.FieldRef<"Dispute", 'String'>
   readonly provinceId: Prisma.FieldRef<"Dispute", 'String'>
   readonly status: Prisma.FieldRef<"Dispute", 'DisputeStatus'>
+  readonly reporter: Prisma.FieldRef<"Dispute", 'String'>
+  readonly category: Prisma.FieldRef<"Dispute", 'String'>
+  readonly severity: Prisma.FieldRef<"Dispute", 'String'>
   readonly subject: Prisma.FieldRef<"Dispute", 'String'>
   readonly description: Prisma.FieldRef<"Dispute", 'String'>
+  readonly requestedOutcome: Prisma.FieldRef<"Dispute", 'String'>
+  readonly evidence: Prisma.FieldRef<"Dispute", 'Json'>
+  readonly operatorNotes: Prisma.FieldRef<"Dispute", 'Json'>
+  readonly refundAdjustment: Prisma.FieldRef<"Dispute", 'Decimal'>
+  readonly payoutAdjustment: Prisma.FieldRef<"Dispute", 'Decimal'>
+  readonly decision: Prisma.FieldRef<"Dispute", 'String'>
   readonly resolution: Prisma.FieldRef<"Dispute", 'String'>
   readonly resolvedBy: Prisma.FieldRef<"Dispute", 'String'>
   readonly resolvedAt: Prisma.FieldRef<"Dispute", 'DateTime'>

@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 
 function formatOperatorNumber(value: number) {
@@ -38,6 +39,59 @@ function mapBookingStatus(status: string): string {
     COMPLETED: "Hoàn tất",
   };
   return map[status] ?? status;
+}
+
+const ACTIVE_DISPUTE_STATUSES = ["OPEN", "INVESTIGATING"] as const;
+
+function toNumber(value: { toNumber: () => number } | number | null | undefined) {
+  if (typeof value === "number") return value;
+  return value?.toNumber() ?? 0;
+}
+
+function toJsonArray(value: Prisma.JsonValue | null | undefined): Prisma.JsonArray {
+  return Array.isArray(value) ? value : [];
+}
+
+function appendOperatorNote(
+  current: Prisma.JsonValue | null | undefined,
+  note: { action: string; message?: string; by: string; status?: string; decision?: string }
+) {
+  return [
+    ...toJsonArray(current),
+    {
+      ...note,
+      createdAt: new Date().toISOString(),
+    },
+  ] as Prisma.InputJsonValue;
+}
+
+function classifyDisputeText(text: string) {
+  const normalized = text.toLowerCase();
+  if (/(sai|khác|khong dung|không đúng|hình|ảnh|mo ta|mô tả)/i.test(normalized)) {
+    return { category: "PROPERTY_MISMATCH", severity: "HIGH" };
+  }
+  if (/(không nhận|khong nhan|từ chối|tu choi|không vào|khong vao)/i.test(normalized)) {
+    return { category: "CHECKIN_BLOCKED", severity: "CRITICAL" };
+  }
+  if (/(hoàn tiền|hoan tien|refund|tiền|thanh toán|cọc)/i.test(normalized)) {
+    return { category: "REFUND_PAYMENT", severity: "HIGH" };
+  }
+  if (/(phá|pha|hư hỏng|hu hong|vi phạm|vi pham|không đến|khong den)/i.test(normalized)) {
+    return { category: "HOST_REPORT", severity: "MEDIUM" };
+  }
+  return { category: "OTHER", severity: "MEDIUM" };
+}
+
+function buildDisputeSla(createdAt: Date, status: string) {
+  const ageHours = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / 36e5));
+  const dueAt = new Date(createdAt.getTime() + 24 * 36e5);
+  const active = ACTIVE_DISPUTE_STATUSES.includes(status as (typeof ACTIVE_DISPUTE_STATUSES)[number]);
+  return {
+    ageHours,
+    dueAt: dueAt.toISOString(),
+    overdue: active && Date.now() > dueAt.getTime(),
+    label: ageHours < 24 ? `${24 - ageHours}h còn lại` : `Trễ ${ageHours - 23}h`,
+  };
 }
 
 async function getNextOperatorCredential() {
@@ -440,7 +494,10 @@ export const operatorService = {
   async listHostApprovals(provinceIds: string[], status?: string) {
     return prisma.hostApprovalRequest.findMany({
       where: {
-        provinceId: { in: provinceIds },
+        OR: [
+          { provinceId: { in: provinceIds } },
+          { provinceId: null },
+        ],
         ...(status && { status: status as never }),
       },
       include: {
@@ -542,32 +599,227 @@ export const operatorService = {
 
   // ── Disputes ─────────────────────────────────────────────────────────────────
 
-  async listDisputes(provinceIds: string[], status?: string) {
-    return prisma.dispute.findMany({
+  async listDisputes(provinceIds: string[], filters: {
+    status?: string;
+    category?: string;
+    severity?: string;
+    sort?: string;
+  } = {}) {
+    const statusFilter = filters.status === "ACTIVE" || !filters.status
+      ? { in: ["OPEN", "INVESTIGATING"] }
+      : filters.status;
+    const orderBy =
+      filters.sort === "oldest"
+        ? { createdAt: "asc" as const }
+        : filters.sort === "severity"
+          ? [{ severity: "desc" as const }, { createdAt: "desc" as const }]
+          : { createdAt: "desc" as const };
+
+    const disputes = await prisma.dispute.findMany({
       where: {
         provinceId: { in: provinceIds },
-        ...(status && { status: status as never }),
+        status: statusFilter as never,
+        ...(filters.category && filters.category !== "ALL" ? { category: filters.category } : {}),
+        ...(filters.severity && filters.severity !== "ALL" ? { severity: filters.severity } : {}),
       },
       include: {
-        host: { select: { email: true } },
-        guest: { select: { email: true } },
-        resolver: { select: { email: true } },
-        province: { select: { name: true } },
+        host: { select: { id: true, email: true, name: true, displayName: true, phone: true } },
+        guest: { select: { id: true, email: true, name: true, displayName: true, phone: true } },
+        resolver: { select: { id: true, email: true, name: true } },
+        province: { select: { id: true, name: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
+
+    const bookingIds = disputes.map((dispute) => dispute.bookingId).filter((id): id is string => Boolean(id));
+    const bookings = bookingIds.length
+      ? await prisma.booking.findMany({
+          where: { id: { in: bookingIds } },
+          include: {
+            property: { select: { id: true, title: true, city: true, pricePerNight: true } },
+            user: { select: { email: true, name: true, phone: true } },
+            payment: { select: { amount: true, method: true, status: true, paidAt: true } },
+          },
+        })
+      : [];
+    const bookingById = new Map(bookings.map((booking) => [booking.id, booking]));
+
+    const cases = disputes.map((dispute) => {
+      const booking = dispute.bookingId ? bookingById.get(dispute.bookingId) : undefined;
+      const sla = buildDisputeSla(dispute.createdAt, dispute.status);
+      const active = ACTIVE_DISPUTE_STATUSES.includes(dispute.status as (typeof ACTIVE_DISPUTE_STATUSES)[number]);
+      const grossAmount = toNumber(booking?.totalPrice);
+      const refundAdjustment = toNumber(dispute.refundAdjustment);
+      const payoutAdjustment = toNumber(dispute.payoutAdjustment);
+      return {
+        id: dispute.id,
+        bookingId: dispute.bookingId,
+        bookingCode: dispute.bookingId ? `BK-${dispute.bookingId.slice(-8).toUpperCase()}` : "-",
+        status: dispute.status,
+        reporter: dispute.reporter,
+        category: dispute.category,
+        severity: dispute.severity,
+        subject: dispute.subject,
+        description: dispute.description,
+        requestedOutcome: dispute.requestedOutcome,
+        evidence: dispute.evidence,
+        operatorNotes: toJsonArray(dispute.operatorNotes),
+        decision: dispute.decision,
+        resolution: dispute.resolution,
+        refundAdjustment,
+        payoutAdjustment,
+        createdAt: dispute.createdAt.toISOString(),
+        updatedAt: dispute.updatedAt.toISOString(),
+        resolvedAt: dispute.resolvedAt?.toISOString() ?? null,
+        escalatedAt: dispute.escalatedAt?.toISOString() ?? null,
+        host: dispute.host,
+        guest: dispute.guest,
+        resolver: dispute.resolver,
+        province: dispute.province,
+        sla,
+        booking: booking
+          ? {
+              id: booking.id,
+              code: `BK-${booking.id.slice(-8).toUpperCase()}`,
+              status: booking.status,
+              statusLabel: mapBookingStatus(booking.status),
+              checkIn: booking.checkIn?.toISOString() ?? null,
+              checkOut: booking.checkOut?.toISOString() ?? null,
+              guests: booking.numGuests,
+              totalPrice: grossAmount,
+              paymentStatus: booking.paymentStatus,
+              paymentStatusLabel: mapPaymentStatus(booking.paymentStatus),
+              paymentMethod: booking.payment?.method ?? null,
+              paymentMethodLabel: booking.payment ? mapPaymentMethod(booking.payment.method) : "-",
+              paidAmount: toNumber(booking.payment?.amount),
+              property: booking.property
+                ? {
+                    id: booking.property.id,
+                    title: booking.property.title,
+                    city: booking.property.city,
+                    pricePerNight: toNumber(booking.property.pricePerNight),
+                  }
+                : null,
+            }
+          : null,
+        financialImpact: {
+          grossAmount,
+          settlementHold: active,
+          refundAdjustment,
+          payoutAdjustment,
+          operatorDecisionRequired: active,
+          suggestion:
+            dispute.category === "REFUND_PAYMENT" || dispute.category === "CHECKIN_BLOCKED"
+              ? "Kiểm tra chứng từ thanh toán, lịch sử check-in và quyết định mức hoàn tiền."
+              : dispute.category === "PROPERTY_MISMATCH"
+                ? "Đối chiếu ảnh, mô tả chỗ ở và yêu cầu Host phản hồi trước khi quyết định."
+                : "Ghi nhận bằng chứng hai phía và cập nhật quyết định xử lý.",
+        },
+      };
+    });
+
+    const summary = {
+      total: cases.length,
+      open: cases.filter((item) => item.status === "OPEN").length,
+      investigating: cases.filter((item) => item.status === "INVESTIGATING").length,
+      escalated: cases.filter((item) => item.status === "ESCALATED").length,
+      resolved: cases.filter((item) => item.status === "RESOLVED").length,
+      overdue: cases.filter((item) => item.sla.overdue).length,
+      highRisk: cases.filter((item) => item.severity === "HIGH" || item.severity === "CRITICAL").length,
+      settlementHold: cases.filter((item) => item.financialImpact.settlementHold).length,
+    };
+
+    return { summary, cases };
   },
 
-  async resolveDispute(disputeId: string, resolvedBy: string, resolution: string, escalate = false) {
+  async triageDispute(disputeId: string, operatorId: string, status: "OPEN" | "INVESTIGATING" | "ESCALATED", note?: string) {
+    const dispute = await prisma.dispute.findUnique({ where: { id: disputeId } });
+    if (!dispute) throw new Error("DISPUTE_NOT_FOUND");
     return prisma.dispute.update({
       where: { id: disputeId },
       data: {
-        status: escalate ? "ESCALATED" : "RESOLVED",
-        resolvedBy,
-        resolution,
-        resolvedAt: new Date(),
-        ...(escalate && { escalatedAt: new Date() }),
+        status,
+        ...(status === "ESCALATED" ? { escalatedAt: new Date() } : {}),
+        operatorNotes: appendOperatorNote(dispute.operatorNotes, {
+          action: status === "INVESTIGATING" ? "START_INVESTIGATION" : status === "ESCALATED" ? "ESCALATE" : "REOPEN",
+          by: operatorId,
+          status,
+          ...(note?.trim() ? { message: note.trim() } : {}),
+        }),
       },
     });
+  },
+
+  async resolveDispute(disputeId: string, resolvedBy: string, input: {
+    resolution: string;
+    decision?: string;
+    refundAdjustment?: number;
+    payoutAdjustment?: number;
+    escalate?: boolean;
+    note?: string;
+  }) {
+    const dispute = await prisma.dispute.findUnique({ where: { id: disputeId } });
+    if (!dispute) throw new Error("DISPUTE_NOT_FOUND");
+    const status = input.escalate ? "ESCALATED" : "RESOLVED";
+    const refundAdjustment = Number.isFinite(input.refundAdjustment) ? Math.max(0, Number(input.refundAdjustment)) : undefined;
+    const payoutAdjustment = Number.isFinite(input.payoutAdjustment) ? Number(input.payoutAdjustment) : undefined;
+
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.dispute.update({
+        where: { id: disputeId },
+        data: {
+          status,
+          resolvedBy,
+          resolution: input.resolution.trim(),
+          decision: input.decision ?? (input.escalate ? "ESCALATE_ADMIN" : "OPERATOR_DECISION"),
+          resolvedAt: input.escalate ? null : new Date(),
+          ...(input.escalate ? { escalatedAt: new Date() } : {}),
+          ...(refundAdjustment !== undefined ? { refundAdjustment } : {}),
+          ...(payoutAdjustment !== undefined ? { payoutAdjustment } : {}),
+          operatorNotes: appendOperatorNote(dispute.operatorNotes, {
+            action: input.escalate ? "ESCALATE_ADMIN" : "RESOLVE",
+            by: resolvedBy,
+            status,
+            ...(input.decision ? { decision: input.decision } : {}),
+            message: input.note?.trim() || input.resolution.trim(),
+          }),
+        },
+      });
+
+      if (!input.escalate && dispute.bookingId && refundAdjustment !== undefined && refundAdjustment > 0) {
+        await tx.booking.update({
+          where: { id: dispute.bookingId },
+          data: {
+            cancellationRefundAmount: refundAdjustment,
+            refundStatus: "PENDING_OPERATOR_DECISION",
+          },
+        });
+      }
+
+      await tx.notification.createMany({
+        data: [
+          {
+            userId: dispute.guestId,
+            type: "SYSTEM",
+            title: input.escalate ? "Tranh chấp đã được chuyển Admin" : "Tranh chấp đã có quyết định",
+            message: input.resolution.trim(),
+            metadata: { action: "DISPUTE_UPDATED", disputeId, bookingId: dispute.bookingId, status },
+          },
+          {
+            userId: dispute.hostId,
+            type: "SYSTEM",
+            title: input.escalate ? "Tranh chấp đã được chuyển Admin" : "Tranh chấp đã có quyết định",
+            message: input.resolution.trim(),
+            metadata: { action: "DISPUTE_UPDATED", disputeId, bookingId: dispute.bookingId, status },
+          },
+        ],
+      });
+
+      return updated;
+    });
+  },
+
+  inferDisputeMeta(reason: string) {
+    return classifyDisputeText(reason);
   },
 };

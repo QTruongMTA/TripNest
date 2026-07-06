@@ -2,7 +2,7 @@
 
 import { UserAvatar } from "@/components/auth/UserAvatar";
 import { getAccessToken } from "@/lib/auth";
-import { useAuthStore, type SessionUser } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -54,6 +54,27 @@ const COUNTRIES: string[] = [
 ];
 
 const GENDER_OPTIONS = ["Nam", "Nữ", "Không xác định (Non-binary)", "Không muốn nêu rõ"];
+const BANK_OPTIONS = [
+  "Vietcombank",
+  "VietinBank",
+  "BIDV",
+  "Agribank",
+  "Techcombank",
+  "MB Bank",
+  "ACB",
+  "VPBank",
+  "Sacombank",
+  "TPBank",
+  "HDBank",
+  "VIB",
+  "MSB",
+  "SHB",
+  "OCB",
+  "SeABank",
+  "Eximbank",
+  "Nam A Bank",
+  "Khác",
+];
 const MONTH_NAMES = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
 const DAY_LABELS = ["T2","T3","T4","T5","T6","T7","CN"];
 
@@ -105,10 +126,6 @@ function getPasswordStrength(password: string) {
     { label: "Mật khẩu RẤT MẠNH", color: "text-emerald-600", barColor: "bg-emerald-500" },
   ];
   return { score, ...map[score] };
-}
-
-function isProfileComplete(user: SessionUser) {
-  return Boolean(user.displayName && user.phone && user.birthDate && user.nationality && user.gender && user.address);
 }
 
 // =============================================================================
@@ -431,6 +448,60 @@ function CountrySelect({ value, onChange }: { value: string; onChange: (v: strin
 // =============================================================================
 // GENDER SELECT
 // =============================================================================
+function BankSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [customMode, setCustomMode] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const knownBanks = BANK_OPTIONS.slice(0, -1);
+  const isKnownBank = !value || knownBanks.includes(value);
+  const isCustom = customMode || (Boolean(value) && !isKnownBank);
+
+  useEffect(() => {
+    function h(e: MouseEvent) { if (!ref.current?.contains(e.target as Node)) setOpen(false); }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full max-w-sm">
+      <button type="button" onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-xl border border-slate-300 px-3 py-2 text-left text-sm transition hover:border-teal-400 focus:outline-none">
+        <span className={value ? "text-slate-900" : "text-slate-400"}>{value || "Tên ngân hàng"}</span>
+        <ChevronIcon />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+          <div className="max-h-60 overflow-y-auto">
+            {BANK_OPTIONS.map((bank) => (
+              <button key={bank} type="button" onClick={() => {
+                if (bank === "Khác") {
+                  setCustomMode(true);
+                  onChange(isKnownBank ? "" : value);
+                } else {
+                  setCustomMode(false);
+                  onChange(bank);
+                }
+                setOpen(false);
+              }}
+                className={`flex w-full items-center px-3 py-2.5 text-sm transition hover:bg-teal-50 ${value === bank || (bank === "Khác" && isCustom) ? "bg-teal-50 font-medium text-teal-700" : "text-slate-900"}`}>
+                {bank}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {isCustom ? (
+        <input
+          value={isKnownBank ? "" : value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Nhập tên ngân hàng"
+          className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-500"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function GenderSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -528,8 +599,19 @@ function ConfirmModal({ title, message, confirmLabel, cancelLabel, confirmClass,
 // =============================================================================
 // FIELD ROW
 // =============================================================================
+function RefundRequiredMark() {
+  return (
+    <span className="group relative ml-1 inline-flex align-super text-rose-500">
+      *
+      <span className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-72 -translate-x-1/2 rounded-xl border border-amber-100 bg-white px-3 py-2 text-xs font-medium leading-5 text-slate-700 opacity-0 shadow-xl shadow-slate-900/10 transition group-hover:opacity-100">
+        Cẩn trọng ! Đây là tài khoản sẽ nhận hoàn tiền vui lòng nhập chính xác.
+      </span>
+    </span>
+  );
+}
+
 function FieldRow({ label, children, helper, error }: {
-  label: string; children: React.ReactNode; helper?: string; error?: string;
+  label: React.ReactNode; children: React.ReactNode; helper?: string; error?: string;
 }) {
   return (
     <div className="grid gap-3 border-t border-slate-200 py-4 md:grid-cols-[160px_1fr]">
@@ -557,11 +639,19 @@ export default function Page() {
   const router = useRouter();
 
   const [form, setFormState] = useState({
-    displayName: "", phone: "", birthDate: "", nationality: "Việt Nam", gender: "", address: "",
+    displayName: "",
+    phone: "",
+    birthDate: "",
+    nationality: "Việt Nam",
+    gender: "",
+    address: "",
+    bankName: "",
+    bankAccountNumber: "",
   });
   const [original, setOriginal] = useState({ ...form });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState("");
 
   // Per-field blur errors
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
@@ -589,6 +679,8 @@ export default function Page() {
         nationality: user.nationality || "Việt Nam",
         gender: user.gender || "",
         address: user.address || "",
+        bankName: user.bankName || "",
+        bankAccountNumber: user.bankAccountNumber || "",
       };
       setFormState(init);
       setOriginal(init);
@@ -601,6 +693,13 @@ export default function Page() {
   function setField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setFormState((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => { const n = { ...prev }; delete n[key]; return n; });
+  }
+
+  function showToast(message: string) {
+    setToast(message);
+    window.setTimeout(() => {
+      setToast((current) => current === message ? "" : current);
+    }, 2600);
   }
 
   function handleClose() {
@@ -695,6 +794,8 @@ export default function Page() {
             nationality: form.nationality,
             gender: form.gender || null,
             address: form.address.trim() || null,
+            bankName: form.bankName.trim() || null,
+            bankAccountNumber: form.bankAccountNumber.replace(/\s/g, "") || null,
           }),
         });
         if (!res.ok) {
@@ -733,6 +834,7 @@ export default function Page() {
         setPasswordError(null);
         setIsEditingPassword(false);
       }
+      showToast("Đã lưu thay đổi");
       setShowPasswordConfirm(false);
     } finally {
       setSaving(false);
@@ -754,7 +856,14 @@ export default function Page() {
 
   return (
     <>
-      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+      {toast ? (
+        <div className="fixed right-5 top-5 z-[80] rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 shadow-2xl shadow-slate-900/10">
+          {toast}
+        </div>
+      ) : null}
+
+      <div className="px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-4xl overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
         {/* Teal header */}
         <div className="relative flex items-start gap-4 bg-teal-900 px-5 py-5 text-white md:px-8">
           <div className="shrink-0 flex flex-col items-center gap-1">
@@ -903,16 +1012,27 @@ export default function Page() {
               className="w-full max-w-sm rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-500" />
           </FieldRow>
 
+          <FieldRow label={<>Tên ngân hàng<RefundRequiredMark /></>}>
+            <BankSelect value={form.bankName} onChange={(value) => setField("bankName", value)} />
+          </FieldRow>
+
+          <FieldRow label={<>Số tài khoản<RefundRequiredMark /></>}>
+            <input
+              inputMode="numeric"
+              value={form.bankAccountNumber}
+              onChange={(e) => setField("bankAccountNumber", e.target.value.replace(/[^\d\s]/g, "").slice(0, 32))}
+              placeholder="Số tài khoản"
+              className="w-full max-w-sm rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-500"
+            />
+          </FieldRow>
+
           {errors._global && (
             <p className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{errors._global}</p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-slate-50 px-5 py-4 md:px-8">
-          <p className="text-sm text-slate-600">
-            {isProfileComplete(user) ? "Tất cả thông tin đã được cập nhật ✓" : "Cập nhật đầy đủ thông tin để có trải nghiệm tốt hơn"}
-          </p>
+        <div className="flex flex-wrap items-center justify-end gap-4 border-t border-slate-200 bg-slate-50 px-5 py-4 md:px-8">
           <div className="flex gap-3">
             <button type="button" onClick={handleClose}
               className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
@@ -925,6 +1045,7 @@ export default function Page() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* Exit confirmation */}
       {showExitConfirm && (

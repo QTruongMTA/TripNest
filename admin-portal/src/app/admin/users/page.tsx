@@ -28,6 +28,8 @@ interface User {
   emailVerified: boolean;
   createdAt: string;
   phone?: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
 }
 
 interface UserDetail {
@@ -371,6 +373,8 @@ export default function UsersPage() {
                     ["Quốc tịch", detail.user.nationality || "-"],
                     ["Giới tính", detail.user.gender || "-"],
                     ["Địa chỉ", detail.user.address || "-"],
+                    ["Ngân hàng", detail.user.bankName || "-"],
+                    ["Số tài khoản", detail.user.bankAccountNumber || "-"],
                     ["Vai trò", ROLE_LABELS[detail.user.role] ?? detail.user.role],
                     ["Email", detail.user.emailVerified ? "Đã xác minh" : "Chưa xác minh"],
                     ["Ngày tạo", formatDateTime(detail.user.createdAt)],

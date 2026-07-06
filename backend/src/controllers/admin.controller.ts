@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import {
   CancellationPolicy,
+  DiscountType,
   ListingStatus,
   PropertyType,
   TourCategory,
@@ -18,6 +19,17 @@ function isPositiveNumber(value: unknown): value is number {
 
 function isNonNegativeNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function parseVoucherCode(value: unknown) {
+  return String(value ?? "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 24);
+}
+
+function parseVoucherConditions(value: unknown) {
+  const conditions = Array.isArray(value) ? value : [];
+  return conditions.filter((condition): condition is "MIN_ORDER_500K" | "MIN_GUESTS_5" =>
+    condition === "MIN_ORDER_500K" || condition === "MIN_GUESTS_5"
+  );
 }
 
 export const adminController = {
@@ -202,7 +214,7 @@ export const adminController = {
   },
 
   async bookings(_req: Request, res: Response) {
-    const data = await adminService.listAdminBookings();
+    const data = await adminService.listAdminPropertyBookings();
     return res.json({ data });
   },
 
@@ -249,14 +261,140 @@ export const adminController = {
     return res.json({ data: result.data });
   },
 
+  async markBookingRefunded(req: Request, res: Response) {
+    const { id } = req.params;
+
+    if (typeof id !== "string" || !id) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_BOOKING_ID",
+          message: "Invalid booking id",
+        },
+      });
+    }
+
+    const result = await adminService.markBookingRefunded(id);
+
+    if (result.kind === "BOOKING_NOT_FOUND") {
+      return res.status(404).json({
+        error: {
+          code: "BOOKING_NOT_FOUND",
+          message: "Booking not found",
+        },
+      });
+    }
+
+    if (result.kind === "REFUND_NOT_REQUIRED") {
+      return res.status(409).json({
+        error: {
+          code: "REFUND_NOT_REQUIRED",
+          message: "Booking does not require a refund",
+        },
+      });
+    }
+
+    return res.json({ data: result.data });
+  },
+
   async payments(_req: Request, res: Response) {
     const data = await adminService.listAdminPayments();
     return res.json({ data });
   },
 
-  async promotions(_req: Request, res: Response) {
-    const data = await adminService.listAdminPromotions();
+  async revenue(req: Request, res: Response) {
+    const period = typeof req.query.period === "string" ? req.query.period : undefined;
+    const data = await adminService.getRevenueManagement(period);
     return res.json({ data });
+  },
+
+  async generateSettlement(req: Request, res: Response) {
+    const period = typeof req.body?.period === "string" ? req.body.period : "";
+    const force = Boolean(req.body?.force);
+    if (!/^\d{4}-\d{2}$/.test(period)) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_SETTLEMENT_PERIOD",
+          message: "period must be YYYY-MM",
+        },
+      });
+    }
+    const result = await adminService.generateMonthlySettlement({
+      adminId: req.user?.id ?? null,
+      period,
+      force,
+    });
+    return res.status(result.kind === "ALREADY_EXISTS" ? 200 : 201).json({ data: result.data, kind: result.kind });
+  },
+
+  async markHostPayoutPaid(req: Request, res: Response) {
+    const hostId = typeof req.params.hostId === "string" ? req.params.hostId : "";
+    const period = typeof req.body?.period === "string" ? req.body.period : "";
+    const amount = Number(req.body?.amount ?? 0);
+    const bookingCount = Number(req.body?.bookingCount ?? 0);
+    const commissionReceivable = Number(req.body?.commissionReceivable ?? 0);
+
+    if (!hostId || !period || !Number.isFinite(amount) || amount < 0) {
+      return res.status(400).json({
+        error: {
+          code: "INVALID_PAYOUT_PAYLOAD",
+          message: "Invalid payout payload",
+        },
+      });
+    }
+
+    const result = await adminService.markHostPayoutPaid({
+      adminId: req.user?.id ?? null,
+      hostId,
+      period,
+      amount,
+      bookingCount: Number.isFinite(bookingCount) ? bookingCount : 0,
+      commissionReceivable: Number.isFinite(commissionReceivable) ? commissionReceivable : 0,
+    });
+
+    if (result.kind === "HOST_NOT_FOUND") {
+      return res.status(404).json({
+        error: {
+          code: "HOST_NOT_FOUND",
+          message: "Host not found",
+        },
+      });
+    }
+
+    return res.json({ data: result.data });
+  },
+
+  async promotions(_req: Request, res: Response) {
+    const data = await adminService.listSystemPromotions();
+    return res.json({ data });
+  },
+
+  async createPromotion(req: Request, res: Response) {
+    const code = parseVoucherCode(req.body?.code);
+    const discountType = req.body?.discountType === "FIXED_AMOUNT" ? DiscountType.FIXED_AMOUNT : DiscountType.PERCENTAGE;
+    const discountValue = Number(req.body?.discountValue);
+    const quantity = Math.max(1, Math.floor(Number(req.body?.quantity ?? 10)));
+    const expiresAt = typeof req.body?.expiresAt === "string" ? new Date(`${req.body.expiresAt}T23:59:59.999Z`) : null;
+    const voucherType = String(req.body?.voucherType ?? "Voucher hệ thống").trim() || "Voucher hệ thống";
+    const conditions = parseVoucherConditions(req.body?.conditions);
+
+    if (!code || !Number.isFinite(discountValue) || discountValue <= 0 || !expiresAt || Number.isNaN(expiresAt.getTime())) {
+      return res.status(400).json({ error: { code: "INVALID_VOUCHER", message: "Voucher không hợp lệ." } });
+    }
+
+    try {
+      const promotion = await adminService.createSystemPromotion({
+        code,
+        discountType,
+        discountValue,
+        quantity,
+        expiresAt,
+        voucherType,
+        conditions,
+      });
+      return res.status(201).json({ data: promotion });
+    } catch {
+      return res.status(409).json({ error: { code: "VOUCHER_CODE_EXISTS", message: "Mã voucher đã tồn tại." } });
+    }
   },
 
   async commissions(_req: Request, res: Response) {

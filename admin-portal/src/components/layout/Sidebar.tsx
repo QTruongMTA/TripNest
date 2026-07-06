@@ -59,6 +59,10 @@ const ADMIN_NAV: NavItem[] = [
   { label: "Audit log", href: "/admin/audit-log", icon: <Shield size={18} /> },
 ];
 
+const ADMIN_NAV_DISPLAY = ADMIN_NAV
+  .filter((item) => item.href !== "/admin/commission")
+  .map((item) => item.href === "/admin/listings" ? { ...item, label: "Chỗ ở" } : item);
+
 type OperatorStats = {
   pendingListings?: number;
   pendingApprovals?: number;
@@ -150,6 +154,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ],
     },
     {
+      label: "Đánh giá",
+      href: "/operator/reviews",
+      icon: <ClipboardList size={18} />,
+    },
+    {
       label: "Doanh thu tỉnh",
       href: "/operator/revenue",
       icon: <CreditCard size={18} />,
@@ -208,7 +217,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
       <nav className="scrollbar-hidden flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {user?.role === "ADMIN"
-          ? ADMIN_NAV.map((item) => {
+          ? ADMIN_NAV_DISPLAY.map((item) => {
               const active = isActiveHref(item.href);
               return (
                 <Link

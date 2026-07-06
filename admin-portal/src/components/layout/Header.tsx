@@ -3,7 +3,7 @@ import { Bell, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import api from "@/lib/api";
+import api, { API_MODE_EVENT, API_MODE_STORAGE_KEY } from "@/lib/api";
 
 interface HeaderProps {
   title: string;
@@ -43,7 +43,21 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [apiMode, setApiMode] = useState("PRIMARY");
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const current = localStorage.getItem(API_MODE_STORAGE_KEY);
+    if (current) setApiMode(current);
+
+    function handleModeChange(event: Event) {
+      const detail = (event as CustomEvent<string>).detail;
+      setApiMode(detail || localStorage.getItem(API_MODE_STORAGE_KEY) || "PRIMARY");
+    }
+
+    window.addEventListener(API_MODE_EVENT, handleModeChange);
+    return () => window.removeEventListener(API_MODE_EVENT, handleModeChange);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -110,6 +124,13 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
+          <span className={`hidden rounded-md px-3 py-2 text-xs font-semibold ring-1 sm:inline-flex ${
+            apiMode === "PHP_FAILOVER"
+              ? "bg-amber-50 text-amber-800 ring-amber-200"
+              : "bg-emerald-50 text-emerald-800 ring-emerald-200"
+          }`}>
+            API: {apiMode === "PHP_FAILOVER" ? "PHP Failover" : "Node.js Primary"}
+          </span>
           <div ref={ref} className="relative">
             <button
               type="button"

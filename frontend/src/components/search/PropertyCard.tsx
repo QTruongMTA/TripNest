@@ -1,4 +1,7 @@
-﻿import { Card } from "@/components/ui/Card";
+"use client";
+
+import { FavoritePropertyButton } from "@/components/property/FavoritePropertyButton";
+import { Card } from "@/components/ui/Card";
 import type { PropertyListItem } from "@/types/property";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,12 +28,13 @@ function buildPropertyHref(propertyId: string, bookingQuery?: PropertyCardProps[
 
 export function PropertyCard({ property, nights, bookingQuery }: PropertyCardProps) {
   const total = nights ? property.pricePerNight * nights + (property.cleaningFee ?? 0) : null;
+  const href = buildPropertyHref(property.id, bookingQuery);
 
   return (
-    <Link href={buildPropertyHref(property.id, bookingQuery)} className="block">
-      <Card>
+    <Card>
+      <div className="relative">
         {property.thumbnailUrl ? (
-          <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-2xl">
+          <Link href={href} className="relative mb-4 block aspect-[4/3] w-full overflow-hidden rounded-2xl">
             <Image
               src={property.thumbnailUrl}
               alt={property.title}
@@ -39,8 +43,16 @@ export function PropertyCard({ property, nights, bookingQuery }: PropertyCardPro
               sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
               className="object-cover"
             />
-          </div>
-        ) : null}
+          </Link>
+        ) : (
+          <Link href={href} className="mb-4 grid aspect-[4/3] w-full place-items-center rounded-2xl bg-slate-100 text-sm text-slate-500">
+            Chưa có ảnh
+          </Link>
+        )}
+        <FavoritePropertyButton property={property} className="absolute right-3 top-3" />
+      </div>
+
+      <Link href={href} className="block">
         <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
           <p>{property.city}</p>
           <p>{property.rating.average ? `★ ${property.rating.average} (${property.rating.count})` : "Chưa có đánh giá"}</p>
@@ -59,7 +71,8 @@ export function PropertyCard({ property, nights, bookingQuery }: PropertyCardPro
             <p className="font-medium">{property.pricePerNight.toLocaleString("vi-VN")} ₫ / đêm</p>
           )}
         </div>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }
+
